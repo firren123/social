@@ -49,7 +49,7 @@ class PlugController extends Controller
                 $val .= $v;
             }
             $sign = md5(md5(md5($app_code.$timestamp).md5($timestamp)).md5($val));
-            $data['msg'] = '&amp;appId=I500_SOCIAL&amp;timestamp='.$timestamp.'&amp;sign='.$sign;
+            $data['msg'] = '&amp;appId=I500_SOCIAL&amp;dev=1&amp;timestamp='.$timestamp.'&amp;sign='.$sign;
         }
         $data['timestamp'] = $timestamp;
         return $this->render('sign', ['data'=>$data]);
