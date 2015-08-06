@@ -76,7 +76,17 @@ class Common
      */
     public static function getIp()
     {
-        return \Yii::$app->request->getUserIP();
+        $ip = '';
+        if (getenv('HTTP_CLIENT_IP') && strcasecmp(getenv('HTTP_CLIENT_IP'), 'unknown')) {
+            $ip = getenv('HTTP_CLIENT_IP');
+        } elseif (getenv('HTTP_X_FORWARDED_FOR') && strcasecmp(getenv('HTTP_X_FORWARDED_FOR'), 'unknown')) {
+            $ip = getenv('HTTP_X_FORWARDED_FOR');
+        } elseif (getenv('REMOTE_ADDR') && strcasecmp(getenv('REMOTE_ADDR'), 'unknown')) {
+            $ip = getenv('REMOTE_ADDR');
+        } elseif (isset($_SERVER['REMOTE_ADDR']) && $_SERVER['REMOTE_ADDR'] && strcasecmp($_SERVER['REMOTE_ADDR'], 'unknown')) {
+            $ip = $_SERVER['REMOTE_ADDR'];
+        }
+        return $ip;
     }
 
     /**
@@ -120,11 +130,13 @@ class Common
                 /**第一次登陆发送密码**/
                 $temp = '【i500】登陆密码为'.$code.'，如非本人操作请忽略此短信，如有疑问请咨询400-661-1690';
                 break;
+            case 3 :
+                /**找回密码**/
+                $temp = '【i500】操作为找回密码的验证码为'.$code.'，如非本人操作请忽略此短信，如有疑问请咨询400-661-1690';
+                break;
             default :
                 $temp = '';
         }
         return $temp;
     }
-
-
 }

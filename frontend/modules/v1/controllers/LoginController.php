@@ -186,6 +186,95 @@ class LoginController extends BaseController
         if (!Common::validateMobile($mobile)) {
             $this->returnJsonMsg('605', [], Common::C('code', '605'));
         }
+        $type   = RequestHelper::post('type', '1', '');
+        switch ($type) {
+            case '1' :
+                /**登陆页获取验证码**/
+                $this->_loginPageSendCode($mobile);
+                break;
+            case '2' :
+                /**找回密码页获取验证码**/
+                $this->_findPwdSendCode($mobile);
+                break;
+        }
+    }
+
+    /**
+     * 找回密码 验证短信验证码
+     * @return array
+     */
+    public function actionFindPwdCheck()
+    {
+        $mobile = RequestHelper::post('mobile', '', '');
+        if (empty($mobile)) {
+            $this->returnJsonMsg('604', [], Common::C('code', '604'));
+        }
+        if (!Common::validateMobile($mobile)) {
+            $this->returnJsonMsg('605', [], Common::C('code', '605'));
+        }
+        $code = RequestHelper::post('code', '', '');
+        if (empty($code)) {
+            $this->returnJsonMsg('608', [], Common::C('code', '608'));
+        }
+        $user_verify_code_model = new UserVerifyCode();
+        $user_verify_code_where['mobile'] = $mobile;
+        $user_verify_code_where['code']   = $code;
+        $user_verify_code_where['type']   = '2';
+        $user_verify_code_fields = 'id,expires_in';
+        $user_verify_code_info = $user_verify_code_model->getInfo($user_verify_code_where, true, $user_verify_code_fields, '', 'id desc');
+        if ($user_verify_code_info) {
+            if (strtotime($user_verify_code_info['expires_in']) < time()) {
+                $this->returnJsonMsg('609', [], Common::C('code', '609'));
+            }
+            $this->returnJsonMsg('200', [], Common::C('code', '200'));
+        } else {
+            $this->returnJsonMsg('610', [], Common::C('code', '610'));
+        }
+    }
+
+    /**
+     * 修改密码的方法
+     * @return array
+     */
+    public function actionModifyPwd()
+    {
+        $mobile = RequestHelper::post('mobile', '', '');
+        if (empty($mobile)) {
+            $this->returnJsonMsg('604', [], Common::C('code', '604'));
+        }
+        if (!Common::validateMobile($mobile)) {
+            $this->returnJsonMsg('605', [], Common::C('code', '605'));
+        }
+        $password = RequestHelper::post('password', '', '');
+        if (empty($password)) {
+            $this->returnJsonMsg('606', [], Common::C('code', '606'));
+        }
+        $user_model = new User();
+        $user_where['mobile']     = $mobile;
+        $user_where['is_deleted'] = '2';
+        $user_fields = 'id,mobile,salt';
+        $user_info = $user_model->getInfo($user_where, true, $user_fields);
+        if (!empty($user_info)) {
+            $user_update_data['password'] = md5($user_info['salt'].$password);
+            $user_update_where['mobile']  = $mobile;
+            $rs = $user_model->updateInfo($user_update_data, $user_update_where);
+            if (!$rs) {
+                $this->returnJsonMsg('612', [], Common::C('code', '612'));
+            } else {
+                $this->returnJsonMsg('200', [], Common::C('code', '200'));
+            }
+        } else {
+            $this->returnJsonMsg('602', [], Common::C('code', '602'));
+        }
+    }
+
+    /**
+     * 登陆页获取验证码
+     * @param string $mobile 手机号
+     * @return array
+     */
+    private function _loginPageSendCode($mobile = '')
+    {
         $user_model = new User();
         $user_where['mobile']     = $mobile;
         $user_where['is_deleted'] = '2';
@@ -220,6 +309,43 @@ class LoginController extends BaseController
             $this->returnJsonMsg('611', [], Common::C('code', '611'));
         } else {
             $this->returnJsonMsg('200', ['first_login'=>$first_login], Common::C('code', '200'));
+        }
+    }
+
+    /**
+     * 找回密码页获取验证码
+     * @param string $mobile 手机号
+     * @return array
+     */
+    private function _findPwdSendCode($mobile = '')
+    {
+        $user_model = new User();
+        $user_where['mobile']     = $mobile;
+        $user_where['is_deleted'] = '2';
+        $user_fields = 'id,mobile';
+        $user_info = $user_model->getInfo($user_where, true, $user_fields);
+        if (empty($user_info)) {
+            /**未存在该用户**/
+            $this->returnJsonMsg('602', [], Common::C('code', '602'));
+        }
+        /**发送验证码**/
+        $user_verify_code_model = new UserVerifyCode();
+        $user_verify_code_data['mobile']     = $mobile;
+        $user_verify_code_data['code']       = Common::getRandomNumber();
+        $user_verify_code_data['type']       = '2';
+        $user_verify_code_data['expires_in'] = date('Y-m-d H:i:s', (time()+ Common::C('verify_code_timeout')));
+        $rs = $user_verify_code_model->insertInfo($user_verify_code_data);
+        if (!$rs) {
+            $this->returnJsonMsg('400', [], Common::C('code', '400'));
+        }
+        $user_sms_model = new UserSms();
+        $user_sms_data['mobile']  = $mobile;
+        $user_sms_data['content'] = Common::getSmsTemplate(3, $user_verify_code_data['code']);
+        $rs = $user_sms_model->insertInfo($user_sms_data);
+        if (!$rs) {
+            $this->returnJsonMsg('611', [], Common::C('code', '611'));
+        } else {
+            $this->returnJsonMsg('200', ['first_login'=>'2'], Common::C('code', '200'));
         }
     }
 }
