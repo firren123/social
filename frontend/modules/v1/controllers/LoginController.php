@@ -166,7 +166,7 @@ class LoginController extends BaseController
      *
      * @return array
      */
-    public function actionSendSms()
+    public function actionSendcode()
     {
         $mobile = RequestHelper::post('mobile', '', '');
         if (empty($mobile)) {
