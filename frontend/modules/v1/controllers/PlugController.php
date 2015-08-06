@@ -41,7 +41,7 @@ class PlugController extends Controller
         $app_code = 'DKJA@(SL)RssMAKDKas!L';
         $timestamp = time();
         $val  = '';
-        $params = $_GET;
+        $params = RequestHelper::get();
         $data['msg'] = '';
         if ($params) {
             //ksort($params);

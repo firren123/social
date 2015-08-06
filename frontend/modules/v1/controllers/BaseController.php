@@ -74,6 +74,15 @@ class BaseController extends Controller
             $sign = $this->params['sign'];
             unset($this->params['sign']);
 
+            if (!isset($this->params['dev'])) {
+                $this->returnJsonMsg('509', [], Common::C('code', '509'));
+            }
+            if (!in_array($this->params['dev'], array('1', '2', '3'))) {
+                $this->returnJsonMsg('510', [], Common::C('code', '510'));
+            }
+            $dev = $this->params['dev'];
+            unset($this->params['dev']);
+
             if (isset($this->params['uid']) && $this->params['uid']) {
                 /**验证签名**/
                 $this->_checkToken($this->params['token'], $this->params['mobile']);
