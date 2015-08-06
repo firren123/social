@@ -33,6 +33,10 @@
             <input type="text" class="form-control" readonly value="<?php echo $data['timestamp'];?>">
         </div>
 
+        <div style="margin-top: 10px; text-align: center;" class="alert alert-success" role="alert">
+            在地址栏中传递参数，第一个参数用?连接，其余用&连接。
+        </div>
+
 
         <?php if(!empty($data['msg'])) {
             ?>
