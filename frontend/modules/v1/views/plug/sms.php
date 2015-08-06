@@ -46,6 +46,18 @@
             </tr>
         </table>
 
+        <!-- 字符串 -->
+        <div class="input-group" style="margin-top: 10px;">
+            <span class="input-group-addon">MD5前</span>
+            <input type="text" class="form-control" id="md5_before">
+        </div>
+        <div class="input-group" style="margin-top: 10px;">
+            <span class="input-group-addon">MD5后</span>
+            <input type="text" class="form-control" readonly id="md5_after">
+        </div>
+        <div style="margin-top: 5px;text-align: center;">
+            <button type="submit" class="btn btn-default btn-md5">MD5</button>
+        </div>
     </div>
     </body>
 </html>

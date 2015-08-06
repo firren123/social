@@ -60,6 +60,31 @@ var Plug={
                     }
                 }
             });
+    },
+    /**
+     * Md5
+     */
+    'MD5_str' : function() {
+        $.ajax(
+            {
+                type: "GET",
+                url : "/v1/plug/get-md5",
+                data: {
+                    'str'   : $("#md5_before").val()
+                },
+                async: false,
+                dataType: "json",
+                beforeSend: function () {
+
+                },
+                success: function (result) {
+                    if (result.code==='ok') {
+                        $("#md5_after").val(result['msg']);
+                    } else {
+                        alert('生成失败，请重试！');
+                    }
+                }
+            });
     }
 };
 $(function(){
@@ -78,6 +103,14 @@ $(function(){
             Plug.getCode();
         } else {
             alert('请输入手机号');
+        }
+    });
+    $(".btn-md5").click(function(){
+        var md5_before = $("#md5_before").val();
+        if (md5_before) {
+            Plug.MD5_str();
+        } else {
+            alert('请输入MD5字符串');
         }
     });
 });

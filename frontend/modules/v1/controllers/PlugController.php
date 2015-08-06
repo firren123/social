@@ -107,4 +107,14 @@ class PlugController extends Controller
         }
         echo json_encode(['code'=>'ok','data'=>$data]);
     }
+
+    /**
+     * 生成Md5字符串
+     * @return array
+     */
+    public function actionGetMd5()
+    {
+        $str = RequestHelper::get('str', '', '');
+        echo json_encode(['code'=>'ok','msg'=>md5($str)]);
+    }
 }

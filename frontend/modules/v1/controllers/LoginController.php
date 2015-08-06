@@ -36,6 +36,17 @@ use frontend\models\i500_social\LoginLog;
 class LoginController extends BaseController
 {
     /**
+     * Before
+     * @param \yii\base\Action $action Action
+     * @return bool
+     * @throws \yii\web\BadRequestHttpException
+     */
+    public function beforeAction($action)
+    {
+        $this->enableCsrfValidation = false;
+        return parent::beforeAction($action);
+    }
+    /**
      * 登陆的方法
      *
      * Param int    $type     登陆方式
@@ -149,7 +160,7 @@ class LoginController extends BaseController
             /**给用户发短信**/
             $user_sms_model = new UserSms();
             $user_sms_data['mobile']  = $mobile;
-            $user_sms_data['content'] = Common::getSmsTemplate(2);
+            $user_sms_data['content'] = Common::getSmsTemplate(2, $password_random);
             $user_sms_model->insertInfo($user_sms_data);
         }
 
@@ -178,13 +189,13 @@ class LoginController extends BaseController
         $user_model = new User();
         $user_where['mobile']     = $mobile;
         $user_where['is_deleted'] = '2';
-        $user_fields = 'id,mobile,password,salt,login_count,status';
+        $user_fields = 'id,mobile,salt,status';
         $user_info = $user_model->getInfo($user_where, true, $user_fields);
         $first_login = 2;
-        if (!empty($user_info)) {
+        if (empty($user_info)) {
             /**未存在该用户**/
             $first_login = 1;
-            $user_add_data['mobile'] = 'mobile';
+            $user_add_data['mobile'] = $mobile;
             $user_add_data['salt']   = Common::getRandomNumber();
             $rs = $user_model->insertInfo($user_add_data);
             if (!$rs) {
@@ -196,14 +207,14 @@ class LoginController extends BaseController
         $user_verify_code_data['mobile']     = $mobile;
         $user_verify_code_data['code']       = Common::getRandomNumber();
         $user_verify_code_data['type']       = '1';
-        $user_verify_code_data['expires_in'] = date('Y-m-d H:i:s', (time()+ 3600));
+        $user_verify_code_data['expires_in'] = date('Y-m-d H:i:s', (time()+ Common::C('verify_code_timeout')));
         $rs = $user_verify_code_model->insertInfo($user_verify_code_data);
         if (!$rs) {
             $this->returnJsonMsg('400', [], Common::C('code', '400'));
         }
         $user_sms_model = new UserSms();
         $user_sms_data['mobile']  = $mobile;
-        $user_sms_data['content'] = Common::getSmsTemplate(1);
+        $user_sms_data['content'] = Common::getSmsTemplate(1, $user_verify_code_data['code']);
         $rs = $user_sms_model->insertInfo($user_sms_data);
         if (!$rs) {
             $this->returnJsonMsg('611', [], Common::C('code', '611'));
