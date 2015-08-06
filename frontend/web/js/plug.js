@@ -10,7 +10,7 @@ var Plug={
         $.ajax(
             {
                 type: "GET",
-                url : "/plug/get-token",
+                url : "/v1/plug/get-token",
                 data: {
                     'mobile'   : $("#mobile").val()
                 },
@@ -37,7 +37,7 @@ var Plug={
         $.ajax(
             {
                 type: "GET",
-                url : "/plug/get-code",
+                url : "/v1/plug/get-code",
                 data: {
                     'mobile'   : $("#mobile").val()
                 },

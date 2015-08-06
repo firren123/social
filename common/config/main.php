@@ -52,4 +52,9 @@ return [
     'defaultRoute'=>'index',  //设置默认路由
     'controllerNamespace' => 'frontend\controllers',
     'params' => require(__DIR__ . '/params.php'),
+    'modules' => [
+        'v1' => [
+            'class' => 'frontend\modules\v1\Module',
+        ],
+    ],
 ];
