@@ -58,23 +58,23 @@ class LoginController extends BaseController
      */
     public function actionIndex()
     {
-        $type        = RequestHelper::post('type', '1', '');
-        $channel     = RequestHelper::post('channel', '1', '');
-        $source      = RequestHelper::post('dev', '1', '');
-        $login_ua    = RequestHelper::post('login_ua', '', '');
-        $mobile      = RequestHelper::post('mobile', '', 'trim');
-        $password    = RequestHelper::post('password', '', 'trim');
-        $code        = RequestHelper::post('code', '', 'trim');
-        $first_login = RequestHelper::post('first_login', '2', '');
-        if (empty($mobile)) {
-            $this->returnJsonMsg('604', [], Common::C('code', '604'));
-        }
-        if (!Common::validateMobile($mobile)) {
-            $this->returnJsonMsg('605', [], Common::C('code', '605'));
-        }
-        if ($channel != '1') {
-            /**第三方合作平台登陆**/
-
+        $type            = RequestHelper::post('type', '1', '');
+        $channel         = RequestHelper::post('channel', '1', '');
+        $channel_user_id = RequestHelper::post('channel_user_id', '0', '');
+        $source          = RequestHelper::post('dev', '1', '');
+        $login_ua        = RequestHelper::post('login_ua', '', '');
+        $mobile          = RequestHelper::post('mobile', '', 'trim');
+        $password        = RequestHelper::post('password', '', 'trim');
+        $code            = RequestHelper::post('code', '', 'trim');
+        $first_login     = RequestHelper::post('first_login', '2', '');
+        if ($type != '3') {
+            /** 第三方登陆不传递手机号 **/
+            if (empty($mobile)) {
+                $this->returnJsonMsg('604', [], Common::C('code', '604'));
+            }
+            if (!Common::validateMobile($mobile)) {
+                $this->returnJsonMsg('605', [], Common::C('code', '605'));
+            }
         }
         if ($type == '1') {
             /**普通登陆**/
@@ -97,7 +97,7 @@ class LoginController extends BaseController
             } else {
                 $this->returnJsonMsg('602', [], Common::C('code', '602'));
             }
-        } else {
+        } elseif ($type == '2') {
             /**验证码登陆**/
             if (empty($code)) {
                 $this->returnJsonMsg('608', [], Common::C('code', '608'));
@@ -115,6 +115,29 @@ class LoginController extends BaseController
             } else {
                 $this->returnJsonMsg('610', [], Common::C('code', '610'));
             }
+        } elseif ($type == '3') {
+            /**第三方平台登录**/
+            if (empty($channel_user_id)) {
+                $this->returnJsonMsg('613', [], Common::C('code', '613'));
+            }
+            if (empty($channel)) {
+                $this->returnJsonMsg('614', [], Common::C('code', '614'));
+            }
+            if (!in_array($channel, ['1', '2', '3'])) {
+                $this->returnJsonMsg('615', [], Common::C('code', '615'));
+            }
+            $user_channel_model = new UserChannel();
+            $user_channel_where['channel_user_id'] = $channel_user_id;
+            $user_channel_where['channel']         = $channel;
+            $user_channel_where['status']          = '1';
+            $user_channel_info = $user_channel_model->getInfo($user_channel_where, true, 'id,mobile');
+            if (empty($user_channel_info)) {
+                $this->returnJsonMsg('616', [], Common::C('code', '616'));
+            }
+            if (empty($user_channel_info['mobile'])) {
+                $this->returnJsonMsg('617', [], Common::C('code', '617'));
+            }
+            $mobile = $user_channel_info['mobile'];
         }
         /**成功后记录日志**/
         $user_m = new User();
@@ -268,6 +291,108 @@ class LoginController extends BaseController
         }
     }
 
+    /**
+     * 第三方授权成功后调用
+     * @return array
+     */
+    public function actionAuthSuccess()
+    {
+        $channel         = RequestHelper::post('channel', '1', '');
+        $channel_user_id = RequestHelper::post('channel_user_id', '0', '');
+        $source          = RequestHelper::post('dev', '1', '');
+        if (empty($channel)) {
+            $this->returnJsonMsg('614', [], Common::C('code', '614'));
+        }
+        if (!in_array($channel, ['1', '2', '3'])) {
+            $this->returnJsonMsg('615', [], Common::C('code', '615'));
+        }
+        if (empty($channel_user_id)) {
+            $this->returnJsonMsg('613', [], Common::C('code', '613'));
+        }
+        $user_channel_model = new UserChannel();
+        $user_channel_where['channel'] = $channel;
+        $user_channel_where['channel_user_id'] = $channel_user_id;
+        $user_channel_where['status'] = '1';
+        $user_channel_info = $user_channel_model->getInfo($user_channel_where, true, 'id,mobile');
+        if (empty($user_channel_info)) {
+            $user_channel_data['channel'] = $channel;
+            $user_channel_data['source']  = $source;
+            $user_channel_data['channel_user_id'] = $channel_user_id;
+            $rs = $user_channel_model->insertInfo($user_channel_data);
+            if (!$rs) {
+                $this->returnJsonMsg('400', [], Common::C('code', '400'));
+            }
+        } else {
+            if (empty($user_channel_info['mobile'])) {
+                $this->returnJsonMsg('617', [], Common::C('code', '617'));
+            } else {
+                $this->returnJsonMsg('200', ['mobile'=>$user_channel_info['mobile']], Common::C('code', '200'));
+            }
+        }
+        $this->returnJsonMsg('617', [], Common::C('code', '617'));
+    }
+
+    /**
+     * 绑定用户
+     * @return array
+     */
+    public function actionBindUser()
+    {
+        $channel         = RequestHelper::post('channel', '1', '');
+        $channel_user_id = RequestHelper::post('channel_user_id', '0', '');
+        $source          = RequestHelper::post('dev', '1', '');
+        $mobile          = RequestHelper::post('mobile', '', '');
+        if (empty($channel)) {
+            $this->returnJsonMsg('614', [], Common::C('code', '614'));
+        }
+        if (!in_array($channel, ['1', '2', '3'])) {
+            $this->returnJsonMsg('615', [], Common::C('code', '615'));
+        }
+        if (empty($channel_user_id)) {
+            $this->returnJsonMsg('613', [], Common::C('code', '613'));
+        }
+        if (empty($mobile)) {
+            $this->returnJsonMsg('604', [], Common::C('code', '604'));
+        }
+        if (!Common::validateMobile($mobile)) {
+            $this->returnJsonMsg('605', [], Common::C('code', '605'));
+        }
+        $user_channel_model = new UserChannel();
+        $user_channel_where['channel'] = $channel;
+        $user_channel_where['channel_user_id'] = $channel_user_id;
+        $user_channel_where['status'] = '1';
+        $user_channel_info = $user_channel_model->getInfo($user_channel_where, true, 'id,mobile');
+        if (empty($user_channel_info)) {
+            $this->returnJsonMsg('616', [], Common::C('code', '616'));
+        } else {
+            if (!empty($user_channel_info['mobile'])) {
+                $this->returnJsonMsg('618', [], Common::C('code', '618'));
+            }
+        }
+        $user_channel_update['mobile'] = $mobile;
+        $user_channel_update['source'] = $source;
+        $user_channel_update_where['id'] = $user_channel_info['id'];
+        $rs = $user_channel_model->updateInfo($user_channel_update, $user_channel_update_where);
+        if (!$rs) {
+            $this->returnJsonMsg('400', [], Common::C('code', '400'));
+        }
+        $user_model = new User();
+        $user_add_data['mobile'] = $mobile;
+        $user_add_data['salt']   = Common::getRandomNumber();
+        $rs = $user_model->insertInfo($user_add_data);
+        if (!$rs) {
+            $this->returnJsonMsg('400', [], Common::C('code', '400'));
+        }
+        $user_sms_model = new UserSms();
+        $user_sms_data['mobile']  = $mobile;
+        $user_sms_data['content'] = Common::getSmsTemplate(4);
+        $rs = $user_sms_model->insertInfo($user_sms_data);
+        if (!$rs) {
+            $this->returnJsonMsg('619', [], Common::C('code', '619'));
+        } else {
+            $this->returnJsonMsg('200', ['first_login'=>'1'], Common::C('code', '200'));
+        }
+    }
     /**
      * 登陆页获取验证码
      * @param string $mobile 手机号
