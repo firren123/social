@@ -53,42 +53,42 @@ class IndexController extends Controller
     {
         echo 123;
         exit;
-        $config = array(
-            'host' => '118.186.247.55',
-            'port' => 5672,
-            'vhost' => '500m',
-            'login' => '500m',
-            'password' => 'gbjY51Rpstx'
-        );
-        $conn = new AMQPConnection($config);
-
-        if ($conn->connect()) {
-            echo "Established a connection to the broker <br />";
-        } else {
-            echo "Cannot connect to the broker <br />";
-        }
-
-        $conn->setHost('www.w3hacker.com');
-        var_dump($conn->getHost());
-        $conn->setLogin('admin');
-        var_dump($conn->getLogin());
-        $conn->setPassword('www.w3hacker.com');
-        var_dump($conn->getPassword());
-        $conn->setPort('1234');
-        var_dump($conn->getPort());
-        $conn->setTimeout(3000);
-        var_dump($conn->getTimeout());
-        $conn->setVhost('admin');
-        var_dump($conn->getVhost());
-        var_dump($conn->isConnected());
-
-        if (!$conn->disconnect()) {
-            throw new Exception('Could not disconnect');
-        } else {
-            var_dump("disconnect");
-        }
-
-        //$conn->reconnect();
-        var_dump($conn->isConnected());
+//        $config = array(
+//            'host' => '118.186.247.55',
+//            'port' => 5672,
+//            'vhost' => '500m',
+//            'login' => '500m',
+//            'password' => 'gbjY51Rpstx'
+//        );
+//        $conn = new AMQPConnection($config);
+//
+//        if ($conn->connect()) {
+//            echo "Established a connection to the broker <br />";
+//        } else {
+//            echo "Cannot connect to the broker <br />";
+//        }
+//
+//        $conn->setHost('www.w3hacker.com');
+//        var_dump($conn->getHost());
+//        $conn->setLogin('admin');
+//        var_dump($conn->getLogin());
+//        $conn->setPassword('www.w3hacker.com');
+//        var_dump($conn->getPassword());
+//        $conn->setPort('1234');
+//        var_dump($conn->getPort());
+//        $conn->setTimeout(3000);
+//        var_dump($conn->getTimeout());
+//        $conn->setVhost('admin');
+//        var_dump($conn->getVhost());
+//        var_dump($conn->isConnected());
+//
+//        if (!$conn->disconnect()) {
+//            throw new Exception('Could not disconnect');
+//        } else {
+//            var_dump("disconnect");
+//        }
+//
+//        //$conn->reconnect();
+//        var_dump($conn->isConnected());
     }
 }
