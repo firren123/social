@@ -51,7 +51,6 @@ class IndexController extends Controller
      */
     public function actionMess()
     {
-        echo 123;
         $config = array(
             'host' => '118.186.247.55',
             'port' => 5672,
@@ -66,7 +65,7 @@ class IndexController extends Controller
         } else {
             echo "Cannot connect to the broker <br />";
         }
-
+        exit(123);
         $conn->setHost('www.w3hacker.com');
         var_dump($conn->getHost());
         $conn->setLogin('admin');
