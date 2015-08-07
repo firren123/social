@@ -140,7 +140,7 @@ class Common
                 break;
             case 4 :
                 /**绑定用户发送验证码**/
-                $temp = '【i500】恭喜您绑定了本系统的账号。';
+                $temp = '【i500】恭喜您绑定了本系统的账号，密码为'.$code;
                 break;
             default :
                 $temp = '';
