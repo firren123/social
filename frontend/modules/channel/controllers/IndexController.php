@@ -49,7 +49,7 @@ class IndexController extends Controller
      * @throws Exception
      * @return string
      */
-    public function actionMq()
+    public function actionMess()
     {
         echo 123;
         exit;
