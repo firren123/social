@@ -32,6 +32,13 @@ class TestController extends Controller{
     /**
      * 简介：
      * @author  lichenjun@iyangpin.com。
+     */
+    public function actionT(){
+        echo '测试是否能用';
+    }
+    /**
+     * 简介：
+     * @author  lichenjun@iyangpin.com。
      * @throws Exception
      * @return string
      */
