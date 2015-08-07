@@ -38,7 +38,7 @@ class IndexController extends Controller
      */
     public function actionIndex()
     {
-        echo "这是通道模块，请完善。";
+        echo "这是通道模块，请完善。111";
     }
 
     /**
