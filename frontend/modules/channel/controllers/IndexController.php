@@ -40,7 +40,9 @@ class IndexController extends Controller
     {
         echo "这是通道模块，请完善。111";
     }
-
+    public function actionGoods(){
+        echo 123333333;
+    }
     /**
      * 简介：
      * @author  lichenjun@iyangpin.com。
