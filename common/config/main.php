@@ -59,8 +59,5 @@ return [
         'channel' => [
             'class' => 'frontend\modules\channel\Module',
         ],
-        'sms' => [
-            'class' => 'frontend\modules\sms\Module',
-        ],
     ],
 ];
