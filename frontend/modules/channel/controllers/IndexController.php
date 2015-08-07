@@ -49,6 +49,8 @@ class IndexController extends Controller
      */
     public function actionMq()
     {
+        echo 123;
+        exit;
         $config = array(
             'host' => '118.186.247.55',
             'port' => 5672,
