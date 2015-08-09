@@ -194,6 +194,48 @@ class LoginController extends BaseController
     }
 
     /**
+     * 注册
+     * @return array
+     */
+    public function actionRegister()
+    {
+        $mobile = RequestHelper::post('mobile', '', '');
+        if (empty($mobile)) {
+            $this->returnJsonMsg('604', [], Common::C('code', '604'));
+        }
+        if (!Common::validateMobile($mobile)) {
+            $this->returnJsonMsg('605', [], Common::C('code', '605'));
+        }
+        $password = RequestHelper::post('password', '', 'trim');
+        $code     = RequestHelper::post('code', '', 'trim');
+        if (empty($code)) {
+            $this->returnJsonMsg('608', [], Common::C('code', '608'));
+        }
+        $user_verify_code_model = new UserVerifyCode();
+        $user_verify_code_where['mobile'] = $mobile;
+        $user_verify_code_where['code']   = $code;
+        $user_verify_code_where['type']   = '1';
+        $user_verify_code_fields = 'id,expires_in';
+        $user_verify_code_info = $user_verify_code_model->getInfo($user_verify_code_where, true, $user_verify_code_fields, '', 'id desc');
+        if ($user_verify_code_info) {
+            if (strtotime($user_verify_code_info['expires_in']) < time()) {
+                $this->returnJsonMsg('609', [], Common::C('code', '609'));
+            }
+        } else {
+            $this->returnJsonMsg('610', [], Common::C('code', '610'));
+        }
+        $user_model = new User();
+        $user_data['mobile']   = $mobile;
+        $user_data['salt']     = Common::getRandomNumber();
+        $user_data['password'] = md5($user_data['salt'].$password);
+        $rs = $user_model->insertInfo($user_data);
+        if (!$rs) {
+            $this->returnJsonMsg('400', [], Common::C('code', '400'));
+        }
+        $this->returnJsonMsg('200', [], Common::C('code', '200'));
+    }
+
+    /**
      * 发送验证码
      *
      * Param string $mobile   手机号
@@ -218,6 +260,10 @@ class LoginController extends BaseController
             case '2' :
                 /**找回密码页获取验证码**/
                 $this->_findPwdSendCode($mobile);
+                break;
+            case '3' :
+                /**注册获取验证码**/
+                $this->_regSendCode($mobile);
                 break;
         }
     }
@@ -473,6 +519,43 @@ class LoginController extends BaseController
             $this->returnJsonMsg('611', [], Common::C('code', '611'));
         } else {
             $this->returnJsonMsg('200', ['first_login'=>'2'], Common::C('code', '200'));
+        }
+    }
+
+    /**
+     * 注册发送验证码
+     * @param string $mobile 手机号
+     * @return array
+     */
+    private function _regSendCode($mobile = '')
+    {
+        $user_model = new User();
+        $user_where['mobile']     = $mobile;
+        $user_where['is_deleted'] = '2';
+        $user_fields = 'id,mobile';
+        $user_info = $user_model->getInfo($user_where, true, $user_fields);
+        if (!empty($user_info)) {
+            /**未存在该用户**/
+            $this->returnJsonMsg('620', [], Common::C('code', '620'));
+        }
+        /**发送验证码**/
+        $user_verify_code_model = new UserVerifyCode();
+        $user_verify_code_data['mobile']     = $mobile;
+        $user_verify_code_data['code']       = Common::getRandomNumber();
+        $user_verify_code_data['type']       = '3';  //注册发送验证码
+        $user_verify_code_data['expires_in'] = date('Y-m-d H:i:s', (time()+ Common::C('verify_code_timeout')));
+        $rs = $user_verify_code_model->insertInfo($user_verify_code_data);
+        if (!$rs) {
+            $this->returnJsonMsg('400', [], Common::C('code', '400'));
+        }
+        $user_sms_model = new UserSms();
+        $user_sms_data['mobile']  = $mobile;
+        $user_sms_data['content'] = Common::getSmsTemplate(4, $user_verify_code_data['code']);
+        $rs = $user_sms_model->insertInfo($user_sms_data);
+        if (!$rs) {
+            $this->returnJsonMsg('611', [], Common::C('code', '611'));
+        } else {
+            $this->returnJsonMsg('200', ['first_login'=>'1'], Common::C('code', '200'));
         }
     }
 }

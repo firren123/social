@@ -142,6 +142,10 @@ class Common
                 /**绑定用户发送验证码**/
                 $temp = '【i500】恭喜您绑定了本系统的账号，密码为'.$code;
                 break;
+            case 5 :
+                /**注册发送验证码**/
+                $temp = '【i500】尊敬的用户，您的i500注册的验证码为'.$code;
+                break;
             default :
                 $temp = '';
         }
