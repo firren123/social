@@ -453,23 +453,30 @@ class LoginController extends BaseController
             $this->returnJsonMsg('400', [], Common::C('code', '400'));
         }
         $user_model = new User();
-        $user_add_data['mobile']   = $mobile;
-        $user_add_data['salt']     = Common::getRandomNumber();
-        $password_random = Common::getRandomNumber();
-        $user_add_data['password'] = md5($user_add_data['salt'].md5($password_random));
-        $rs = $user_model->insertInfo($user_add_data);
-        if (!$rs) {
-            $this->returnJsonMsg('400', [], Common::C('code', '400'));
+        $user_where['mobile']     = $mobile;
+        $user_where['is_deleted'] = '2';
+        $user_fields = 'id,mobile';
+        $user_info = $user_model->getInfo($user_where, true, $user_fields);
+        if (empty($user_info)) {
+            $user_add_data['mobile']   = $mobile;
+            $user_add_data['salt']     = Common::getRandomNumber();
+            $password_random = Common::getRandomNumber();
+            $user_add_data['password'] = md5($user_add_data['salt'].md5($password_random));
+            $rs = $user_model->insertInfo($user_add_data);
+            if (!$rs) {
+                $this->returnJsonMsg('400', [], Common::C('code', '400'));
+            }
+            $user_sms_model = new UserSms();
+            $user_sms_data['mobile']  = $mobile;
+            $user_sms_data['content'] = Common::getSmsTemplate(4, $password_random);
+            $rs = $user_sms_model->insertInfo($user_sms_data);
+            if (!$rs) {
+                $this->returnJsonMsg('619', [], Common::C('code', '619'));
+            } else {
+                $this->returnJsonMsg('200', [], Common::C('code', '200'));
+            }
         }
-        $user_sms_model = new UserSms();
-        $user_sms_data['mobile']  = $mobile;
-        $user_sms_data['content'] = Common::getSmsTemplate(4, $password_random);
-        $rs = $user_sms_model->insertInfo($user_sms_data);
-        if (!$rs) {
-            $this->returnJsonMsg('619', [], Common::C('code', '619'));
-        } else {
-            $this->returnJsonMsg('200', [], Common::C('code', '200'));
-        }
+        $this->returnJsonMsg('200', [], Common::C('code', '200'));
     }
     /**
      * 登陆页获取验证码
