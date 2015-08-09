@@ -56,8 +56,5 @@ return [
         'v1' => [
             'class' => 'frontend\modules\v1\Module',
         ],
-        'channel' => [
-            'class' => 'frontend\modules\channel\Module',
-        ],
     ],
 ];
