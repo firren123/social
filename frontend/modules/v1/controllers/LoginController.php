@@ -211,6 +211,15 @@ class LoginController extends BaseController
         if (empty($code)) {
             $this->returnJsonMsg('608', [], Common::C('code', '608'));
         }
+        $user_model = new User();
+        $user_where['mobile']     = $mobile;
+        $user_where['is_deleted'] = '2';
+        $user_fields = 'id,mobile';
+        $user_info = $user_model->getInfo($user_where, true, $user_fields);
+        if (!empty($user_info)) {
+            /**未存在该用户**/
+            $this->returnJsonMsg('620', [], Common::C('code', '620'));
+        }
         $user_verify_code_model = new UserVerifyCode();
         $user_verify_code_where['mobile'] = $mobile;
         $user_verify_code_where['code']   = $code;
