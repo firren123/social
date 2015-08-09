@@ -473,10 +473,10 @@ class LoginController extends BaseController
             if (!$rs) {
                 $this->returnJsonMsg('619', [], Common::C('code', '619'));
             } else {
-                $this->returnJsonMsg('200', [], Common::C('code', '200'));
+                $this->returnJsonMsg('200', ['first_login'=>'1'], Common::C('code', '200'));
             }
         } else {
-            $this->returnJsonMsg('200', [], Common::C('code', '200'));
+            $this->returnJsonMsg('200', ['first_login'=>'2'], Common::C('code', '200'));
         }
     }
     /**
