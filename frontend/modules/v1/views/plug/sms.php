@@ -67,6 +67,16 @@
         </div>
         <div style="margin-top: 10px; text-align: center; display: none;" class="alert alert-success error-msg" role="alert">
         </div>
+
+        <div class="input-group" style="margin-top: 10px;">
+            <span class="input-group-addon">解绑号码</span>
+            <input type="text" placeholder="例如：13264185553" class="form-control" id="bind_user">
+        </div>
+        <div style="margin-top: 10px;text-align: center;">
+            <button type="submit" class="btn btn-default btn-remove-bind-user">解绑</button>
+        </div>
+        <div style="margin-top: 10px; text-align: center; display: none;" class="alert alert-success remove-bind-user-msg" role="alert">
+        </div>
     </div>
     </body>
 </html>

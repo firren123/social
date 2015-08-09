@@ -15,6 +15,8 @@
 
 namespace frontend\modules\v1\controllers;
 
+use frontend\models\i500_social\User;
+use frontend\models\i500_social\UserChannel;
 use frontend\models\i500_social\UserToken;
 use frontend\models\i500_social\UserVerifyCode;
 use Yii;
@@ -63,6 +65,22 @@ class PlugController extends Controller
     public function actionSms()
     {
         return $this->render('sms');
+    }
+
+    /**
+     * 解绑
+     * @return array
+     */
+    public function actionRemoveBindUser()
+    {
+        $mobile = RequestHelper::get('mobile', '', '');
+        $rs_1 = User::deleteAll('mobile='.$mobile);
+        $rs_2 = UserChannel::deleteAll('mobile='.$mobile);
+        if ($rs_1 && $rs_2) {
+            echo json_encode(['code'=>'ok','msg'=>'解绑成功']);
+        } else {
+            echo json_encode(['code'=>'no','msg'=>'解绑失败']);
+        }
     }
 
     /**

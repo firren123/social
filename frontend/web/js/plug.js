@@ -111,6 +111,32 @@ var Plug={
                     }
                 }
             });
+    },
+    /**
+     * 解绑
+     */
+    'removeBindUser' : function() {
+        $.ajax(
+            {
+                type: "GET",
+                url : "/v1/plug/remove-bind-user",
+                data: {
+                    'mobile'   : $("#bind_user").val()
+                },
+                async: false,
+                dataType: "json",
+                beforeSend: function () {
+                    $(".remove-bind-user-msg").css('display','none');
+                },
+                success: function (result) {
+                    if (result.code==='ok') {
+                        $(".remove-bind-user-msg").show();
+                        $(".remove-bind-user-msg").html(result['msg']);
+                    } else {
+                        alert('解绑失败。');
+                    }
+                }
+            });
     }
 };
 $(function(){
@@ -145,6 +171,14 @@ $(function(){
             Plug.getErrorMsg();
         } else {
             alert('请输入错误代码');
+        }
+    });
+    $(".btn-remove-bind-user").click(function(){
+        var bind_user = $("#bind_user").val();
+        if (bind_user) {
+            Plug.removeBindUser();
+        } else {
+            alert('请输入解绑号码');
         }
     });
 });
