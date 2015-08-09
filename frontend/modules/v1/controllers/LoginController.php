@@ -123,7 +123,7 @@ class LoginController extends BaseController
             if (empty($channel)) {
                 $this->returnJsonMsg('614', [], Common::C('code', '614'));
             }
-            if (!in_array($channel, ['1', '2', '3'])) {
+            if (!in_array($channel, ['1', '2', '3', '4'])) {
                 $this->returnJsonMsg('615', [], Common::C('code', '615'));
             }
             $user_channel_model = new UserChannel();
@@ -303,7 +303,7 @@ class LoginController extends BaseController
         if (empty($channel)) {
             $this->returnJsonMsg('614', [], Common::C('code', '614'));
         }
-        if (!in_array($channel, ['1', '2', '3'])) {
+        if (!in_array($channel, ['1', '2', '3', '4'])) {
             $this->returnJsonMsg('615', [], Common::C('code', '615'));
         }
         if (empty($channel_user_id)) {
@@ -345,7 +345,7 @@ class LoginController extends BaseController
         if (empty($channel)) {
             $this->returnJsonMsg('614', [], Common::C('code', '614'));
         }
-        if (!in_array($channel, ['1', '2', '3'])) {
+        if (!in_array($channel, ['1', '2', '3', '4'])) {
             $this->returnJsonMsg('615', [], Common::C('code', '615'));
         }
         if (empty($channel_user_id)) {
