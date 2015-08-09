@@ -217,7 +217,7 @@ class LoginController extends BaseController
         $user_fields = 'id,mobile';
         $user_info = $user_model->getInfo($user_where, true, $user_fields);
         if (!empty($user_info)) {
-            /**未存在该用户**/
+            /**存在该用户**/
             $this->returnJsonMsg('620', [], Common::C('code', '620'));
         }
         $user_verify_code_model = new UserVerifyCode();
@@ -544,7 +544,7 @@ class LoginController extends BaseController
         $user_fields = 'id,mobile';
         $user_info = $user_model->getInfo($user_where, true, $user_fields);
         if (!empty($user_info)) {
-            /**未存在该用户**/
+            /**存在该用户**/
             $this->returnJsonMsg('620', [], Common::C('code', '620'));
         }
         /**发送验证码**/
