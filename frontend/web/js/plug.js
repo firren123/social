@@ -137,6 +137,60 @@ var Plug={
                     }
                 }
             });
+    },
+    /**
+     * 删除用户
+     */
+    'removeUser' : function() {
+        $.ajax(
+            {
+                type: "GET",
+                url : "/v1/plug/remove-user",
+                data: {
+                    'mobile'   : $("#remove_user").val(),
+                    'type'     : '1'
+                },
+                async: false,
+                dataType: "json",
+                beforeSend: function () {
+                    $(".user-msg").css('display','none');
+                },
+                success: function (result) {
+                    if (result.code==='ok') {
+                        $(".user-msg").show();
+                        $(".user-msg").html(result['msg']);
+                    } else {
+                        alert('删除失败。');
+                    }
+                }
+            });
+    },
+    /**
+     * 检测用户
+     */
+    'checkUser' : function() {
+        $.ajax(
+            {
+                type: "GET",
+                url : "/v1/plug/remove-user",
+                data: {
+                    'mobile'   : $("#remove_user").val(),
+                    'type'     : '2'
+                },
+                async: false,
+                dataType: "json",
+                beforeSend: function () {
+                    $(".user-msg").css('display','none');
+                },
+                success: function (result) {
+                    if (result.code==='ok') {
+                        $(".user-msg").show();
+                        $(".user-msg").html(result['msg']);
+                    } else {
+                        alert('服务器繁忙。');
+                    }
+                }
+            });
     }
 };
 $(function(){
@@ -179,6 +233,22 @@ $(function(){
             Plug.removeBindUser();
         } else {
             alert('请输入解绑号码');
+        }
+    });
+    $(".btn-remove-user").click(function(){
+        var remove_user = $("#remove_user").val();
+        if (remove_user) {
+            Plug.removeUser();
+        } else {
+            alert('请输入删除号码');
+        }
+    });
+    $(".btn-check-user").click(function(){
+        var remove_user = $("#remove_user").val();
+        if (remove_user) {
+            Plug.checkUser();
+        } else {
+            alert('请输入检测号码');
         }
     });
 });

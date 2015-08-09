@@ -68,6 +68,35 @@ class PlugController extends Controller
     }
 
     /**
+     * 删除用户
+     * @return array
+     */
+    public function actionRemoveUser()
+    {
+
+        $mobile = RequestHelper::get('mobile', '', '');
+        $type   = RequestHelper::get('type', '', '');
+        if ($type == '1') {
+            $rs_1 = User::deleteAll('mobile='.$mobile);
+            if ($rs_1) {
+                echo json_encode(['code'=>'ok','msg'=>'删除成功']);
+            } else {
+                echo json_encode(['code'=>'no','msg'=>'删除失败']);
+            }
+        } else {
+            $user_model = new User();
+            $user_where['mobile']     = $mobile;
+            $user_where['is_deleted'] = '2';
+            $user_info = $user_model->getInfo($user_where, true, 'id,mobile');
+            if ($user_info) {
+                echo json_encode(['code'=>'ok','msg'=>'存在']);
+            } else {
+                echo json_encode(['code'=>'ok','msg'=>'不存在']);
+            }
+        }
+    }
+
+    /**
      * 解绑
      * @return array
      */
