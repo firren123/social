@@ -19,6 +19,7 @@ use frontend\models\i500_social\UserToken;
 use frontend\models\i500_social\UserVerifyCode;
 use Yii;
 use common\helpers\RequestHelper;
+use common\helpers\Common;
 use yii\web\Controller;
 
 /**
@@ -64,6 +65,20 @@ class PlugController extends Controller
         return $this->render('sms');
     }
 
+    /**
+     * 查看Code
+     * @return string
+     */
+    public function actionGetErrorMsg()
+    {
+        $code = RequestHelper::get('code', '', '');
+        $msg = Common::C('code', $code);
+        if ($msg) {
+            echo json_encode(['code'=>'ok','msg'=>'错误信息：'.$msg]);
+        } else {
+            echo json_encode(['code'=>'ok','msg'=>'抱歉，未能查询到。']);
+        }
+    }
     /**
      * 获取Token的方法
      * @return array

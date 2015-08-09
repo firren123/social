@@ -58,6 +58,15 @@
         <div style="margin-top: 5px;text-align: center;">
             <button type="submit" class="btn btn-default btn-md5">MD5</button>
         </div>
+        <div class="input-group" style="margin-top: 10px;">
+            <span class="input-group-addon">错误代码</span>
+            <input type="text" class="form-control" id="error_code">
+        </div>
+        <div style="margin-top: 10px;text-align: center;">
+            <button type="submit" class="btn btn-default btn-get-error-msg">获取错误信息</button>
+        </div>
+        <div style="margin-top: 10px; text-align: center; display: none;" class="alert alert-success error-msg" role="alert">
+        </div>
     </div>
     </body>
 </html>

@@ -85,6 +85,32 @@ var Plug={
                     }
                 }
             });
+    },
+    /**
+     * 获取错误信息
+     */
+    'getErrorMsg' : function() {
+        $.ajax(
+            {
+                type: "GET",
+                url : "/v1/plug/get-error-msg",
+                data: {
+                    'code'   : $("#error_code").val()
+                },
+                async: false,
+                dataType: "json",
+                beforeSend: function () {
+                    $(".error-msg").css('display','none');
+                },
+                success: function (result) {
+                    if (result.code==='ok') {
+                        $(".error-msg").show();
+                        $(".error-msg").html(result['msg']);
+                    } else {
+                        alert('查询失败，请重试！');
+                    }
+                }
+            });
     }
 };
 $(function(){
@@ -111,6 +137,14 @@ $(function(){
             Plug.MD5_str();
         } else {
             alert('请输入MD5字符串');
+        }
+    });
+    $(".btn-get-error-msg").click(function(){
+        var error_code = $("#error_code").val();
+        if (error_code) {
+            Plug.getErrorMsg();
+        } else {
+            alert('请输入错误代码');
         }
     });
 });
