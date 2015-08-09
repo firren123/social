@@ -274,6 +274,10 @@ class LoginController extends BaseController
                 /**注册获取验证码**/
                 $this->_regSendCode($mobile);
                 break;
+            case '4' :
+                /**绑定用户获取验证码**/
+                $this->_bindUserSendCode($mobile);
+                break;
         }
     }
 
@@ -397,6 +401,7 @@ class LoginController extends BaseController
         $channel_user_id = RequestHelper::post('channel_user_id', '0', '');
         $source          = RequestHelper::post('dev', '1', '');
         $mobile          = RequestHelper::post('mobile', '', '');
+        $code            = RequestHelper::post('code', '', '');
         if (empty($channel)) {
             $this->returnJsonMsg('614', [], Common::C('code', '614'));
         }
@@ -411,6 +416,22 @@ class LoginController extends BaseController
         }
         if (!Common::validateMobile($mobile)) {
             $this->returnJsonMsg('605', [], Common::C('code', '605'));
+        }
+        if (empty($code)) {
+            $this->returnJsonMsg('608', [], Common::C('code', '608'));
+        }
+        $user_verify_code_model = new UserVerifyCode();
+        $user_verify_code_where['mobile'] = $mobile;
+        $user_verify_code_where['code']   = $code;
+        $user_verify_code_where['type']   = '4';
+        $user_verify_code_fields = 'id,expires_in';
+        $user_verify_code_info = $user_verify_code_model->getInfo($user_verify_code_where, true, $user_verify_code_fields, '', 'id desc');
+        if ($user_verify_code_info) {
+            if (strtotime($user_verify_code_info['expires_in']) < time()) {
+                $this->returnJsonMsg('609', [], Common::C('code', '609'));
+            }
+        } else {
+            $this->returnJsonMsg('610', [], Common::C('code', '610'));
         }
         $user_channel_model = new UserChannel();
         $user_channel_where['channel'] = $channel;
@@ -559,7 +580,44 @@ class LoginController extends BaseController
         }
         $user_sms_model = new UserSms();
         $user_sms_data['mobile']  = $mobile;
-        $user_sms_data['content'] = Common::getSmsTemplate(4, $user_verify_code_data['code']);
+        $user_sms_data['content'] = Common::getSmsTemplate(5, $user_verify_code_data['code']);
+        $rs = $user_sms_model->insertInfo($user_sms_data);
+        if (!$rs) {
+            $this->returnJsonMsg('611', [], Common::C('code', '611'));
+        } else {
+            $this->returnJsonMsg('200', ['first_login'=>'1'], Common::C('code', '200'));
+        }
+    }
+
+    /**
+     * 绑定用户发送验证码
+     * @param string $mobile 手机号
+     * @return array
+     */
+    private function _bindUserSendCode($mobile = '')
+    {
+        $user_model = new User();
+        $user_where['mobile']     = $mobile;
+        $user_where['is_deleted'] = '2';
+        $user_fields = 'id,mobile';
+        $user_info = $user_model->getInfo($user_where, true, $user_fields);
+        if (empty($user_info)) {
+            /**不存在该用户**/
+            $this->returnJsonMsg('602', [], Common::C('code', '602'));
+        }
+        /**发送验证码**/
+        $user_verify_code_model = new UserVerifyCode();
+        $user_verify_code_data['mobile']     = $mobile;
+        $user_verify_code_data['code']       = Common::getRandomNumber();
+        $user_verify_code_data['type']       = '4';  //绑定用户发送验证码
+        $user_verify_code_data['expires_in'] = date('Y-m-d H:i:s', (time()+ Common::C('verify_code_timeout')));
+        $rs = $user_verify_code_model->insertInfo($user_verify_code_data);
+        if (!$rs) {
+            $this->returnJsonMsg('400', [], Common::C('code', '400'));
+        }
+        $user_sms_model = new UserSms();
+        $user_sms_data['mobile']  = $mobile;
+        $user_sms_data['content'] = Common::getSmsTemplate(6, $user_verify_code_data['code']);
         $rs = $user_sms_model->insertInfo($user_sms_data);
         if (!$rs) {
             $this->returnJsonMsg('611', [], Common::C('code', '611'));
