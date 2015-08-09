@@ -251,7 +251,7 @@ class LoginController extends BaseController
         if (!Common::validateMobile($mobile)) {
             $this->returnJsonMsg('605', [], Common::C('code', '605'));
         }
-        $type   = RequestHelper::post('type', '1', '');
+        $type   = RequestHelper::post('type', '', '0');
         switch ($type) {
             case '1' :
                 /**登陆页获取验证码**/
