@@ -475,8 +475,9 @@ class LoginController extends BaseController
             } else {
                 $this->returnJsonMsg('200', [], Common::C('code', '200'));
             }
+        } else {
+            $this->returnJsonMsg('200', [], Common::C('code', '200'));
         }
-        $this->returnJsonMsg('200', [], Common::C('code', '200'));
     }
     /**
      * 登陆页获取验证码
