@@ -214,7 +214,7 @@ class LoginController extends BaseController
         $user_verify_code_model = new UserVerifyCode();
         $user_verify_code_where['mobile'] = $mobile;
         $user_verify_code_where['code']   = $code;
-        $user_verify_code_where['type']   = '1';
+        $user_verify_code_where['type']   = '3';
         $user_verify_code_fields = 'id,expires_in';
         $user_verify_code_info = $user_verify_code_model->getInfo($user_verify_code_where, true, $user_verify_code_fields, '', 'id desc');
         if ($user_verify_code_info) {
