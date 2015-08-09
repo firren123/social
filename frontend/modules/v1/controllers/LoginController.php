@@ -604,15 +604,15 @@ class LoginController extends BaseController
      */
     private function _bindUserSendCode($mobile = '')
     {
-        $user_model = new User();
-        $user_where['mobile']     = $mobile;
-        $user_where['is_deleted'] = '2';
-        $user_fields = 'id,mobile';
-        $user_info = $user_model->getInfo($user_where, true, $user_fields);
-        if (empty($user_info)) {
-            /**不存在该用户**/
-            $this->returnJsonMsg('602', [], Common::C('code', '602'));
-        }
+//        $user_model = new User();
+//        $user_where['mobile']     = $mobile;
+//        $user_where['is_deleted'] = '2';
+//        $user_fields = 'id,mobile';
+//        $user_info = $user_model->getInfo($user_where, true, $user_fields);
+//        if (empty($user_info)) {
+//            /**不存在该用户**/
+//            $this->returnJsonMsg('602', [], Common::C('code', '602'));
+//        }
         /**发送验证码**/
         $user_verify_code_model = new UserVerifyCode();
         $user_verify_code_data['mobile']     = $mobile;
