@@ -73,7 +73,7 @@ class ProfileController extends BaseController
                 $user_base_info['avatar'] = Common::C('imgHost').$user_base_info['avatar'];
             }
         }
-        $this->returnJsonMsg('200', $user_base_info, Common::C('code', '605'));
+        $this->returnJsonMsg('200', $user_base_info, Common::C('code', '200'));
     }
 
     /**
