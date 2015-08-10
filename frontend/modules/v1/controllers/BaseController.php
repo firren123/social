@@ -17,8 +17,11 @@ namespace frontend\modules\v1\controllers;
 
 use common\helpers\Common;
 use common\helpers\RequestHelper;
+use common\helpers\CurlHelper;
 use frontend\models\i500_social\User;
 use frontend\models\i500_social\UserToken;
+use frontend\models\i500_social\UserSms;
+use frontend\models\i500_social\UserVerifyCode;
 use yii\web\Controller;
 
 /**
@@ -188,5 +191,34 @@ class BaseController extends Controller
         $ret = json_encode($arr);
         $ret_str = str_replace('null', '""', $ret);
         die($ret_str);
+    }
+
+    /**
+     * 发送短信通道
+     * @param string $mobile  手机号
+     * @param string $content 短信内容
+     * @return array
+     */
+    public function sendSmsChannel($mobile = '', $content = '')
+    {
+        $url = Common::C('channelHost').'sms/get-add';
+        $arr['mobile']  = $mobile;
+        $arr['content'] = $content;
+        $rs = CurlHelper::post($url, $arr);
+        if ($rs['code']=='200') {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * 保存用户发送短信信息
+     * @param array $data 数据
+     * @return array
+     */
+    public function saveUserSms($data = array())
+    {
+        $user_sms_model = new UserSms();
+        return $user_sms_model->insertInfo($data);
     }
 }
