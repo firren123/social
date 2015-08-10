@@ -18,6 +18,7 @@ use Yii;
 use common\helpers\Common;
 use common\helpers\RequestHelper;
 use frontend\models\i500_social\User;
+use frontend\models\i500_social\UserBasicInfo;
 use frontend\models\i500_social\UserToken;
 use frontend\models\i500_social\UserChannel;
 use frontend\models\i500_social\UserVerifyCode;
@@ -399,6 +400,8 @@ class LoginController extends BaseController
     {
         $channel         = RequestHelper::post('channel', '1', '');
         $channel_user_id = RequestHelper::post('channel_user_id', '0', '');
+        $channel_nickname = RequestHelper::post('channel_nickname', '', '');
+        $channel_user_avatar = RequestHelper::post('channel_user_avatar', '', '');
         $source          = RequestHelper::post('dev', '1', '');
         $mobile          = RequestHelper::post('mobile', '', '');
         $code            = RequestHelper::post('code', '', '');
@@ -463,6 +466,12 @@ class LoginController extends BaseController
             $password_random = Common::getRandomNumber();
             $user_add_data['password'] = md5($user_add_data['salt'].md5($password_random));
             $rs = $user_model->insertInfo($user_add_data);
+            /**同时记录UserBaseInfo**/
+            $user_base_model = new UserBasicInfo();
+            $user_base_data['mobile'] = $mobile;
+            $user_base_data['nickname'] = $channel_nickname;
+            $user_base_data['avatar'] = $channel_user_avatar;
+            $user_base_model->insertInfo($user_base_data);
             if (!$rs) {
                 $this->returnJsonMsg('400', [], Common::C('code', '400'));
             }

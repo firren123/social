@@ -21,7 +21,6 @@ use common\helpers\CurlHelper;
 use frontend\models\i500_social\User;
 use frontend\models\i500_social\UserToken;
 use frontend\models\i500_social\UserSms;
-use frontend\models\i500_social\UserVerifyCode;
 use yii\web\Controller;
 
 /**
