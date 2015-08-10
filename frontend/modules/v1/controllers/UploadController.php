@@ -17,6 +17,7 @@ namespace frontend\modules\v1\controllers;
 
 use Yii;
 use common\helpers\FastDFSHelper;
+use common\helpers\Common;
 use yii\web\Controller;
 
 /**
@@ -38,13 +39,18 @@ class UploadController extends Controller
      */
     public function actionUploadImg()
     {
-        $rs = ['state'=>'ERROR'];
         $fastDfs = new FastDFSHelper();
         $rs_data = $fastDfs->fdfs_upload('file');
         if ($rs_data) {
-            $rs['state'] = 'SUCCESS';
-            $rs['url'] = $rs_data['group_name'].'/'.$rs_data['filename'];
+            $url = $rs_data['group_name'].'/'.$rs_data['filename'];
+            $rs_arr['code'] = '200';
+            $rs_arr['url']  = $url;
+            $rs_arr['message'] = Common::C('code', '200');
+            die(json_encode($rs_arr));
         }
-        echo json_encode($rs);
+        $rs_arr['code'] = '624';
+        $rs_arr['url']  = '';
+        $rs_arr['message'] = Common::C('code', '624');
+        die(json_encode($rs_arr));
     }
 }
