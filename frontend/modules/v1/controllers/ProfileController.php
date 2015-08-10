@@ -63,6 +63,9 @@ class ProfileController extends BaseController
         $user_base_where['mobile'] = $mobile;
         $user_base_fields = 'mobile,nickname,avatar,personal_sign,realname,sex,birthday,province_id,city_id,district_id,community_name';
         $user_base_info = $user_base_model->getInfo($user_base_where, true, $user_base_fields);
+        if ($user_base_info['avatar']) {
+            $user_base_info['avatar'] = Common::C('imgHost').$user_base_info['avatar'];
+        }
         $this->returnJsonMsg('200', $user_base_info, Common::C('code', '605'));
     }
 
