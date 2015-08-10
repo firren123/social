@@ -65,7 +65,10 @@ class ProfileController extends BaseController
         $user_base_info = $user_base_model->getInfo($user_base_where, true, $user_base_fields);
         if (empty($user_base_info)) {
             $user_base_data['mobile'] = $mobile;
-            $user_base_model->insertInfo($user_base_data);
+            $rs = $user_base_model->insertInfo($user_base_data);
+            if (!$rs) {
+                $this->returnJsonMsg('200', $user_base_info, Common::C('code', '200'));
+            }
             $user_base_info = $user_base_model->getInfo($user_base_where, true, $user_base_fields);
         }
         if (!empty($user_base_info)) {
