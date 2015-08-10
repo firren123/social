@@ -12,8 +12,8 @@ return [
         'store_path_index'=>0,
     ],
     'imgHost'         => 'http://img.test.i500m.com/', //图片服务器
-    'mobilePreg'      => '/^1[34587][0-9]{9}$/',      //Mobile 验证规则
-    'token_timeout'   => 7*24*60*60,                  //用户登陆token有效期
-    'verify_code_timeout'   => 60*60,            //用户短信验证码有效期
-    'sign_debug'      => true,                       //false = 开启验证 true 关闭验证
+    'mobilePreg'      => '/^1[34587][0-9]{9}$/',       //Mobile 验证规则
+    'token_timeout'   => 7*24*60*60,                   //用户登陆token有效期
+    'verify_code_timeout'   => 60*60,                  //用户短信验证码有效期
+    'sign_debug'      => false,                        //false = 开启验证 true 关闭验证
 ];
