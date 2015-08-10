@@ -73,7 +73,7 @@ class ProfileController extends BaseController
         }
         if (!empty($user_base_info)) {
             if ($user_base_info['avatar']) {
-                if (!strpos($user_base_info['avatar'], 'http')) {
+                if (!strstr($user_base_info['avatar'], 'http')) {
                     $user_base_info['avatar'] = Common::C('imgHost').$user_base_info['avatar'];
                 }
             }
