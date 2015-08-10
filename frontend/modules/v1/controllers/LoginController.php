@@ -181,11 +181,9 @@ class LoginController extends BaseController
         if ($first_login == '1') {
             /**给用户发短信**/
             $sms_content = Common::getSmsTemplate(2, $password_random);
-            if (Common::C('saveSms')) {
-                $user_sms_data['mobile']  = $mobile;
-                $user_sms_data['content'] = $sms_content;
-                $this->saveUserSms($user_sms_data);
-            }
+            $user_sms_data['mobile']  = $mobile;
+            $user_sms_data['content'] = $sms_content;
+            $this->saveUserSms($user_sms_data);
             /**发送短信通道**/
             $this->sendSmsChannel($mobile, $sms_content);
         }
@@ -470,12 +468,10 @@ class LoginController extends BaseController
             }
             /**给用户发短信**/
             $sms_content = Common::getSmsTemplate(4, $password_random);
-            if (Common::C('saveSms')) {
-                $user_sms_data['mobile']  = $mobile;
-                $user_sms_data['content'] = $sms_content;
-                if (!$this->saveUserSms($user_sms_data)) {
-                    $this->returnJsonMsg('619', [], Common::C('code', '619'));
-                }
+            $user_sms_data['mobile']  = $mobile;
+            $user_sms_data['content'] = $sms_content;
+            if (!$this->saveUserSms($user_sms_data)) {
+                $this->returnJsonMsg('619', [], Common::C('code', '619'));
             }
             /**发送短信通道**/
             $rs = $this->sendSmsChannel($mobile, $sms_content);
@@ -521,13 +517,11 @@ class LoginController extends BaseController
             $this->returnJsonMsg('400', [], Common::C('code', '400'));
         }
         $sms_content = Common::getSmsTemplate(1, $user_verify_code_data['code']);
-        /**是否开启 保存数据**/
-        if (Common::C('saveSms')) {
-            $user_sms_data['mobile']  = $mobile;
-            $user_sms_data['content'] = $sms_content;
-            if (!$this->saveUserSms($user_sms_data)) {
-                $this->returnJsonMsg('611', [], Common::C('code', '611'));
-            }
+        /**保存短信数据**/
+        $user_sms_data['mobile']  = $mobile;
+        $user_sms_data['content'] = $sms_content;
+        if (!$this->saveUserSms($user_sms_data)) {
+            $this->returnJsonMsg('611', [], Common::C('code', '611'));
         }
         /**发送短信通道**/
         $rs = $this->sendSmsChannel($mobile, $sms_content);
@@ -564,13 +558,11 @@ class LoginController extends BaseController
             $this->returnJsonMsg('400', [], Common::C('code', '400'));
         }
         $sms_content = Common::getSmsTemplate(3, $user_verify_code_data['code']);
-        /**是否开启 保存数据**/
-        if (Common::C('saveSms')) {
-            $user_sms_data['mobile']  = $mobile;
-            $user_sms_data['content'] = $sms_content;
-            if (!$this->saveUserSms($user_sms_data)) {
-                $this->returnJsonMsg('611', [], Common::C('code', '611'));
-            }
+        /**保存短信数据**/
+        $user_sms_data['mobile']  = $mobile;
+        $user_sms_data['content'] = $sms_content;
+        if (!$this->saveUserSms($user_sms_data)) {
+            $this->returnJsonMsg('611', [], Common::C('code', '611'));
         }
         /**发送短信通道**/
         $rs = $this->sendSmsChannel($mobile, $sms_content);
@@ -607,13 +599,11 @@ class LoginController extends BaseController
             $this->returnJsonMsg('400', [], Common::C('code', '400'));
         }
         $sms_content = Common::getSmsTemplate(5, $user_verify_code_data['code']);
-        /**是否开启 保存数据**/
-        if (Common::C('saveSms')) {
-            $user_sms_data['mobile']  = $mobile;
-            $user_sms_data['content'] = $sms_content;
-            if (!$this->saveUserSms($user_sms_data)) {
-                $this->returnJsonMsg('611', [], Common::C('code', '611'));
-            }
+        /**保存短信数据**/
+        $user_sms_data['mobile']  = $mobile;
+        $user_sms_data['content'] = $sms_content;
+        if (!$this->saveUserSms($user_sms_data)) {
+            $this->returnJsonMsg('611', [], Common::C('code', '611'));
         }
         /**发送短信通道**/
         $rs = $this->sendSmsChannel($mobile, $sms_content);
@@ -641,13 +631,11 @@ class LoginController extends BaseController
             $this->returnJsonMsg('400', [], Common::C('code', '400'));
         }
         $sms_content = Common::getSmsTemplate(6, $user_verify_code_data['code']);
-        /**是否开启 保存数据**/
-        if (Common::C('saveSms')) {
-            $user_sms_data['mobile']  = $mobile;
-            $user_sms_data['content'] = $sms_content;
-            if (!$this->saveUserSms($user_sms_data)) {
-                $this->returnJsonMsg('611', [], Common::C('code', '611'));
-            }
+        /**保存短信数据**/
+        $user_sms_data['mobile']  = $mobile;
+        $user_sms_data['content'] = $sms_content;
+        if (!$this->saveUserSms($user_sms_data)) {
+            $this->returnJsonMsg('611', [], Common::C('code', '611'));
         }
         /**发送短信通道**/
         $rs = $this->sendSmsChannel($mobile, $sms_content);

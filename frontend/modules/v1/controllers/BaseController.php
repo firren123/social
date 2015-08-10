@@ -201,14 +201,18 @@ class BaseController extends Controller
      */
     public function sendSmsChannel($mobile = '', $content = '')
     {
-        $url = Common::C('channelHost').'sms/get-add';
-        $arr['mobile']  = $mobile;
-        $arr['content'] = $content;
-        $rs = CurlHelper::post($url, $arr);
-        if ($rs['code']=='200') {
+        if (Common::C('openSmsChannel')) {
+            $url = Common::C('channelHost').'sms/get-add';
+            $arr['mobile']  = $mobile;
+            $arr['content'] = $content;
+            $rs = CurlHelper::post($url, $arr);
+            if ($rs['code']=='200') {
+                return true;
+            }
+            return false;
+        } else {
             return true;
         }
-        return false;
     }
 
     /**
@@ -218,7 +222,11 @@ class BaseController extends Controller
      */
     public function saveUserSms($data = array())
     {
-        $user_sms_model = new UserSms();
-        return $user_sms_model->insertInfo($data);
+        if (Common::C('saveSms')) {
+            $user_sms_model = new UserSms();
+            return $user_sms_model->insertInfo($data);
+        } else {
+            return true;
+        }
     }
 }
