@@ -56,7 +56,7 @@ class BaseController extends Controller
                 $this->params = RequestHelper::get();
                 break;
         }
-        //file_put_contents('/tmp/app_request_param.log', "请求时间：".date('Y-m-d H:i:s')." 请求参数:". var_export($this->params, true)."\n", FILE_APPEND);
+        $this->saveLog(Common::C('returnLogFile'), var_export($this->params, true));
         if (!\Yii::$app->params['sign_debug']) {
             if (!isset($this->params['appId'])) {
                 $this->returnJsonMsg('501', [], Common::C('code', '501'));
@@ -186,7 +186,7 @@ class BaseController extends Controller
             'data' => $data,
             'message' => $message,
         );
-        //file_put_contents('/tmp/app_send_log.log', "执行时间：".date('Y-m-d H:i:s')." 返回结果".var_export($arr, true)."\n", FILE_APPEND);
+        $this->saveLog(Common::C('paramsLogFile'), var_export($arr, true));
         $ret = json_encode($arr);
         $ret_str = str_replace('null', '""', $ret);
         die($ret_str);
@@ -226,6 +226,19 @@ class BaseController extends Controller
             return $user_sms_model->insertInfo($data);
         } else {
             return true;
+        }
+    }
+
+    /**
+     * 开启日志
+     * @param string $path 路径
+     * @param string $data 数据
+     * @return bool
+     */
+    public function saveLog($path = '', $data = '')
+    {
+        if (Common::C('openLog')) {
+            file_put_contents($path, "执行时间：" . date('Y-m-d H:i:s') . " 数据：" . var_export($data, true) . "\n", FILE_APPEND);
         }
     }
 }
