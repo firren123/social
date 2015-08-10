@@ -67,7 +67,7 @@ class ProfileController extends BaseController
             $user_base_data['mobile'] = $mobile;
             $rs = $user_base_model->insertInfo($user_base_data);
             if (!$rs) {
-                $this->returnJsonMsg('200', $user_base_info, Common::C('code', '200'));
+                $this->returnJsonMsg('400', [], Common::C('code', '400'));
             }
             $user_base_info = $user_base_model->getInfo($user_base_where, true, $user_base_fields);
         }
