@@ -127,7 +127,7 @@ class BaseController extends Controller
             $params = $this->params;
             //ksort($params);
             foreach ($params as $k=>$v) {
-                $val .= $v;
+                $val .= strtolower($v);
             }
         }
         $sign = md5(md5(md5($app_code[$app_id].$timestamp).md5($timestamp)).md5($val));
