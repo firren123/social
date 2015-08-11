@@ -17,6 +17,7 @@ namespace frontend\modules\v1\controllers;
 
 use frontend\models\i500_social\User;
 use frontend\models\i500_social\UserChannel;
+use frontend\models\i500_social\UserBasicInfo;
 use frontend\models\i500_social\UserToken;
 use frontend\models\i500_social\UserVerifyCode;
 use Yii;
@@ -42,7 +43,8 @@ class PlugController extends Controller
     public function actionSign()
     {
         $app_code = 'DKJA@(SL)RssMAKDKas!L';
-        $timestamp = time();
+        //$timestamp = time();
+        $timestamp = '1439200388';
         $val  = '';
         $params = RequestHelper::get();
         $data['msg'] = '';
@@ -56,6 +58,28 @@ class PlugController extends Controller
         }
         $data['timestamp'] = $timestamp;
         return $this->render('sign', ['data'=>$data]);
+    }
+
+    public function actionTest()
+    {
+        $app_code = 'DKJA@(SL)RssMAKDKas!L';
+        echo "app_code=".$app_code."<br><br>";
+        $timestamp = '1439200388';
+        echo "timestamp=".$timestamp."<br><br>";
+        $channel = '3';
+        echo "参数：channel=".$channel."<br><br>";
+        $channel_user_id = '123456';
+        echo "参数：channel_user_id=".$channel_user_id."<br><br>";
+        $md5_1 = "md5(app_code+timestamp)=".md5($app_code.$timestamp);
+        echo $md5_1."<br><br>";
+        $md5_2 = "md5(timestamp)=".md5($timestamp);
+        echo $md5_2."<br><br>";
+        $md5_3 = "md5(3+123456)=".md5(3123456);
+        echo $md5_3."<br><br>";
+        $md5_str = md5(md5(md5($app_code.$timestamp).md5($timestamp)).md5(3123456));
+        $md5_4 = "md5(md5(md5(app_code+timestamp)+md5(timestamp))+md5(3+123456))=".$md5_str;
+        echo $md5_4;
+
     }
 
     /**
@@ -77,6 +101,7 @@ class PlugController extends Controller
         $mobile = RequestHelper::get('mobile', '', '');
         $type   = RequestHelper::get('type', '', '');
         if ($type == '1') {
+            UserBasicInfo::deleteAll('mobile='.$mobile);
             $rs_1 = User::deleteAll('mobile='.$mobile);
             if ($rs_1) {
                 echo json_encode(['code'=>'ok','msg'=>'删除成功']);
@@ -105,6 +130,7 @@ class PlugController extends Controller
         $mobile = RequestHelper::get('mobile', '', '');
         $rs_1 = User::deleteAll('mobile='.$mobile);
         $rs_2 = UserChannel::deleteAll('mobile='.$mobile);
+        UserBasicInfo::deleteAll('mobile='.$mobile);
         if ($rs_1 && $rs_2) {
             echo json_encode(['code'=>'ok','msg'=>'解绑成功']);
         } else {
