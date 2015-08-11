@@ -150,4 +150,26 @@ class Base extends ActiveRecord
         }
         return $re !== false;
     }
+
+    /**
+     * 插入一条数据 带ID
+     * @param array $arr_field_value 数据
+     * @return array
+     */
+    public function insertOneRecord($arr_field_value)
+    {
+        foreach ($arr_field_value as $key => $value) {
+            $this->$key = $value;
+        }
+        try {
+            $result = $this->insert();
+            if ($result === false) {
+                return array('result' => 0, 'data' => array(), 'msg' => 'failed');
+            } else {
+                return array('result' => 1, 'data' => array('new_id' => $this->id), 'msg' => '');
+            }
+        } catch (\Exception $e) {
+            return array('result' => 0, 'data' => array(), 'msg' => $e->getMessage());
+        }
+    }
 }
