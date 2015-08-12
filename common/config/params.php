@@ -11,7 +11,7 @@ return [
         'sock'=>-1,
         'store_path_index'=>0,
     ],
-    'openLog'         => true, //true = 开始日志 false = 关闭日志
+    'openLog'         => false, //true = 开始日志 false = 关闭日志
     'returnLogFile'   => '/tmp/return_log.txt', //返回值日志文件
     'paramsLogFile'   => '/tmp/params_log.txt', //客户端传递参数日志
     'imgHost'         => 'http://img.test.i500m.com/', //图片服务器
