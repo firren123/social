@@ -18,7 +18,9 @@ use Yii;
 use common\helpers\Common;
 use common\helpers\RequestHelper;
 use frontend\models\i500_social\Post;
+use frontend\models\i500_social\PostThumbs;
 use frontend\models\i500_social\PostComments;
+use frontend\models\i500_social\PostCommentsThumbs;
 use frontend\models\i500_social\PostContent;
 use frontend\models\i500_social\PostForumOther;
 use frontend\models\i500_social\UserBasicInfo;
@@ -181,9 +183,16 @@ class PostController extends BaseController
      */
     public function actionThumbsForPost()
     {
-        $uid = RequestHelper::post('uid', '', '');
+        $uid = RequestHelper::get('uid', '', '');
         if (empty($uid)) {
             $this->returnJsonMsg('621', [], Common::C('code', '621'));
+        }
+        $mobile = RequestHelper::get('mobile', '', '');
+        if (empty($mobile)) {
+            $this->returnJsonMsg('604', [], Common::C('code', '604'));
+        }
+        if (!Common::validateMobile($mobile)) {
+            $this->returnJsonMsg('605', [], Common::C('code', '605'));
         }
         $post_id = RequestHelper::get('post_id', '0', 'intval');
         if (empty($post_id)) {
@@ -199,7 +208,11 @@ class PostController extends BaseController
             $this->returnJsonMsg('707', [], Common::C('code', '707'));
         }
         $rs = $this->_setPostNumber($post_id, $rs['thumbs']+1, '1');
-        if (!$rs) {
+        $post_thumbs = new PostThumbs();
+        $post_thumbs_add_data['mobile']  = $mobile;
+        $post_thumbs_add_data['post_id'] = $post_id;
+        $add_rs = $post_thumbs->insertInfo($post_thumbs_add_data);
+        if (!$rs && !$add_rs) {
             $this->returnJsonMsg('400', [], Common::C('code', '400'));
         }
         $this->returnJsonMsg('200', [], Common::C('code', '200'));
@@ -211,9 +224,16 @@ class PostController extends BaseController
      */
     public function actionThumbsForComments()
     {
-        $uid = RequestHelper::post('uid', '', '');
+        $uid = RequestHelper::get('uid', '', '');
         if (empty($uid)) {
             $this->returnJsonMsg('621', [], Common::C('code', '621'));
+        }
+        $mobile = RequestHelper::get('mobile', '', '');
+        if (empty($mobile)) {
+            $this->returnJsonMsg('604', [], Common::C('code', '604'));
+        }
+        if (!Common::validateMobile($mobile)) {
+            $this->returnJsonMsg('605', [], Common::C('code', '605'));
         }
         $comment_id = RequestHelper::get('comment_id', '0', 'intval');
         if (empty($comment_id)) {
@@ -229,7 +249,11 @@ class PostController extends BaseController
         }
         $post_comments_update['thumbs'] = $post_comments_info['thumbs'] + 1;
         $rs = $post_comments_model->updateInfo($post_comments_update, $post_comments_where);
-        if (!$rs) {
+        $post_comments_thumbs_model = new PostCommentsThumbs();
+        $post_comments_thumbs_add_data['mobile']     = $mobile;
+        $post_comments_thumbs_add_data['comment_id'] = $comment_id;
+        $add_rs = $post_comments_thumbs_model->insertInfo($post_comments_thumbs_add_data);
+        if (!$rs && !$add_rs) {
             $this->returnJsonMsg('400', [], Common::C('code', '400'));
         }
         $this->returnJsonMsg('200', [], Common::C('code', '200'));
