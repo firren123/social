@@ -39,6 +39,12 @@ class UploadController extends Controller
      */
     public function actionUploadImg()
     {
+        if (empty($_FILES)) {
+            $rs_arr['code'] = '625';
+            $rs_arr['data'] = [];
+            $rs_arr['message'] = Common::C('code', '625');
+            die(json_encode($rs_arr));
+        }
         $fastDfs = new FastDFSHelper();
         $rs_data = $fastDfs->fdfs_upload('file');
         if ($rs_data) {
