@@ -98,8 +98,6 @@ class LoginController extends BaseController
             } else {
                 $this->returnJsonMsg('602', [], Common::C('code', '602'));
             }
-            /**环信登陆**/
-            HuanXinHelper::hxLogin($mobile, $user_info['password']);
         } elseif ($type == '2') {
             /**验证码登陆**/
             if (empty($code)) {
