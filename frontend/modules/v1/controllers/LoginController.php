@@ -527,6 +527,11 @@ class LoginController extends BaseController
             if (!$rs) {
                 $this->returnJsonMsg('400', [], Common::C('code', '400'));
             }
+            /**环信注册**/
+            $hx_rs = HuanXinHelper::hxRegister($mobile, Common::C('passwordCode'), $mobile);
+            if (empty($hx_rs)) {
+                $this->returnJsonMsg('626', ['first_login'=>'1'], Common::C('code', '626'));
+            }
         }
         /**发送验证码**/
         $user_verify_code_model = new UserVerifyCode();
@@ -549,11 +554,6 @@ class LoginController extends BaseController
         $rs = $this->sendSmsChannel($mobile, $sms_content);
         if (!$rs) {
             $this->returnJsonMsg('611', [], Common::C('code', '611'));
-        }
-        /**环信注册**/
-        $hx_rs = HuanXinHelper::hxRegister($mobile, Common::C('passwordCode'), $mobile);
-        if (empty($hx_rs)) {
-            $this->returnJsonMsg('626', ['first_login'=>$first_login], Common::C('code', '626'));
         }
         $this->returnJsonMsg('200', ['first_login'=>$first_login], Common::C('code', '200'));
     }
