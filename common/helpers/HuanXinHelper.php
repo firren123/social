@@ -70,7 +70,7 @@ class HuanXinHelper
             $data = json_encode($post_data);
             $curl = new Curl();
             $response = $curl->setOption(CURLOPT_POSTFIELDS, $data)->post(Common::C('hxUsersAPI'));
-            $list = json_decode($response, 1);
+            $list = json_decode($response, true);
             if (!empty($list['entities'])) {
                 return $list;
             } else {
@@ -100,7 +100,7 @@ class HuanXinHelper
                 ->setOption(CURLOPT_HTTPHEADER, $header)
                 ->setOption(CURLOPT_POSTFIELDS, $data)
                 ->put(Common::C('hxUsersAPI') . $username);
-            $list = json_decode($response, 1);
+            $list = json_decode($response, true);
             if ($list) {
                 return 200;
             } else {
