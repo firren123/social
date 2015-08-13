@@ -141,7 +141,7 @@ class LoginController extends BaseController
             $mobile = $user_channel_info['mobile'];
         }
         /**环信登陆**/
-        //HuanXinHelper::hxLogin($mobile, md5($mobile.Common::C('passwordCode')));
+        //HuanXinHelper::hxLogin($mobile, Common::C('passwordCode'));
         /**成功后记录日志**/
         $user_m = new User();
         $user_cond['mobile']     = $mobile;
@@ -243,7 +243,7 @@ class LoginController extends BaseController
         $user_data['password'] = md5($user_data['salt'].$password);
         $rs = $user_model->insertInfo($user_data);
         /**环信注册**/
-        HuanXinHelper::hxRegister($mobile, md5($mobile.Common::C('passwordCode')), $mobile);
+        HuanXinHelper::hxRegister($mobile, Common::C('passwordCode'), $mobile);
         if (!$rs) {
             $this->returnJsonMsg('400', [], Common::C('code', '400'));
         }
@@ -472,7 +472,7 @@ class LoginController extends BaseController
             $user_add_data['password'] = md5($user_add_data['salt'].md5($password_random));
             $rs = $user_model->insertInfo($user_add_data);
             /**环信注册**/
-            HuanXinHelper::hxRegister($mobile, md5($mobile.Common::C('passwordCode')), $channel_nickname);
+            HuanXinHelper::hxRegister($mobile, Common::C('passwordCode'), $channel_nickname);
             /**同时记录UserBaseInfo**/
             $user_base_model = new UserBasicInfo();
             $user_base_data['mobile'] = $mobile;
@@ -522,7 +522,7 @@ class LoginController extends BaseController
                 $this->returnJsonMsg('400', [], Common::C('code', '400'));
             }
             /**环信注册**/
-            HuanXinHelper::hxRegister($mobile, md5($mobile.Common::C('passwordCode')), $mobile);
+            HuanXinHelper::hxRegister($mobile, Common::C('passwordCode'), $mobile);
         }
         /**发送验证码**/
         $user_verify_code_model = new UserVerifyCode();
