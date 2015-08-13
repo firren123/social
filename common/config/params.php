@@ -22,7 +22,13 @@ return [
     'token_timeout'   => 7*24*60*60,                   //用户登陆token有效期
     'verify_code_timeout'   => 60*60,                  //用户短信验证码有效期
     'maxPageSize'     => 10,         //最大分页数
-    'hxLoginAPI'      => 'https://a1.easemob.com/iyangpin2015/i500/token', //环信登陆API
-    'hxRegAPI'        => 'https://a1.easemob.com/iyangpin2015/i500/users', //环信注册API
-    'sign_debug'      => true,                        //false = 开启验证 true 关闭验证
+    /**环信相关配置**/
+    'openHuanXin'     => true, //true = 开启环信 false = 关闭环信
+    'passwordCode'    => '3e4r5t6y', //环信那边用户密码
+    'hxClientID'      => 'YXA6C5R2MECSEeWmN6vKBaqwVQ',
+    'hxClientSecret'  => 'YXA6vHECKE3XO06uVozdV9ceAjJBMhg',
+    'hxTokenAPI'      => 'https://a1.easemob.com/iyangpin2015/i500social/token/', //环信登陆API
+    'hxUsersAPI'      => 'https://a1.easemob.com/iyangpin2015/i500social/users/', //环信注册API
+
+    'sign_debug'      => false,                        //false = 开启验证 true 关闭验证
 ];

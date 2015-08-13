@@ -17,6 +17,7 @@ namespace frontend\modules\v1\controllers;
 use Yii;
 use common\helpers\Common;
 use common\helpers\RequestHelper;
+use common\helpers\HuanXinHelper;
 use frontend\models\i500_social\User;
 use frontend\models\i500_social\UserBasicInfo;
 use frontend\models\i500_social\UserToken;
@@ -97,6 +98,8 @@ class LoginController extends BaseController
             } else {
                 $this->returnJsonMsg('602', [], Common::C('code', '602'));
             }
+            /**环信登陆**/
+            HuanXinHelper::hxLogin($mobile, $user_info['password']);
         } elseif ($type == '2') {
             /**验证码登陆**/
             if (empty($code)) {
@@ -139,6 +142,8 @@ class LoginController extends BaseController
             }
             $mobile = $user_channel_info['mobile'];
         }
+        /**环信登陆**/
+        HuanXinHelper::hxLogin($mobile, md5(Common::C('passwordCode').$mobile));
         /**成功后记录日志**/
         $user_m = new User();
         $user_cond['mobile']     = $mobile;
@@ -239,6 +244,8 @@ class LoginController extends BaseController
         $user_data['salt']     = Common::getRandomNumber();
         $user_data['password'] = md5($user_data['salt'].$password);
         $rs = $user_model->insertInfo($user_data);
+        /**环信注册**/
+        HuanXinHelper::hxRegister($mobile, md5(Common::C('passwordCode').$mobile), $mobile);
         if (!$rs) {
             $this->returnJsonMsg('400', [], Common::C('code', '400'));
         }
@@ -466,6 +473,8 @@ class LoginController extends BaseController
             $password_random = Common::getRandomNumber();
             $user_add_data['password'] = md5($user_add_data['salt'].md5($password_random));
             $rs = $user_model->insertInfo($user_add_data);
+            /**环信注册**/
+            HuanXinHelper::hxRegister($mobile, md5(Common::C('passwordCode').$mobile), $channel_nickname);
             /**同时记录UserBaseInfo**/
             $user_base_model = new UserBasicInfo();
             $user_base_data['mobile'] = $mobile;
@@ -514,6 +523,8 @@ class LoginController extends BaseController
             if (!$rs) {
                 $this->returnJsonMsg('400', [], Common::C('code', '400'));
             }
+            /**环信注册**/
+            HuanXinHelper::hxRegister($mobile, md5(Common::C('passwordCode').$mobile), $mobile);
         }
         /**发送验证码**/
         $user_verify_code_model = new UserVerifyCode();

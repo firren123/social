@@ -17,6 +17,7 @@ namespace frontend\modules\v1\controllers;
 use Yii;
 use common\helpers\Common;
 use common\helpers\RequestHelper;
+use common\helpers\HuanXinHelper;
 use frontend\models\i500_social\UserBasicInfo;
 
 /**
@@ -136,6 +137,9 @@ class ProfileController extends BaseController
             if (!$rs) {
                 $this->returnJsonMsg('623', [], Common::C('code', '623'));
             } else {
+                if (!empty($nickname)) {
+                    HuanXinHelper::hxModifyNickName($mobile, $nickname);
+                }
                 $this->returnJsonMsg('200', [], Common::C('code', '200'));
             }
         } else {
