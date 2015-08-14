@@ -147,9 +147,11 @@ class LoginController extends BaseController
         $user_cond['mobile']     = $mobile;
         $user_cond['is_deleted'] = '2';
         $user_info = $user_m->getInfo($user_cond, true, 'id,login_count,salt');
-        $password_random = Common::getRandomNumber();
-        if ($first_login == '1') {
-            $user_update_data['password']  = md5($user_info['salt'].md5($password_random));
+        if ($type != '1') {
+            $password_random = Common::getRandomNumber();
+            if ($first_login == '1') {
+                $user_update_data['password']  = md5($user_info['salt'].md5($password_random));
+            }
         }
         $user_update_data['last_login_ip']      = Common::getIp();
         $user_update_data['last_login_channel'] = $channel;
@@ -182,7 +184,7 @@ class LoginController extends BaseController
             $user_token_model->insertInfo($user_token_data);
         }
 
-        if ($first_login == '1') {
+        if ($first_login == '1' && $type != '1') {
             /**给用户发短信**/
             $sms_content = Common::getSmsTemplate(2, $password_random);
             $user_sms_data['mobile']  = $mobile;
