@@ -111,6 +111,12 @@ class PostController extends BaseController
      */
     public function actionList()
     {
+        $mobile = RequestHelper::get('mobile', '', '');
+        if (!empty($mobile)) {
+            if (!Common::validateMobile($mobile)) {
+                $this->returnJsonMsg('605', [], Common::C('code', '605'));
+            }
+        }
         $forum_id = RequestHelper::get('forum_id', '0', 'intval');
         if (empty($forum_id)) {
             $this->returnJsonMsg('701', [], Common::C('code', '701'));
@@ -131,6 +137,11 @@ class PostController extends BaseController
         }
         foreach ($list as $k => $v) {
             $list[$k]['post_img'] = $this->_formatImg($v['post_img']);
+            if (empty($mobile)) {
+                $list[$k]['is_thumbs'] = '0';
+            } else {
+                $list[$k]['is_thumbs'] = $this->_checkPostThumbs($mobile, $v['id']);
+            }
             if (!empty($v['mobile'])) {
                 $user_info = $this->_getUserInfo($v['mobile']);
                 $list[$k]['user_nickname'] = $user_info['nickname'];
@@ -146,6 +157,12 @@ class PostController extends BaseController
      */
     public function actionDetails()
     {
+        $mobile = RequestHelper::get('mobile', '', '');
+        if (!empty($mobile)) {
+            if (!Common::validateMobile($mobile)) {
+                $this->returnJsonMsg('605', [], Common::C('code', '605'));
+            }
+        }
         $post_id = RequestHelper::get('post_id', '0', 'intval');
         if (empty($post_id)) {
             $this->returnJsonMsg('706', [], Common::C('code', '706'));
@@ -164,6 +181,11 @@ class PostController extends BaseController
         $rs['user_avatar']   = '';
         $rs['content']       = '';
         $rs['post_img']      = $this->_formatImg($rs['post_img']);
+        if (empty($mobile)) {
+            $rs['is_thumbs']     = '0';
+        } else {
+            $rs['is_thumbs']     = $this->_checkPostThumbs($mobile, $rs['id']);
+        }
         if (!empty($rs['mobile'])) {
             $user_info = $this->_getUserInfo($rs['mobile']);
             $rs['user_nickname'] = $user_info['nickname'];
@@ -172,7 +194,7 @@ class PostController extends BaseController
         $post_info = $this->_getPostContent($post_id);
         $rs['content'] = $post_info['content'];
         $rs_arr['post_info'] = $rs;  //帖子信息
-        $rs_comments_info = $this->actionCommentsList($post_id, '1');
+        $rs_comments_info = $this->actionCommentsList($mobile, $post_id, '1');
         $rs_arr['comments_info'] = $rs_comments_info;
         $this->returnJsonMsg('200', $rs_arr, Common::C('code', '200'));
     }
@@ -297,17 +319,26 @@ class PostController extends BaseController
 
     /**
      * 评论列表
-     * @param int $post_id 帖子ID
-     * @param int $type    类型 1=详情页调用
+     * @param string $mobile  手机号
+     * @param int    $post_id 帖子ID
+     * @param int    $type    类型 1=详情页调用
      * @return array
      */
-    public function actionCommentsList($post_id = 0, $type = 0)
+    public function actionCommentsList($mobile = '' ,$post_id = 0, $type = 0)
     {
         if (empty($post_id)) {
             $post_id = RequestHelper::get('post_id', '0', 'intval');
         }
         if (empty($post_id)) {
             $this->returnJsonMsg('706', [], Common::C('code', '706'));
+        }
+        if (empty($mobile)) {
+            $mobile = RequestHelper::get('mobile', '0', 'intval');
+        }
+        if (!empty($mobile)) {
+            if (!Common::validateMobile($mobile)) {
+                $this->returnJsonMsg('605', [], Common::C('code', '605'));
+            }
         }
         $page      = RequestHelper::get('page', '1', 'intval');
         $page_size = RequestHelper::get('page_size', '6', 'intval');
@@ -328,6 +359,11 @@ class PostController extends BaseController
             }
         }
         foreach ($list as $k => $v) {
+            if (empty($mobile)) {
+                $list[$k]['is_thumbs'] = '0';
+            } else {
+                $list[$k]['is_thumbs'] = $this->_checkCommentThumbs($mobile, $v['id']);
+            }
             if (!empty($v['mobile'])) {
                 $user_info = $this->_getUserInfo($v['mobile']);
                 $list[$k]['user_nickname'] = $user_info['nickname'];
@@ -441,5 +477,43 @@ class PostController extends BaseController
             }
         }
         return $img_data;
+    }
+
+    /**
+     * 判断当前用户帖子是否点赞
+     * @param string $mobile  手机号
+     * @param int    $post_id 帖子ID
+     * @return int
+     */
+    private function _checkPostThumbs($mobile = '', $post_id = 0)
+    {
+        $post_thumbs_model = new PostThumbs();
+        $post_thumbs_where['mobile']  = $mobile;
+        $post_thumbs_where['post_id'] = $post_id;
+        $post_thumbs_fields = 'id';
+        $post_thumbs_info = $post_thumbs_model->getInfo($post_thumbs_where, true, $post_thumbs_fields);
+        if (empty($post_thumbs_info)) {
+            return '0';
+        }
+        return '1';
+    }
+
+    /**
+     * 判断当前用户是否对这个评论点赞
+     * @param string $mobile     手机号
+     * @param int    $comment_id 评论ID
+     * @return int
+     */
+    private function _checkCommentThumbs($mobile = '', $comment_id = 0)
+    {
+        $post_comment_thumbs_model = new PostCommentsThumbs();
+        $post_comment_thumbs_where['mobile']  = $mobile;
+        $post_comment_thumbs_where['comment_id'] = $comment_id;
+        $post_comment_thumbs_fields = 'id';
+        $post_comment_thumbs_info = $post_comment_thumbs_model->getInfo($post_comment_thumbs_where, true, $post_comment_thumbs_fields);
+        if (empty($post_comment_thumbs_info)) {
+            return '0';
+        }
+        return '1';
     }
 }
