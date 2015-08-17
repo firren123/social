@@ -178,6 +178,42 @@ class PostController extends BaseController
     }
 
     /**
+     * 新增评论
+     * @return array
+     */
+    public function actionComment()
+    {
+        $uid = RequestHelper::post('uid', '', '');
+        if (empty($uid)) {
+            $this->returnJsonMsg('621', [], Common::C('code', '621'));
+        }
+        $mobile = RequestHelper::post('mobile', '', '');
+        if (empty($mobile)) {
+            $this->returnJsonMsg('604', [], Common::C('code', '604'));
+        }
+        if (!Common::validateMobile($mobile)) {
+            $this->returnJsonMsg('605', [], Common::C('code', '605'));
+        }
+        $post_id = RequestHelper::post('post_id', '0', 'intval');
+        if (empty($post_id)) {
+            $this->returnJsonMsg('706', [], Common::C('code', '706'));
+        }
+        $content = RequestHelper::post('content', '', '');
+        if (empty($content)) {
+            $this->returnJsonMsg('715', [], Common::C('code', '715'));
+        }
+        $post_comment_model = new PostComments();
+        $post_comment_add_data['mobile']  = $mobile;
+        $post_comment_add_data['post_id'] = $post_id;
+        $post_comment_add_data['comment'] = $content;
+        $rs = $post_comment_model->insertInfo($post_comment_add_data);
+        if (empty($rs)) {
+            $this->returnJsonMsg('400', [], Common::C('code', '400'));
+        }
+        $this->returnJsonMsg('200', [], Common::C('code', '200'));
+    }
+
+    /**
      * 为帖子点赞
      * @return array
      */
