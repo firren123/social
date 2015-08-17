@@ -456,7 +456,7 @@ class PostController extends BaseController
         $post_comment_where['is_deleted'] = '2';
         $post_comment_fields = 'id,mobile,post_id,content,thumbs,create_time';
         $post_comment_model = new PostComments();
-        $list = $post_comment_model->getPageList($post_comment_where, $post_comment_fields, 'id desc', $page, $page_size);
+        $list = $post_comment_model->getPageList($post_comment_where, $post_comment_fields, 'id asc', $page, $page_size);
         if (empty($list)) {
             if ($type == '1') {
                 return [];
