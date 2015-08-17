@@ -265,8 +265,14 @@ class PostController extends BaseController
         if (empty($rs)) {
             $this->returnJsonMsg('707', [], Common::C('code', '707'));
         }
-        $rs = $this->_setPostNumber($post_id, $rs['thumbs']+1, '1');
         $post_thumbs = new PostThumbs();
+        $post_thumbs_where['mobile']  = $mobile;
+        $post_thumbs_where['post_id'] = $post_id;
+        $post_thumbs_info = $post_thumbs->getInfo($post_thumbs_where, true, 'id');
+        if (!empty($post_thumbs_info)) {
+            $this->returnJsonMsg('718', [], Common::C('code', '718'));
+        }
+        $rs = $this->_setPostNumber($post_id, $rs['thumbs']+1, '1');
         $post_thumbs_add_data['mobile']  = $mobile;
         $post_thumbs_add_data['post_id'] = $post_id;
         $add_rs = $post_thumbs->insertInfo($post_thumbs_add_data);
@@ -306,8 +312,14 @@ class PostController extends BaseController
         if (empty($rs)) {
             $this->returnJsonMsg('707', [], Common::C('code', '707'));
         }
-        $rs = $this->_setPostNumber($post_id, $rs['thumbs']-1, '1');
         $post_thumbs = new PostThumbs();
+        $post_thumbs_where['mobile']  = $mobile;
+        $post_thumbs_where['post_id'] = $post_id;
+        $post_thumbs_info = $post_thumbs->getInfo($post_thumbs_where, true, 'id');
+        if (empty($post_thumbs_info)) {
+            $this->returnJsonMsg('719', [], Common::C('code', '719'));
+        }
+        $rs = $this->_setPostNumber($post_id, $rs['thumbs']-1, '1');
         $post_thumbs_where['mobile']  = $mobile;
         $post_thumbs_where['post_id'] = $post_id;
         $del_rs = $post_thumbs->delOneRecord($post_thumbs_where);
@@ -346,9 +358,15 @@ class PostController extends BaseController
         if (empty($post_comments_info)) {
             $this->returnJsonMsg('714', [], Common::C('code', '714'));
         }
+        $post_comments_thumbs_model = new PostCommentsThumbs();
+        $post_comments_thumbs_where['mobile']     = $mobile;
+        $post_comments_thumbs_where['comment_id'] = $comment_id;
+        $post_comments_thumbs_info = $post_comments_thumbs_model->getInfo($post_comments_thumbs_where, true, 'id');
+        if (!empty($post_comments_thumbs_info)) {
+            $this->returnJsonMsg('716', [], Common::C('code', '716'));
+        }
         $post_comments_update['thumbs'] = $post_comments_info['thumbs'] + 1;
         $rs = $post_comments_model->updateInfo($post_comments_update, $post_comments_where);
-        $post_comments_thumbs_model = new PostCommentsThumbs();
         $post_comments_thumbs_add_data['mobile']     = $mobile;
         $post_comments_thumbs_add_data['comment_id'] = $comment_id;
         $add_rs = $post_comments_thumbs_model->insertInfo($post_comments_thumbs_add_data);
@@ -387,9 +405,15 @@ class PostController extends BaseController
         if (empty($post_comments_info)) {
             $this->returnJsonMsg('714', [], Common::C('code', '714'));
         }
+        $post_comments_thumbs_model = new PostCommentsThumbs();
+        $post_comments_thumbs_where['mobile']     = $mobile;
+        $post_comments_thumbs_where['comment_id'] = $comment_id;
+        $post_comments_thumbs_info = $post_comments_thumbs_model->getInfo($post_comments_thumbs_where, true, 'id');
+        if (empty($post_comments_thumbs_info)) {
+            $this->returnJsonMsg('717', [], Common::C('code', '717'));
+        }
         $post_comments_update['thumbs'] = $post_comments_info['thumbs'] - 1;
         $rs = $post_comments_model->updateInfo($post_comments_update, $post_comments_where);
-        $post_comments_thumbs_model = new PostCommentsThumbs();
         $post_comments_thumbs_where['mobile']     = $mobile;
         $post_comments_thumbs_where['comment_id'] = $comment_id;
         $del_rs = $post_comments_thumbs_model->delOneRecord($post_comments_thumbs_where);
