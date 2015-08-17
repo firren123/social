@@ -270,7 +270,48 @@ class PostController extends BaseController
         $post_thumbs_add_data['mobile']  = $mobile;
         $post_thumbs_add_data['post_id'] = $post_id;
         $add_rs = $post_thumbs->insertInfo($post_thumbs_add_data);
-        if (!$rs && !$add_rs) {
+        if (!$rs || !$add_rs) {
+            $this->returnJsonMsg('400', [], Common::C('code', '400'));
+        }
+        $this->returnJsonMsg('200', [], Common::C('code', '200'));
+    }
+
+    /**
+     * 取消帖子点赞
+     * @return array
+     */
+    public function actionCancelThumbsForPost()
+    {
+        $uid = RequestHelper::get('uid', '', '');
+        if (empty($uid)) {
+            $this->returnJsonMsg('621', [], Common::C('code', '621'));
+        }
+        $mobile = RequestHelper::get('mobile', '', '');
+        if (empty($mobile)) {
+            $this->returnJsonMsg('604', [], Common::C('code', '604'));
+        }
+        if (!Common::validateMobile($mobile)) {
+            $this->returnJsonMsg('605', [], Common::C('code', '605'));
+        }
+        $post_id = RequestHelper::get('post_id', '0', 'intval');
+        if (empty($post_id)) {
+            $this->returnJsonMsg('706', [], Common::C('code', '706'));
+        }
+        $post_model = new Post();
+        $post_where['id']         = $post_id;
+        $post_where['status']     = '2';
+        $post_where['is_deleted'] = '2';
+        $post_fields = 'id,thumbs';
+        $rs = $post_model->getInfo($post_where, true, $post_fields);
+        if (empty($rs)) {
+            $this->returnJsonMsg('707', [], Common::C('code', '707'));
+        }
+        $rs = $this->_setPostNumber($post_id, $rs['thumbs']-1, '1');
+        $post_thumbs = new PostThumbs();
+        $post_thumbs_where['mobile']  = $mobile;
+        $post_thumbs_where['post_id'] = $post_id;
+        $del_rs = $post_thumbs->delOneRecord($post_thumbs_where);
+        if ($del_rs['result'] != '1' || empty($rs)) {
             $this->returnJsonMsg('400', [], Common::C('code', '400'));
         }
         $this->returnJsonMsg('200', [], Common::C('code', '200'));
@@ -311,7 +352,48 @@ class PostController extends BaseController
         $post_comments_thumbs_add_data['mobile']     = $mobile;
         $post_comments_thumbs_add_data['comment_id'] = $comment_id;
         $add_rs = $post_comments_thumbs_model->insertInfo($post_comments_thumbs_add_data);
-        if (!$rs && !$add_rs) {
+        if (!$rs || !$add_rs) {
+            $this->returnJsonMsg('400', [], Common::C('code', '400'));
+        }
+        $this->returnJsonMsg('200', [], Common::C('code', '200'));
+    }
+
+    /**
+     * 取消评论点赞
+     * @return array
+     */
+    public function actionCancelThumbsForComments()
+    {
+        $uid = RequestHelper::get('uid', '', '');
+        if (empty($uid)) {
+            $this->returnJsonMsg('621', [], Common::C('code', '621'));
+        }
+        $mobile = RequestHelper::get('mobile', '', '');
+        if (empty($mobile)) {
+            $this->returnJsonMsg('604', [], Common::C('code', '604'));
+        }
+        if (!Common::validateMobile($mobile)) {
+            $this->returnJsonMsg('605', [], Common::C('code', '605'));
+        }
+        $comment_id = RequestHelper::get('comment_id', '0', 'intval');
+        if (empty($comment_id)) {
+            $this->returnJsonMsg('713', [], Common::C('code', '713'));
+        }
+        $post_comments_model = new PostComments();
+        $post_comments_where['id']         = $comment_id;
+        $post_comments_where['status']     = '2';
+        $post_comments_where['is_deleted'] = '2';
+        $post_comments_info = $post_comments_model->getInfo($post_comments_where, true, 'id,thumbs');
+        if (empty($post_comments_info)) {
+            $this->returnJsonMsg('714', [], Common::C('code', '714'));
+        }
+        $post_comments_update['thumbs'] = $post_comments_info['thumbs'] - 1;
+        $rs = $post_comments_model->updateInfo($post_comments_update, $post_comments_where);
+        $post_comments_thumbs_model = new PostCommentsThumbs();
+        $post_comments_thumbs_where['mobile']     = $mobile;
+        $post_comments_thumbs_where['comment_id'] = $comment_id;
+        $del_rs = $post_comments_thumbs_model->delOneRecord($post_comments_thumbs_where);
+        if (empty($rs) || $del_rs['result']!='1') {
             $this->returnJsonMsg('400', [], Common::C('code', '400'));
         }
         $this->returnJsonMsg('200', [], Common::C('code', '200'));

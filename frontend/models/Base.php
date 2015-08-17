@@ -172,4 +172,37 @@ class Base extends ActiveRecord
             return array('result' => 0, 'data' => array(), 'msg' => $e->getMessage());
         }
     }
+
+    /**
+     * 删除1条记录
+     *
+     * Author zhengyu@iyangpin.com
+     *
+     * @param array  $arr_where    查询条件
+     * @param string $str_andwhere 字符串where条件
+     *
+     * @return array array('result'=>0/1,'data'=>array(),'msg'=>'')
+     */
+    public function delOneRecord($arr_where, $str_andwhere = '')
+    {
+        $active_record = $this->find()
+            ->where($arr_where)
+            ->andWhere($str_andwhere)
+            ->one();
+        if ($active_record) {
+            try {
+                $result = $active_record->delete();
+                if ($result === false) {
+                    return array('result' => 0, 'data' => array(), 'msg' => 'failed');
+                } else {
+                    return array('result' => 1, 'data' => array(), 'msg' => '');
+                }
+            } catch (\Exception $e) {
+                return array('result' => 0, 'data' => array(), 'msg' => $e->getMessage());
+            }
+        } else {
+            return array('result' => 0, 'data' => array(), 'msg' => 'failed');
+        }
+
+    }
 }
