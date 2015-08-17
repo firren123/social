@@ -19,6 +19,7 @@ use common\helpers\Common;
 use common\helpers\RequestHelper;
 use common\helpers\HuanXinHelper;
 use frontend\models\i500_social\UserBasicInfo;
+use frontend\models\i500_social\UserToken;
 
 /**
  * Profile
@@ -89,6 +90,12 @@ class ProfileController extends BaseController
     public function actionEdit()
     {
         $mobile = RequestHelper::post('mobile', '', '');
+        if (empty($mobile)) {
+            $this->returnJsonMsg('604', [], Common::C('code', '604'));
+        }
+        if (!Common::validateMobile($mobile)) {
+            $this->returnJsonMsg('605', [], Common::C('code', '605'));
+        }
         $user_base_update_data = [];
         $nickname = RequestHelper::post('nickname', '', 'trim');
         if (!empty($nickname)) {
@@ -145,5 +152,32 @@ class ProfileController extends BaseController
         } else {
             $this->returnJsonMsg('622', [], Common::C('code', '622'));
         }
+    }
+
+    /**
+     * 退出登陆
+     * @return array
+     */
+    public function actionLogOut()
+    {
+        $mobile = RequestHelper::post('mobile', '', '');
+        if (empty($mobile)) {
+            $this->returnJsonMsg('604', [], Common::C('code', '604'));
+        }
+        if (!Common::validateMobile($mobile)) {
+            $this->returnJsonMsg('605', [], Common::C('code', '605'));
+        }
+        $user_token_model = new UserToken();
+        $user_token_where['mobile'] = $mobile;
+        $user_token_info = $user_token_model->getInfo($user_token_where, true, 'id');
+        if (empty($user_token_info)) {
+            $this->returnJsonMsg('627', [], Common::C('code', '627'));
+        }
+        $user_token_update['token'] = '';
+        $rs = $user_token_model->updateInfo($user_token_update, $user_token_where);
+        if (empty($rs)) {
+            $this->returnJsonMsg('400', [], Common::C('code', '400'));
+        }
+        $this->returnJsonMsg('200', [], Common::C('code', '200'));
     }
 }
