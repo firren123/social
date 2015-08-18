@@ -10,8 +10,8 @@ return [
     'paramsLogFile'   => '/tmp/params_log.txt', //客户端传递参数日志
     'imgHost'         => 'http://img.pre.i500m.com/', //图片服务器
     'channelHost'     => 'http://channel.pre.i500m.com/', //通道服务器
-    'saveSms'         => true, //true = 保存短信内容入库 false = 不保存短信入库
-    'openSmsChannel'  => false, //true = 开启短信通道 false = 关闭短信通道
+    'saveSms'         => false, //true = 保存短信内容入库 false = 不保存短信入库
+    'openSmsChannel'  => true, //true = 开启短信通道 false = 关闭短信通道
     'mobilePreg'      => '/^1[34587][0-9]{9}$/',       //Mobile 验证规则
     'token_timeout'   => 7*24*60*60,                   //用户登陆token有效期
     'verify_code_timeout'   => 60*60,                  //用户短信验证码有效期
