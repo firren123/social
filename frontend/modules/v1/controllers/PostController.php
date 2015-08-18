@@ -111,7 +111,7 @@ class PostController extends BaseController
      */
     public function actionList()
     {
-        $mobile = RequestHelper::get('mobile', '', '');
+        $mobile = RequestHelper::post('mobile', '', '');
         if (!empty($mobile)) {
             if (!Common::validateMobile($mobile)) {
                 $this->returnJsonMsg('605', [], Common::C('code', '605'));
@@ -157,7 +157,7 @@ class PostController extends BaseController
      */
     public function actionDetails()
     {
-        $mobile = RequestHelper::get('mobile', '', '');
+        $mobile = RequestHelper::post('mobile', '', '');
         if (!empty($mobile)) {
             if (!Common::validateMobile($mobile)) {
                 $this->returnJsonMsg('605', [], Common::C('code', '605'));
@@ -241,11 +241,11 @@ class PostController extends BaseController
      */
     public function actionThumbsForPost()
     {
-        $uid = RequestHelper::get('uid', '', '');
+        $uid = RequestHelper::post('uid', '', '');
         if (empty($uid)) {
             $this->returnJsonMsg('621', [], Common::C('code', '621'));
         }
-        $mobile = RequestHelper::get('mobile', '', '');
+        $mobile = RequestHelper::post('mobile', '', '');
         if (empty($mobile)) {
             $this->returnJsonMsg('604', [], Common::C('code', '604'));
         }
@@ -288,11 +288,11 @@ class PostController extends BaseController
      */
     public function actionCancelThumbsForPost()
     {
-        $uid = RequestHelper::get('uid', '', '');
+        $uid = RequestHelper::post('uid', '', '');
         if (empty($uid)) {
             $this->returnJsonMsg('621', [], Common::C('code', '621'));
         }
-        $mobile = RequestHelper::get('mobile', '', '');
+        $mobile = RequestHelper::post('mobile', '', '');
         if (empty($mobile)) {
             $this->returnJsonMsg('604', [], Common::C('code', '604'));
         }
@@ -335,11 +335,11 @@ class PostController extends BaseController
      */
     public function actionThumbsForComments()
     {
-        $uid = RequestHelper::get('uid', '', '');
+        $uid = RequestHelper::post('uid', '', '');
         if (empty($uid)) {
             $this->returnJsonMsg('621', [], Common::C('code', '621'));
         }
-        $mobile = RequestHelper::get('mobile', '', '');
+        $mobile = RequestHelper::post('mobile', '', '');
         if (empty($mobile)) {
             $this->returnJsonMsg('604', [], Common::C('code', '604'));
         }
@@ -382,11 +382,11 @@ class PostController extends BaseController
      */
     public function actionCancelThumbsForComments()
     {
-        $uid = RequestHelper::get('uid', '', '');
+        $uid = RequestHelper::post('uid', '', '');
         if (empty($uid)) {
             $this->returnJsonMsg('621', [], Common::C('code', '621'));
         }
-        $mobile = RequestHelper::get('mobile', '', '');
+        $mobile = RequestHelper::post('mobile', '', '');
         if (empty($mobile)) {
             $this->returnJsonMsg('604', [], Common::C('code', '604'));
         }
@@ -439,7 +439,7 @@ class PostController extends BaseController
             $this->returnJsonMsg('706', [], Common::C('code', '706'));
         }
         if (empty($mobile)) {
-            $mobile = RequestHelper::get('mobile', '0', 'intval');
+            $mobile = RequestHelper::post('mobile', '0', 'intval');
         }
         if (!empty($mobile)) {
             if (!Common::validateMobile($mobile)) {
