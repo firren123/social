@@ -227,7 +227,7 @@ class PostController extends BaseController
         $post_comment_model = new PostComments();
         $post_comment_add_data['mobile']  = $mobile;
         $post_comment_add_data['post_id'] = $post_id;
-        $post_comment_add_data['comment'] = $content;
+        $post_comment_add_data['content'] = $content;
         $rs = $post_comment_model->insertInfo($post_comment_add_data);
         if (empty($rs)) {
             $this->returnJsonMsg('400', [], Common::C('code', '400'));
