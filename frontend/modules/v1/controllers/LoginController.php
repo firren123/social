@@ -156,6 +156,7 @@ class LoginController extends BaseController
         $user_update_data['last_login_ip']      = Common::getIp();
         $user_update_data['last_login_channel'] = $channel;
         $user_update_data['last_login_source']  = $source;
+        $user_update_data['last_login_time']    = date('Y-m-d H:i:s', time());
         $user_update_data['login_count']        = $user_info['login_count'] + 1;
         $user_update_where['mobile'] = $mobile;
         $user_m->updateInfo($user_update_data, $user_update_where);
