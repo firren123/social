@@ -1,13 +1,32 @@
 <?php
-
 /**
- * Class FastDFSHelper
- * 上传图片类
+ * 上传图片类（FastDFSHelper）
+ *
+ * PHP Version 5
+ *
+ * @category  Social
+ * @package   FastDFSHelper
+ * @author    linxinliang <linxinliang@iyangpin.com>
+ * @time      2015/8/12
+ * @copyright 2015 灵韬致胜（北京）科技发展有限公司
+ * @license   http://www.i500m.com license
+ * @link      linxinliang@iyangpin.com
  */
 namespace common\helpers;
 
 use Yii;
-class FastDFSHelper{
+
+/**
+ * 上传图片类（FastDFSHelper）
+ *
+ * @category Social
+ * @package  FastDFSHelper
+ * @author   linxinliang <linxinliang@iyangpin.com>
+ * @license  http://www.i500m.com/ license
+ * @link     linxinliang@iyangpin.com
+ */
+class FastDFSHelper
+{
     protected $server;
     protected $storage;
     protected $config;
@@ -15,9 +34,10 @@ class FastDFSHelper{
     /**
      * 构造函数
      */
-    public function __construct(){
+    public function __construct()
+    {
 		$this->storage = fastdfs_tracker_query_storage_store();
-        $this->server = fastdfs_connect_server($this->storage['ip_addr'], $this->storage['port']);
+        $this->server  = fastdfs_connect_server($this->storage['ip_addr'], $this->storage['port']);
         if(! $this->server){
             echo "<pre>";
             echo fastdfs_get_last_error_no();
@@ -30,11 +50,13 @@ class FastDFSHelper{
 
     /**
      * 通过文件路径上传文件
-     * @param string $filename
+     * @param string $filename 文件名称
+     * @return array
      */
-    public function fdfs_upload_by_filename($filename){
+    public function fdfs_upload_by_filename($filename)
+    {
         $file_info = fastdfs_storage_upload_by_filename($filename);
-        if($file_info){
+        if ($file_info) {
             return $file_info;
         }
         return false;
@@ -42,16 +64,20 @@ class FastDFSHelper{
 
     /**
      * 上传文件
-     * @param string $input_name
+     * @param string $input_name 表单名称
+     * @return array
      */
-    public function fdfs_upload($input_name){
+    public function fdfs_upload($input_name)
+    {
         $file_tmp = $_FILES[$input_name]['tmp_name'];
         $real_name = $_FILES[$input_name]['name'];
         $filename = dirname($file_tmp) . "/" . $real_name;
         @rename($file_tmp, $filename);
         return $this->fdfs_upload_by_filename($filename);
     }
-    public function fdfs_upload_name_size($file_tmp,$real_name){
+
+    public function fdfs_upload_name_size($file_tmp,$real_name)
+    {
         $filename = dirname($file_tmp) . "/" . $real_name;
         @rename($file_tmp, $filename);
         return $this->fdfs_upload_by_filename($filename);

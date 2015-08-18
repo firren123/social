@@ -1,82 +1,136 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: lbc
- * Date: 15/3/17
- * Time: 上午10:42
+ * BaseRequest
+ *
+ * PHP Version 5
+ *
+ * @category  Social
+ * @package   BaseRequest
+ * @author    linxinliang <linxinliang@iyangpin.com>
+ * @time      2015/8/12
+ * @copyright 2015 灵韬致胜（北京）科技发展有限公司
+ * @license   http://www.i500m.com license
+ * @link      linxinliang@iyangpin.com
  */
 
 namespace common\helpers;
 
+/**
+ * BaseRequest
+ *
+ * @category Social
+ * @package  BaseRequest
+ * @author   linxinliang <linxinliang@iyangpin.com>
+ * @license  http://www.i500m.com/ license
+ * @link     linxinliang@iyangpin.com
+ */
+class BaseRequestHelps
+{
 
-class BaseRequestHelps {
-
-    public static function get($name = '', $default = '', $filter = null){
+    /**
+     * Get
+     * @param string $name    参数名
+     * @param string $default 默认值
+     * @param null   $filter  过滤方法
+     * @return array|mixed|null|string
+     */
+    public static function get($name = '', $default = '', $filter = null)
+    {
         return self::getParams($name, $default, $filter, $_GET);
     }
 
-    public static function post($name = '', $default = '', $filter = null){
+    /**
+     * Post
+     * @param string $name    参数名
+     * @param string $default 默认值
+     * @param null   $filter  过滤方法
+     * @return array|mixed|null|string
+     */
+    public static function post($name = '', $default = '', $filter = null)
+    {
         return self::getParams($name, $default, $filter, $_POST);
     }
 
-    public static function put($name = '', $default = '', $filter = null){
-        static $_PUT	=	null;
-        if(is_null($_PUT)){
+    /**
+     * Put
+     * @param string $name    参数名
+     * @param string $default 默认值
+     * @param null   $filter  过滤方法
+     * @return array|mixed|null|string
+     */
+    public static function put($name = '', $default = '', $filter = null)
+    {
+        static $_PUT = null;
+        if (is_null($_PUT)) {
             parse_str(file_get_contents('php://input'), $_PUT);
         }
         return self::getParams($name, $default, $filter, $_PUT);
     }
 
-    public static function getMethod(){
+    /**
+     * 获取方法
+     * @return string
+     */
+    public static function getMethod()
+    {
         switch($_SERVER['REQUEST_METHOD']) {
             case 'POST':
-                $input  =  'POST';
+                $input = 'POST';
                 break;
             case 'PUT':
-                $input 	=	'PUT';
+                $input = 'PUT';
                 break;
             default:
-                $input  =  'GET';
+                $input = 'GET';
         }
         return $input;
     }
 
-    public static function getParams($name, $default = '', $filter = null, $input = null){
-        if('' == $name){
+    /**
+     * 获取参数
+     * @param string $name    参数名称
+     * @param string $default 默认值
+     * @param null   $filter  过滤方法
+     * @param null   $input   Input
+     * @return array|mixed|null|string
+     */
+    public static function getParams($name='', $default = '', $filter = null, $input = null)
+    {
+        if ('' == $name) {
             $data       =   $input;
             $filters    =   isset($filter)?$filter:'htmlspecialchars';
-            if($filters) {
-                if(is_string($filters)){
-                    $filters    =   explode(',',$filters);
+            if ($filters) {
+                if (is_string($filters)) {
+                    $filters    =   explode(',', $filters);
                 }
-                foreach($filters as $filter){
-                    $data   =   self::array_map_recursive($filter,$data); // 参数过滤
+                foreach ($filters as $filter) {
+                    $data   =   self::array_map_recursive($filter, $data); // 参数过滤
                 }
             }
-        }elseif(isset($input[$name])) { // 取值操作
+        } elseif (isset($input[$name])) { // 取值操作
             $data       =   $input[$name];
             $filters    =   isset($filter)?$filter:'htmlspecialchars';
-            if($filters) {
-                if(is_string($filters)){
-                    if(0 === strpos($filters,'/')){
-                        if(1 !== preg_match($filters,(string)$data)){
+            if ($filters) {
+                if (is_string($filters)) {
+                    if (0 === strpos($filters, '/')) {
+                        if (1 !== preg_match($filters, (string)$data)) {
                             // 支持正则验证
                             return   isset($default) ? $default : null;
                         }
-                    }else{
-                        $filters    =   explode(',',$filters);
+                    } else {
+                        $filters    =   explode(',', $filters);
                     }
-                }elseif(is_int($filters)){
+                } elseif (is_int($filters)) {
                     $filters    =   array($filters);
                 }
 
                 if (is_array($filters)) {
-                    foreach($filters as $filter){
+                    foreach ($filters as $filter) {
                         if (function_exists($filter)) {
-                            $data   =   is_array($data) ? self::array_map_recursive($filter,$data) : $filter($data); // 参数过滤
-                        }else{
-                            $data   =   filter_var($data,is_int($filter) ? $filter : filter_id($filter));
-                            if(false === $data) {
+                            $data = is_array($data) ? self::array_map_recursive($filter, $data) : $filter($data); // 参数过滤
+                        } else {
+                            $data = filter_var($data, is_int($filter) ? $filter : filter_id($filter));
+                            if (false === $data) {
                                 return   isset($default) ? $default : null;
                             }
                         }
@@ -84,13 +138,20 @@ class BaseRequestHelps {
                 }
             }
 
-        }else{ // 变量默认值
+        } else { // 变量默认值
             $data       =    isset($default)?$default:null;
         }
         return $data;
     }
 
-    public static function array_map_recursive($filter, $data) {
+    /**
+     * 递归
+     * @param null $filter 过滤方法
+     * @param null $data   数据
+     * @return array
+     */
+    public static function array_map_recursive($filter, $data)
+    {
         $result = array();
         foreach ($data as $key => $val) {
             $result[$key] = is_array($val)

@@ -1,12 +1,15 @@
 <?php
 /**
- * 公共方法库
- * @category  WAP 
- * @package   公共方法库
+ * Common
+ *
+ * PHP Version 5
+ *
+ * @category  Social
+ * @package   Common
  * @author    linxinliang <linxinliang@iyangpin.com>
- * @time      2015/3/19 16:28
- * @copyright 灵韬致胜（北京）科技发展有限公司
- * @license   http://www.i500m.com
+ * @time      2015/8/12
+ * @copyright 2015 灵韬致胜（北京）科技发展有限公司
+ * @license   http://www.i500m.com license
  * @link      linxinliang@iyangpin.com
  */
 
@@ -14,14 +17,22 @@ namespace common\helpers;
 
 use Yii;
 
-
+/**
+ * Common
+ *
+ * @category Social
+ * @package  Common
+ * @author   linxinliang <linxinliang@iyangpin.com>
+ * @license  http://www.i500m.com/ license
+ * @link     linxinliang@iyangpin.com
+ */
 class Common
 {
     /**
      * 截取字符串
-     * @param $string     字符串
-     * @param $length     限制长度
-     * @param string $etc 后缀
+     * @param string $string 字符串
+     * @param string $length 限制长度
+     * @param string $etc    后缀
      * @return string
      */
     public static function truncate_utf8_string($string, $length, $etc = '...')
@@ -29,27 +40,21 @@ class Common
         $result = '';
         $string = html_entity_decode(trim(strip_tags($string)), ENT_QUOTES, 'UTF-8');
         $strlen = strlen($string);
-        for ($i = 0; (($i < $strlen) && ($length > 0)); $i++)
-        {
-            if ($number = strpos(str_pad(decbin(ord(substr($string, $i, 1))), 8, '0', STR_PAD_LEFT), '0'))
-            {
-                if ($length < 1.0)
-                {
+        for ($i = 0; (($i < $strlen) && ($length > 0)); $i++) {
+            if ($number = strpos(str_pad(decbin(ord(substr($string, $i, 1))), 8, '0', STR_PAD_LEFT), '0')) {
+                if ($length < 1.0) {
                     break;
                 }
                 $result .= substr($string, $i, $number);
                 $length -= 1.0;
                 $i += $number - 1;
-            }
-            else
-            {
+            } else {
                 $result .= substr($string, $i, 1);
                 $length -= 0.5;
             }
         }
         $result = htmlspecialchars($result, ENT_QUOTES, 'UTF-8');
-        if ($i < $strlen)
-        {
+        if ($i < $strlen) {
             $result .= $etc;
         }
         return $result;
@@ -57,7 +62,7 @@ class Common
 
     /**
      * 验证手机号
-     * @param $mobile 手机号
+     * @param string $mobile 手机号
      * @return bool
      */
     public static function validateMobile($mobile)
