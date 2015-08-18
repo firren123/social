@@ -6,8 +6,8 @@ return [
         'db_social'=> [
             'class'=>'yii\db\Connection',
             'dsn'=>'mysql:host=127.0.0.1;dbname=i500_social',
-            'username'=>'500m',
-            'password'=>'500m',
+            'username'=>'db_social',
+            'password'=>'ZkorhM-a9gotq4z',
             'charset'=>'utf8',
         ],
         'cache' => [
