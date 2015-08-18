@@ -2,6 +2,14 @@
 return [
     'vendorPath' => dirname(dirname(__DIR__)) . '/vendor',
     'components' => [
+        //数据库配置
+        'db_social'=> [
+            'class'=>'yii\db\Connection',
+            'dsn'=>'mysql:host=118.186.247.55;dbname=i500_social',
+            'username'=>'500m',
+            'password'=>'500m',
+            'charset'=>'utf8',
+        ],
         'cache' => [
             'class' => 'yii\caching\FileCache',
         ],
@@ -25,7 +33,7 @@ return [
             'enablePrettyUrl' => true,
             //'enableStrictParsing' => true,
             'showScriptName' => false,
-            'rules' => require(dirname(dirname(__DIR__)).'/common/config/rules.php'),
+            'rules' => [],
         ],
         'request' => [
             // !!! insert a secret key in the following (if it is empty) - this is required by cookie validation
@@ -44,4 +52,9 @@ return [
     'defaultRoute'=>'index',  //设置默认路由
     'controllerNamespace' => 'frontend\controllers',
     'params' => require(__DIR__ . '/params.php'),
+    'modules' => [
+        'v1' => [
+            'class' => 'frontend\modules\v1\Module',
+        ],
+    ],
 ];

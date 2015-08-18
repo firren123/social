@@ -1,27 +1,28 @@
 <?php
 return [
-    'adminEmail' => 'admin@example.com',
-    'supportEmail' => 'support@example.com',
-    'user.passwordResetTokenExpire' => 3600,
-    'appId' => 'iyangpin_wap',
-    'appKey' => 'DKJA@(SL)RssMAKDKas!L',
-    'access_token'=>'21232f297a57a5a743894a0e4a801fc3',
+    'code'        => require(__DIR__ . '/code.php'),
+    'appId'       => 'I500_SOCIAL',
+    'APP_CODE' => [
+        'I500_SOCIAL' => 'DKJA@(SL)RssMAKDKas!L',
+    ],
+    'openLog'         => false, //true = 开始日志 false = 关闭日志
+    'returnLogFile'   => '/tmp/return_log.txt', //返回值日志文件
+    'paramsLogFile'   => '/tmp/params_log.txt', //客户端传递参数日志
+    'imgHost'         => 'http://img.pre.i500m.com/', //图片服务器
+    'channelHost'     => 'http://channel.pre.i500m.com/', //通道服务器
+    'saveSms'         => true, //true = 保存短信内容入库 false = 不保存短信入库
+    'openSmsChannel'  => false, //true = 开启短信通道 false = 关闭短信通道
+    'mobilePreg'      => '/^1[34587][0-9]{9}$/',       //Mobile 验证规则
+    'token_timeout'   => 7*24*60*60,                   //用户登陆token有效期
+    'verify_code_timeout'   => 60*60,                  //用户短信验证码有效期
+    'maxPageSize'     => 10,         //最大分页数
+    /**环信相关配置**/
+    'openHuanXin'     => true, //true = 开启环信 false = 关闭环信
+    'passwordCode'    => '3e4r5t6y7f8d', //环信那边用户密码
+    'hxClientID'      => 'YXA6C5R2MECSEeWmN6vKBaqwVQ',
+    'hxClientSecret'  => 'YXA6vHECKE3XO06uVozdV9ceAjJBMhg',
+    'hxTokenAPI'      => 'https://a1.easemob.com/iyangpin2015/i500social/token/', //环信登陆API
+    'hxUsersAPI'      => 'https://a1.easemob.com/iyangpin2015/i500social/users/', //环信注册API
 
-    'imgHost'         => 'http://img.i500m.com/',      //图片服务器
-
-    'baseUrl'         => 'http://www.pre.i500m.com/',     //当前站点URL
-    'shopUrl'         => 'http://shop.pre.i500m.com/',     //商家后台URL
-    'serverUrl'       => 'http://server.pre.i500m.com/',   //服务站点URL
-    'apiUrl'          => 'http://api.pre.i500m.com/',      //API站点URL
-
-    'tab'             => 'index',                     //首页选中
-
-    'cssVersion'      => '20150429',                  //CSS版本
-    'jsVersion'       => '20150429',                  //JS 版本
-
-    'mobilePreg'      => '/^1[34587][0-9]{9}$/',      //Mobile 验证规则
-    'apiErrorTip'     => '服务繁忙，请稍后',             //服务器返回null的提示语
-
-    'defaultGoodsImg' => '/images/defaultgoods.png',  //默认商品图片
-    'defaultShopImg'  => '/images/defaultshop.png'    //默认商家图片
+    'sign_debug'      => false,                        //false = 开启验证 true 关闭验证
 ];
