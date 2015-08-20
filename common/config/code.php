@@ -85,4 +85,8 @@ return [
     '718' => '已对该帖子点过赞',
     '719' => '未曾对该帖子点过赞',
 
+    //SSDB KEY 备注
+    'address_details_{id}_{mobile}' => '用户收货地址详情',
+    'address_list_{mobile}' => '用户收货地址列表',
+
 ];

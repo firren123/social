@@ -100,13 +100,12 @@ class SsdbCache extends Cache
      */
     public function setValue($key, $value, $expire)
     {
-        $key = $this->_keyPre.$key;
         $this->getSsdbCache()->hset($this->_keyPre, $key, 1);
         if ($expire > 0) {
-            $expire += time();
-            return $this->getSsdbCache()->setx($this->_keyPre.$key, serialize($value), (int) $expire);
+            //$expire += time();
+            return $this->getSsdbCache()->setx($key, serialize($value), (int) $expire);
         } else {
-            return $this->getSsdbCache()->set($this->_keyPre.$key, serialize($value));
+            return $this->getSsdbCache()->set($key, serialize($value));
         }
     }
 

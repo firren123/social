@@ -35,21 +35,25 @@ class SsdbHelper
      */
     public static function Cache($op='set', $key='', $value='', $ttl=0)
     {
-        switch ($op) {
-            case 'set':
-                return \Yii::$app->cache->setValue($key,$value,$ttl);
-                break;
-            case 'get':
-                return \Yii::$app->cache->getValue($key);
-                break;
-            case 'del':
-                return \Yii::$app->cache->deleteValue($key);
-                break;
-            case 'keys':
-                return \Yii::$app->cache->getkeys();
-                break;
-            default:
-                return false;
+        if (Common::C('openSSDB')) {
+            switch ($op) {
+                case 'set':
+                    return \Yii::$app->cache->setValue($key,$value,$ttl);
+                    break;
+                case 'get':
+                    return \Yii::$app->cache->getValue($key);
+                    break;
+                case 'del':
+                    return \Yii::$app->cache->deleteValue($key);
+                    break;
+                case 'keys':
+                    return \Yii::$app->cache->getkeys();
+                    break;
+                default:
+                    return false;
+            }
+        } else {
+            return false;
         }
     }
 }

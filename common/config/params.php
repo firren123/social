@@ -5,6 +5,8 @@ return [
     'APP_CODE' => [
         'I500_SOCIAL' => 'DKJA@(SL)RssMAKDKas!L',
     ],
+    'openSSDB'        => true, //true = 开启 false = 关闭
+    'SSDBCacheTime'   => 60, //SSDB 缓存时间 60秒
     'openLog'         => false, //true = 开始日志 false = 关闭日志
     'returnLogFile'   => '/tmp/return_log.txt', //返回值日志文件
     'paramsLogFile'   => '/tmp/params_log.txt', //客户端传递参数日志

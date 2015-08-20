@@ -16,6 +16,7 @@ namespace frontend\modules\v1\controllers;
 
 use Yii;
 use common\helpers\Common;
+use common\helpers\SsdbHelper;
 use common\helpers\RequestHelper;
 use frontend\models\i500_social\UserAddress;
 
@@ -150,6 +151,9 @@ class AddressController extends BaseController
         if (empty($rs)) {
             $this->returnJsonMsg('400', [], Common::C('code', '400'));
         }
+        //del缓存
+        $cache_key = 'address_details_'.$where['id'].'_'.$data['mobile'];
+        SsdbHelper::Cache('del', $cache_key);
         $this->returnJsonMsg('200', [], Common::C('code', '200'));
     }
 
@@ -176,6 +180,9 @@ class AddressController extends BaseController
         if (empty($rs)) {
             $this->returnJsonMsg('400', [], Common::C('code', '400'));
         }
+        //del缓存
+        $cache_key = 'address_details_'.$where['id'].'_'.$where['mobile'];
+        SsdbHelper::Cache('del', $cache_key);
         $this->returnJsonMsg('200', [], Common::C('code', '200'));
     }
 
@@ -197,9 +204,17 @@ class AddressController extends BaseController
             $this->returnJsonMsg('605', [], Common::C('code', '605'));
         }
         $where['is_deleted'] = '2';
+        //get缓存
+        $cache_key = 'address_list_'.$where['mobile'];
+        $cache_rs = SsdbHelper::Cache('get', $cache_key);
+        if ($cache_rs) {
+            $this->returnJsonMsg('200', $cache_rs, Common::C('code', '200'));
+        }
         $user_address_model  = new UserAddress();
         $user_address_fields = 'id,consignee,sex,consignee_mobile,province_id,city_id,district_id,address,is_default,tag';
         $list = $user_address_model->getList($where, $user_address_fields, 'id desc');
+        //set缓存
+        SsdbHelper::Cache('set', $cache_key, $list, Common::C('SSDBCacheTime'));
         $this->returnJsonMsg('200', $list, Common::C('code', '200'));
     }
 
@@ -225,9 +240,17 @@ class AddressController extends BaseController
             $this->returnJsonMsg('634', [], Common::C('code', '634'));
         }
         $where['is_deleted'] = '2';
+        //get缓存
+        $cache_key = 'address_details_'.$where['id'].'_'.$where['mobile'];
+        $cache_rs = SsdbHelper::Cache('get', $cache_key);
+        if ($cache_rs) {
+            $this->returnJsonMsg('200', $cache_rs, Common::C('code', '200'));
+        }
         $user_address_model  = new UserAddress();
         $user_address_fields = 'id,consignee,sex,consignee_mobile,province_id,city_id,district_id,address,is_default,tag';
-        $list = $user_address_model->getInfo($where, true, $user_address_fields);
-        $this->returnJsonMsg('200', $list, Common::C('code', '200'));
+        $info = $user_address_model->getInfo($where, true, $user_address_fields);
+        //set 缓存
+        SsdbHelper::Cache('set', $cache_key, $info, Common::C('SSDBCacheTime'));
+        $this->returnJsonMsg('200', $info, Common::C('code', '200'));
     }
 }
