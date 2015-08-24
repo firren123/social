@@ -63,7 +63,7 @@ class ProfileController extends BaseController
         }
         $user_base_model = new UserBasicInfo();
         $user_base_where['mobile'] = $mobile;
-        $user_base_fields = 'mobile,nickname,avatar,personal_sign,realname,sex,birthday,province_id,city_id,district_id,community_name';
+        $user_base_fields = 'id,mobile,nickname,avatar,personal_sign,realname,sex,birthday,province_id,city_id,district_id,community_name';
         $user_base_info = $user_base_model->getInfo($user_base_where, true, $user_base_fields);
         if (empty($user_base_info)) {
             $user_base_data['mobile'] = $mobile;
