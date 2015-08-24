@@ -76,17 +76,13 @@ class AddressController extends BaseController
         if (empty($data['province_id'])) {
             $this->returnJsonMsg('631', [], Common::C('code', '631'));
         }
-        $data['city_id'] = RequestHelper::post('city_id', '', '');
-        if (empty($data['city_id'])) {
-            $this->returnJsonMsg('632', [], Common::C('code', '632'));
+        $data['search_address'] = RequestHelper::post('search_address', '', '');
+        if (empty($data['search_address'])) {
+            $this->returnJsonMsg('635', [], Common::C('code', '635'));
         }
-        $data['district_id'] = RequestHelper::post('district_id', '', '');
-        if (empty($data['district_id'])) {
-            $this->returnJsonMsg('633', [], Common::C('code', '633'));
-        }
-        $data['address'] = RequestHelper::post('address', '', '');
-        if (empty($data['district_id'])) {
-            $this->returnJsonMsg('633', [], Common::C('code', '633'));
+        $data['details_address'] = RequestHelper::post('details_address', '', '');
+        if (empty($data['details_address'])) {
+            $this->returnJsonMsg('636', [], Common::C('code', '636'));
         }
         $data['is_default'] = RequestHelper::post('is_default', '0', '');
         $data['tag'] = RequestHelper::post('tag', '0', '');
@@ -131,17 +127,13 @@ class AddressController extends BaseController
         if (empty($data['province_id'])) {
             $this->returnJsonMsg('631', [], Common::C('code', '631'));
         }
-        $data['city_id'] = RequestHelper::post('city_id', '', '');
-        if (empty($data['city_id'])) {
-            $this->returnJsonMsg('632', [], Common::C('code', '632'));
+        $data['search_address'] = RequestHelper::post('search_address', '', '');
+        if (empty($data['search_address'])) {
+            $this->returnJsonMsg('635', [], Common::C('code', '635'));
         }
-        $data['district_id'] = RequestHelper::post('district_id', '', '');
-        if (empty($data['district_id'])) {
-            $this->returnJsonMsg('633', [], Common::C('code', '633'));
-        }
-        $data['address'] = RequestHelper::post('address', '', '');
-        if (empty($data['district_id'])) {
-            $this->returnJsonMsg('633', [], Common::C('code', '633'));
+        $data['details_address'] = RequestHelper::post('details_address', '', '');
+        if (empty($data['details_address'])) {
+            $this->returnJsonMsg('636', [], Common::C('code', '636'));
         }
         $data['is_default']  = RequestHelper::post('is_default', '0', '');
         $data['tag']         = RequestHelper::post('tag', '0', '');
@@ -211,7 +203,7 @@ class AddressController extends BaseController
             $this->returnJsonMsg('200', $cache_rs, Common::C('code', '200'));
         }
         $user_address_model  = new UserAddress();
-        $user_address_fields = 'id,consignee,sex,consignee_mobile,province_id,city_id,district_id,address,is_default,tag';
+        $user_address_fields = 'id,consignee,sex,consignee_mobile,province_id,search_address,details_address,is_default,tag';
         $list = $user_address_model->getList($where, $user_address_fields, 'id desc');
         //set缓存
         SsdbHelper::Cache('set', $cache_key, $list, Common::C('SSDBCacheTime'));
@@ -247,7 +239,7 @@ class AddressController extends BaseController
             $this->returnJsonMsg('200', $cache_rs, Common::C('code', '200'));
         }
         $user_address_model  = new UserAddress();
-        $user_address_fields = 'id,consignee,sex,consignee_mobile,province_id,city_id,district_id,address,is_default,tag';
+        $user_address_fields = 'id,consignee,sex,consignee_mobile,province_id,search_address,details_address,is_default,tag';
         $info = $user_address_model->getInfo($where, true, $user_address_fields);
         //set 缓存
         SsdbHelper::Cache('set', $cache_key, $info, Common::C('SSDBCacheTime'));
