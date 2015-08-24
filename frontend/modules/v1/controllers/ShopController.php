@@ -14,10 +14,12 @@
  */
 namespace frontend\modules\v1\controllers;
 
+
 use frontend\models\i500m\Shop;
 use Yii;
 use common\helpers\Common;
 use common\helpers\CurlHelper;
+use common\helpers\SsdbHelper;
 use common\helpers\RequestHelper;
 
 /**
@@ -57,6 +59,12 @@ class ShopController extends BaseController
         if (empty($lat)) {
             $this->returnJsonMsg('802', [], Common::C('code', '802'));
         }
+        //get缓存
+        $cache_key = 'shop_list_'.md5($lng.$lat);
+        $cache_rs = SsdbHelper::Cache('get', $cache_key);
+        if ($cache_rs) {
+            $this->returnJsonMsg('200', $cache_rs, Common::C('code', '200'));
+        }
         $dis = Common::C('shopScope');
         $url = Common::C('channelHost').'lbs/near-shop?lng='.$lng.'&lat='.$lat.'&dis='.$dis;
         $rs = CurlHelper::get($url);
@@ -72,6 +80,11 @@ class ShopController extends BaseController
             $info[$k]['star']       = '5';
             $info[$k]['address']    = $shopInfo['address'];
             $info[$k]['distance']   = $v['dis'];
+        }
+        if (empty($info)) {
+            //set缓存
+            SsdbHelper::Cache('set', $cache_key, $info, Common::C('SSDBCacheTime'));
+            $this->returnJsonMsg('200', $info, Common::C('code', '200'));
         }
         $this->returnJsonMsg('200', $info, Common::C('code', '200'));
     }

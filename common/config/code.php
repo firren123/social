@@ -94,6 +94,7 @@ return [
 
     //SSDB KEY 备注
     'address_details_{id}_{mobile}' => '用户收货地址详情',
-    'address_list_{mobile}' => '用户收货地址列表',
+    'address_list_{mobile}'   => '用户收货地址列表',
+    'shop_list_{md5(lng.lat)}'   => '附近商家列表',
 
 ];
