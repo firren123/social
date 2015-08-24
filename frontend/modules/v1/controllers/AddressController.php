@@ -17,6 +17,7 @@ namespace frontend\modules\v1\controllers;
 use Yii;
 use common\helpers\Common;
 use common\helpers\SsdbHelper;
+use common\helpers\CurlHelper;
 use common\helpers\RequestHelper;
 use frontend\models\i500_social\UserAddress;
 
@@ -256,5 +257,34 @@ class AddressController extends BaseController
         //set 缓存
         SsdbHelper::Cache('set', $cache_key, $info, Common::C('SSDBCacheTime'));
         $this->returnJsonMsg('200', $info, Common::C('code', '200'));
+    }
+
+    /**
+     * 检索地址
+     * @return array
+     */
+    public function actionSearch()
+    {
+        $uid = RequestHelper::get('uid', '', '');
+        if (empty($uid)) {
+            $this->returnJsonMsg('621', [], Common::C('code', '621'));
+        }
+        $mobile = RequestHelper::get('mobile', '', '');
+        if (empty($mobile)) {
+            $this->returnJsonMsg('604', [], Common::C('code', '604'));
+        }
+        if (!Common::validateMobile($mobile)) {
+            $this->returnJsonMsg('605', [], Common::C('code', '605'));
+        }
+        $keywords = RequestHelper::get('keywords', '', '');
+        if (empty($keywords)) {
+            $this->returnJsonMsg('637', [], Common::C('code', '637'));
+        }
+        $url = Common::C('channelHost').'lbs/get-suggest?keywords='.$keywords;
+        $res = CurlHelper::get($url);
+        if ($res['code'] != '200' || empty($res['data'])) {
+            $this->returnJsonMsg('200', [], Common::C('code', '200'));
+        }
+        $this->returnJsonMsg('200', $res['data'], Common::C('code', '200'));
     }
 }
