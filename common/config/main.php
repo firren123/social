@@ -23,6 +23,20 @@ return [
             'password'=>'500m',
             'charset'=>'utf8',
         ],
+        'db_shop'  => [
+            'class'=>'yii\db\Connection',
+            'dsn'=>'mysql:host=118.186.247.55;dbname=shop',
+            'username'=>'shop',
+            'password'=>'shop',
+            'charset'=>'utf8',
+        ],
+        'db_500m'  => [
+            'class'=>'yii\db\Connection',
+            'dsn'=>'mysql:host=118.186.247.55;dbname=500m',
+            'username'=>'500m',
+            'password'=>'500m',
+            'charset'=>'utf8',
+        ],
         'user' => [
             'identityClass' => 'common\models\User',
             'enableAutoLogin' => true,

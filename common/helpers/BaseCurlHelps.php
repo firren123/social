@@ -30,7 +30,7 @@ class BaseCurlHelps
 {
 
     /**
-     * 方法描述
+     * Post 请求
      * @param string $url  URl
      * @param array  $post 传递的值
      * @return mixed
@@ -40,6 +40,19 @@ class BaseCurlHelps
         $curl = new Curl();
         $response = $curl->reset()
             ->setOption(CURLOPT_POSTFIELDS, http_build_query($post))->post($url);
+        $response = json_decode($response, true);
+        return $response;
+    }
+
+    /**
+     * Get 请求
+     * @param string $url URL
+     * @return array
+     */
+    public static function get($url = '')
+    {
+        $curl = new Curl();
+        $response = $curl->get($url);
         $response = json_decode($response, true);
         return $response;
     }

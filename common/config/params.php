@@ -18,6 +18,7 @@ return [
     'token_timeout'   => 7*24*60*60,                   //用户登陆token有效期
     'verify_code_timeout'   => 60*60,                  //用户短信验证码有效期
     'maxPageSize'     => 10,         //最大分页数
+    'shopScope'       => 2,         //附近商家范围 单位(公里)
     /**环信相关配置**/
     'openHuanXin'     => true, //true = 开启环信 false = 关闭环信
     'passwordCode'    => '3e4r5t6y7f8d', //环信那边用户密码
