@@ -39,10 +39,6 @@ class AddressController extends BaseController
      */
     public function beforeAction($action)
     {
-        $uid = RequestHelper::post('uid', '', '');
-        if (empty($uid)) {
-            $this->returnJsonMsg('621', [], Common::C('code', '621'));
-        }
         $this->enableCsrfValidation = false;
         return parent::beforeAction($action);
     }
@@ -53,6 +49,10 @@ class AddressController extends BaseController
      */
     public function actionAdd()
     {
+        $uid = RequestHelper::post('uid', '', '');
+        if (empty($uid)) {
+            $this->returnJsonMsg('621', [], Common::C('code', '621'));
+        }
         $data['mobile'] = RequestHelper::post('mobile', '', '');
         if (empty($data['mobile'])) {
             $this->returnJsonMsg('604', [], Common::C('code', '604'));
@@ -100,6 +100,10 @@ class AddressController extends BaseController
      */
     public function actionEdit()
     {
+        $uid = RequestHelper::post('uid', '', '');
+        if (empty($uid)) {
+            $this->returnJsonMsg('621', [], Common::C('code', '621'));
+        }
         $data['mobile'] = RequestHelper::post('mobile', '', '');
         if (empty($data['mobile'])) {
             $this->returnJsonMsg('604', [], Common::C('code', '604'));
@@ -155,6 +159,10 @@ class AddressController extends BaseController
      */
     public function actionDel()
     {
+        $uid = RequestHelper::post('uid', '', '');
+        if (empty($uid)) {
+            $this->returnJsonMsg('621', [], Common::C('code', '621'));
+        }
         $where['mobile'] = RequestHelper::post('mobile', '', '');
         if (empty($where['mobile'])) {
             $this->returnJsonMsg('604', [], Common::C('code', '604'));
