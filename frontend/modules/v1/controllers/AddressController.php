@@ -86,6 +86,8 @@ class AddressController extends BaseController
         }
         $data['is_default'] = RequestHelper::post('is_default', '0', '');
         $data['tag'] = RequestHelper::post('tag', '0', '');
+        $data['lng'] = RequestHelper::post('lng', '0', '');
+        $data['lat'] = RequestHelper::post('lat', '0', '');
         $user_address_model = new UserAddress();
         $rs = $user_address_model->insertInfo($data);
         if (empty($rs)) {
@@ -141,6 +143,8 @@ class AddressController extends BaseController
         }
         $data['is_default']  = RequestHelper::post('is_default', '0', '');
         $data['tag']         = RequestHelper::post('tag', '0', '');
+        $data['lng']         = RequestHelper::post('lng', '0', '');
+        $data['lat']         = RequestHelper::post('lat', '0', '');
         $data['update_time'] = date('Y-m-d H:i:s', time());
         $user_address_model = new UserAddress();
         $rs = $user_address_model->updateInfo($data, $where);
