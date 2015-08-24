@@ -61,6 +61,13 @@ class ProfileController extends BaseController
         if (!Common::validateMobile($mobile)) {
             $this->returnJsonMsg('605', [], Common::C('code', '605'));
         }
+        $user_mobile = RequestHelper::post('user_mobile', '', '');
+        if (!empty($user_mobile)) {
+            if (!Common::validateMobile($user_mobile)) {
+                $this->returnJsonMsg('605', [], Common::C('code', '605'));
+            }
+            $mobile = $user_mobile;
+        }
         $user_base_model = new UserBasicInfo();
         $user_base_where['mobile'] = $mobile;
         $user_base_fields = 'id,mobile,nickname,avatar,personal_sign,realname,sex,birthday,province_id,city_id,district_id,community_name';
