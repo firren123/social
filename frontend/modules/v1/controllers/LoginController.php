@@ -69,7 +69,7 @@ class LoginController extends BaseController
         $code            = RequestHelper::post('code', '', 'trim');
         $first_login     = RequestHelper::post('first_login', '2', '');
         if ($type != '3') {
-            /** 第三方登陆不传递手机号 **/
+            /**第三方登陆不传递手机号**/
             if (empty($mobile)) {
                 $this->returnJsonMsg('604', [], Common::C('code', '604'));
             }
