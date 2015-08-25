@@ -17,6 +17,7 @@ namespace frontend\modules\v1\controllers;
 use Yii;
 use common\helpers\Common;
 use common\helpers\RequestHelper;
+use common\helpers\SsdbHelper;
 use common\helpers\HuanXinHelper;
 use frontend\models\i500_social\UserBasicInfo;
 use frontend\models\i500_social\UserToken;
@@ -211,6 +212,15 @@ class ProfileController extends BaseController
         if (empty($mobile)) {
             $this->returnJsonMsg('604', [], Common::C('code', '604'));
         }
+        if (!Common::validateMobile($mobile)) {
+            $this->returnJsonMsg('605', [], Common::C('code', '605'));
+        }
+        //get缓存
+        $cache_key = 'coupons_'.$mobile;
+        $cache_rs = SsdbHelper::Cache('get', $cache_key);
+        if ($cache_rs) {
+            $this->returnJsonMsg('200', $cache_rs, Common::C('code', '200'));
+        }
         $user_coupons_model = new UserCoupons();
         $user_coupons_where['mobile'] = $mobile;
         $user_coupons_fields = '
@@ -220,41 +230,13 @@ class ProfileController extends BaseController
         expired_time as end_time,
         status';
         $info = $user_coupons_model->getList($user_coupons_where, $user_coupons_fields, 'id desc');
+        foreach ($info as $k => $v) {
+            if (strtotime($v['end_time'] < time())) {
+                $info['status'] = '3';
+            }
+        }
+        //set 缓存
+        SsdbHelper::Cache('set', $cache_key, $info, Common::C('SSDBCacheTime'));
         $this->returnJsonMsg('200', $info, Common::C('code', '200'));
-    }
-
-    /**
-     * 我的订单
-     * @return array
-     */
-    public function actionOrders()
-    {
-        $uid = RequestHelper::get('uid', '', '');
-        if (empty($uid)) {
-            $this->returnJsonMsg('621', [], Common::C('code', '621'));
-        }
-        $mobile = RequestHelper::get('mobile', '', '');
-        if (empty($mobile)) {
-            $this->returnJsonMsg('604', [], Common::C('code', '604'));
-        }
-
-    }
-
-    /**
-     * 订单评价
-     * @return array
-     */
-    public function actionEvaluate()
-    {
-
-    }
-
-    /**
-     * 订单售后
-     * @return array
-     */
-    public function actionAfterSales()
-    {
-
     }
 }

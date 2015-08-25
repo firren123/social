@@ -92,10 +92,14 @@ return [
     '801' => '缺少参数 lng(经度)',
     '802' => '缺少参数 lat(纬度)',
     '803' => '缺少参数 shop_id',
+    '804' => '订单状态传递错误',
+    '805' => '缺少参数 order_sn',
 
     //SSDB KEY 备注
     'address_details_{id}_{mobile}' => '用户收货地址详情',
     'address_list_{mobile}'   => '用户收货地址列表',
     'shop_list_{md5(lng.lat)}'   => '附近商家列表',
+    'coupons_{mobile}'  => '优惠券列表',
+    'orders_{mobile}_{shop_id}_{order_status}_{page}'  => '优惠券列表',
 
 ];
