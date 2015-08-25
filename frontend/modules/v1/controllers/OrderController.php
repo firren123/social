@@ -43,22 +43,4 @@ class OrderController extends BaseController
         $this->enableCsrfValidation = false;
         return parent::beforeAction($action);
     }
-
-    /**
-     * 订单评价
-     * @return array
-     */
-    public function actionEvaluate()
-    {
-
-    }
-
-    /**
-     * 订单售后
-     * @return array
-     */
-    public function actionAfterSales()
-    {
-
-    }
 }
