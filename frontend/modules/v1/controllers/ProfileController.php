@@ -20,6 +20,7 @@ use common\helpers\RequestHelper;
 use common\helpers\HuanXinHelper;
 use frontend\models\i500_social\UserBasicInfo;
 use frontend\models\i500_social\UserToken;
+use frontend\models\i500_social\UserCoupons;
 
 /**
  * Profile
@@ -40,10 +41,6 @@ class ProfileController extends BaseController
      */
     public function beforeAction($action)
     {
-        $uid = RequestHelper::post('uid', '', '');
-        if (empty($uid)) {
-            $this->returnJsonMsg('621', [], Common::C('code', '621'));
-        }
         $this->enableCsrfValidation = false;
         return parent::beforeAction($action);
     }
@@ -54,6 +51,10 @@ class ProfileController extends BaseController
      */
     public function actionIndex()
     {
+        $uid = RequestHelper::post('uid', '', '');
+        if (empty($uid)) {
+            $this->returnJsonMsg('621', [], Common::C('code', '621'));
+        }
         $mobile = RequestHelper::post('mobile', '', '');
         if (empty($mobile)) {
             $this->returnJsonMsg('604', [], Common::C('code', '604'));
@@ -96,6 +97,10 @@ class ProfileController extends BaseController
      */
     public function actionEdit()
     {
+        $uid = RequestHelper::post('uid', '', '');
+        if (empty($uid)) {
+            $this->returnJsonMsg('621', [], Common::C('code', '621'));
+        }
         $mobile = RequestHelper::post('mobile', '', '');
         if (empty($mobile)) {
             $this->returnJsonMsg('604', [], Common::C('code', '604'));
@@ -167,6 +172,10 @@ class ProfileController extends BaseController
      */
     public function actionLogOut()
     {
+        $uid = RequestHelper::post('uid', '', '');
+        if (empty($uid)) {
+            $this->returnJsonMsg('621', [], Common::C('code', '621'));
+        }
         $mobile = RequestHelper::post('mobile', '', '');
         if (empty($mobile)) {
             $this->returnJsonMsg('604', [], Common::C('code', '604'));
@@ -186,5 +195,66 @@ class ProfileController extends BaseController
             $this->returnJsonMsg('400', [], Common::C('code', '400'));
         }
         $this->returnJsonMsg('200', [], Common::C('code', '200'));
+    }
+
+    /**
+     * 优惠券
+     * @return array
+     */
+    public function actionCoupons()
+    {
+        $uid = RequestHelper::get('uid', '', '');
+        if (empty($uid)) {
+            $this->returnJsonMsg('621', [], Common::C('code', '621'));
+        }
+        $mobile = RequestHelper::get('mobile', '', '');
+        if (empty($mobile)) {
+            $this->returnJsonMsg('604', [], Common::C('code', '604'));
+        }
+        $user_coupons_model = new UserCoupons();
+        $user_coupons_where['mobile'] = $mobile;
+        $user_coupons_fields = '
+        type_name as name,
+        par_value as amount,
+        get_time as start_time,
+        expired_time as end_time,
+        status';
+        $info = $user_coupons_model->getList($user_coupons_where, $user_coupons_fields, 'id desc');
+        $this->returnJsonMsg('200', $info, Common::C('code', '200'));
+    }
+
+    /**
+     * 我的订单
+     * @return array
+     */
+    public function actionOrders()
+    {
+        $uid = RequestHelper::get('uid', '', '');
+        if (empty($uid)) {
+            $this->returnJsonMsg('621', [], Common::C('code', '621'));
+        }
+        $mobile = RequestHelper::get('mobile', '', '');
+        if (empty($mobile)) {
+            $this->returnJsonMsg('604', [], Common::C('code', '604'));
+        }
+
+    }
+
+    /**
+     * 订单评价
+     * @return array
+     */
+    public function actionEvaluate()
+    {
+
+    }
+
+    /**
+     * 订单售后
+     * @return array
+     */
+    public function actionAfterSales()
+    {
+
     }
 }
