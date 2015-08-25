@@ -32,7 +32,7 @@ return [
         ],
         'db_500m'  => [
             'class'=>'yii\db\Connection',
-            'dsn'=>'mysql:host=118.186.247.55;dbname=500m',
+            'dsn'=>'mysql:host=118.186.247.55;dbname=500m_new',
             'username'=>'500m',
             'password'=>'500m',
             'charset'=>'utf8',

@@ -94,12 +94,17 @@ return [
     '803' => '缺少参数 shop_id',
     '804' => '订单状态传递错误',
     '805' => '缺少参数 order_sn',
+    '806' => '请检查订单状态，发货状态才能确认收货',
+    '807' => '已退款的订单不能可以取消订单',
+    '808' => '缺少参数 product_id',
+    '809' => '缺少参数 product_name',
+    '810' => '缺少参数 type(售后类型)',
+    '811' => '缺少参数 price(商品价格)',
 
     //SSDB KEY 备注
     'address_details_{id}_{mobile}' => '用户收货地址详情',
     'address_list_{mobile}'   => '用户收货地址列表',
     'shop_list_{md5(lng.lat)}'   => '附近商家列表',
     'coupons_{mobile}'  => '优惠券列表',
-    'orders_{mobile}_{shop_id}_{order_status}_{page}'  => '优惠券列表',
 
 ];
