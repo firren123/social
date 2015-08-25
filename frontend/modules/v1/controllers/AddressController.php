@@ -240,7 +240,7 @@ class AddressController extends BaseController
         if (!Common::validateMobile($where['mobile'])) {
             $this->returnJsonMsg('605', [], Common::C('code', '605'));
         }
-        $where['id'] = RequestHelper::post('address_id', '', '');
+        $where['id'] = RequestHelper::get('address_id', '', '');
         if (empty($where['id'])) {
             $this->returnJsonMsg('634', [], Common::C('code', '634'));
         }
