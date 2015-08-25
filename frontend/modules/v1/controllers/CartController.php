@@ -68,9 +68,17 @@ class CartController extends BaseController
     {
         $cart = RequestHelper::post('cart', '');
         $shop_id = RequestHelper::post('shop_id', 0, 'intval');
-
+        if (empty($shop_id)) {
+            $this->returnJsonMsg(101, [], '无效的商家id');
+        }
+        if (empty($cart)) {
+            $this->returnJsonMsg(102, [], '无效的数据');
+        }
         $cart = htmlspecialchars_decode($cart);
         $list = json_decode($cart, true);
+        if (empty($list)) {
+            $this->returnJsonMsg(102, [], '无效的json数据');
+        }
         $goods = [];
         if (!empty($list)) {
             $product_ids = $goods_lists = [];
@@ -101,7 +109,10 @@ class CartController extends BaseController
                     }
                 }
             }
+            $this->returnJsonMsg(200, $goods, 'SUCCESS');
+        } else {
+            $this->returnJsonMsg(101, [], '购物车数据为空');
         }
-        $this->returnJsonMsg(200, $goods, '');
+
     }
 }
