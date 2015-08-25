@@ -16,6 +16,8 @@
 
 namespace common\helpers;
 
+use Yii;
+
 
 /**
  * 恒信通相关
@@ -36,6 +38,7 @@ class HxtHelper
     //private $_default_int_limit = -1;
 
     private $_switch_log = 1;//1=开启 0=关闭
+    private $_service = '';
 
     /**
      * 构造函数
@@ -48,9 +51,37 @@ class HxtHelper
         //$this->_sep2 = $this->_sep1 . $this->_sep1;
         //$this->_sep4 = $this->_sep2 . $this->_sep2;
 
+        $this->service = Yii::$app->params['hxt_soap_url'];
+    }
+
+    /**
+     * 查询接口
+     *
+     * Author zhengyu@iyangpin.com
+     *
+     * @return void
+     */
+    public function query()
+    {
+        $client = new \SoapClient($this->service);
+
+        $client->soap_defencoding = 'utf-8';
+        $client->decode_utf8 = false;
+        $client->xml_encoding = 'utf-8';
+
+        $param = array('param1'=>'1', 'param2'=>'2');
+
+        $result = $client->__soapCall("HXTServiceQuery", array($param));
+
+        if (is_soap_fault($result)) {
+            $str = "[SOAP Fault],faultcode=" . $result->faultcode . ",faultstring=" . $result->faultstring;
+            $this->_zlog($str, 'soap_exception');
+        } else {
+            var_dump($result->HXTServiceQueryResult->any);exit;
+        }
+    }
 
 
-}
 
     /**
      * 记录日志
@@ -62,7 +93,7 @@ class HxtHelper
      *
      * @return void
      */
-    public function zlog($str = '', $type = '')
+    private function _zlog($str = '', $type = '')
     {
         if ($this->_switch_log !== 1) {
             return;
