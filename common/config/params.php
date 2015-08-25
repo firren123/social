@@ -28,4 +28,6 @@ return [
     'hxUsersAPI'      => 'https://a1.easemob.com/iyangpin2015/i500social/users/', //环信注册API
 
     'sign_debug'      => false,                        //false = 开启验证 true 关闭验证
+
+    'hxt_soap_url' => 'http://114.113.238.50:8765/Service.asmx?WSDL',//恒信通会员缴费业务接口
 ];
