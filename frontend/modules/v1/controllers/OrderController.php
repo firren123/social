@@ -6,11 +6,11 @@
  *
  * @category  Social
  * @package   Order
- * @author    linxinliang <linxinliang@iyangpin.com>
+ * @author    renyineng <renyineng@iyangpin.com>
  * @time      2015/8/25
  * @copyright 2015 灵韬致胜（北京）科技发展有限公司
  * @license   http://www.i500m.com license
- * @link      linxinliang@iyangpin.com
+ * @link      renyineng@iyangpin.com
  */
 namespace frontend\modules\v1\controllers;
 
@@ -26,9 +26,9 @@ use common\helpers\RequestHelper;
  *
  * @category Social
  * @package  Order
- * @author   linxinliang <linxinliang@iyangpin.com>
+ * @author   renyineng <linxinliang@iyangpin.com>
  * @license  http://www.i500m.com/ license
- * @link     linxinliang@iyangpin.com
+ * @link     renyineng@iyangpin.com
  */
 class OrderController extends BaseController
 {

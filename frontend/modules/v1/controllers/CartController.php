@@ -6,7 +6,7 @@
  *
  * @category  Social
  * @package   Cart
- * @author    linxinliang <linxinliang@iyangpin.com>
+ * @author    renyineng <renyineng@iyangpin.com>
  * @time      2015/8/25
  * @copyright 2015 灵韬致胜（北京）科技发展有限公司
  * @license   http://www.i500m.com license
@@ -26,7 +26,7 @@ use common\helpers\RequestHelper;
  *
  * @category Social
  * @package  Cart
- * @author   linxinliang <linxinliang@iyangpin.com>
+ * @author   renyineng <renyineng@iyangpin.com>
  * @license  http://www.i500m.com/ license
  * @link     linxinliang@iyangpin.com
  */
