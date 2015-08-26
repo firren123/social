@@ -401,6 +401,7 @@ class MyorderController extends BaseController
         }
         $data['type_name']  = $type_name;
         $data['send_type']  = '2';
+        $data['number']     = $rs['num'];
         $data['add_time']   = date('Y-m-d H:i:s', time());
         $data['use_system'] = '2';
         $data['only_sign']  = md5(time().mt_rand(1000, 9999));
