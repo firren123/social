@@ -59,9 +59,11 @@ class HxtHelper
      *
      * Author zhengyu@iyangpin.com
      *
+     * @param array $arr 接口所需参数
+     *
      * @return void
      */
-    public function query()
+    public function query($arr)
     {
         $client = new \SoapClient($this->service);
 
@@ -69,7 +71,8 @@ class HxtHelper
         $client->decode_utf8 = false;
         $client->xml_encoding = 'utf-8';
 
-        $param = array('param1'=>'1', 'param2'=>'2');
+        //$param = array('param1'=>'1', 'param2'=>'2');
+        $param = $arr;
 
         $result = $client->__soapCall("HXTServiceQuery", array($param));
 
@@ -77,6 +80,8 @@ class HxtHelper
             $str = "[SOAP Fault],faultcode=" . $result->faultcode . ",faultstring=" . $result->faultstring;
             $this->_zlog($str, 'soap_exception');
         } else {
+            var_dump($result);exit;
+            var_dump($result->HXTServiceQueryResult);exit;
             var_dump($result->HXTServiceQueryResult->any);exit;
         }
     }
