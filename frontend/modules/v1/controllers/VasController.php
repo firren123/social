@@ -62,26 +62,24 @@ class VasController extends Controller
     {
         $helper_hxt = new HxtHelper();
 
+        $arr = array();
+        $arr['TerminalID'] = RequestHelper::post('terminalid', '', '');
+        $arr['KeyID'] = RequestHelper::post('keyid', '', '');
+        $arr['UserID'] = RequestHelper::post('userid', '', '');
+        $arr['Account'] = RequestHelper::post('account', '', '');
+        $arr['EMail'] = RequestHelper::post('email', '', '');
+        $arr['CardNo'] = RequestHelper::post('cardno', '', '');
+        $arr['TotalFee'] = RequestHelper::post('totalfee', '', '');
+        $arr['ShopCode'] = RequestHelper::post('shopcode', '', '');
+        $arr['PaymentInfo'] = RequestHelper::post('paymentinfo', '', '');
+        $arr['IPAddress'] = RequestHelper::post('ipaddress', '', '');
+        $arr['Source'] = RequestHelper::post('source', '', '');
+        $arr['TraceNo'] = RequestHelper::post('traceno', '', '');
 
-        $terminalid = RequestHelper::post('terminalid', '', '');
-        $keyid = RequestHelper::post('keyid', '', '');
-        $userid = RequestHelper::post('userid', '', '');
-        $account = RequestHelper::post('account', '', '');
-        $email = RequestHelper::post('email', '', '');
-        $cardno = RequestHelper::post('cardno', '', '');
-        $totalfee = RequestHelper::post('totalfee', '', '');
-        $shopcode = RequestHelper::post('shopcode', '', '');
-        $paymentinfo = RequestHelper::post('paymentinfo', '', '');
-        $ipaddress = RequestHelper::post('ipaddress', '', '');
-        $source = RequestHelper::post('source', '', '');
-        $traceno = RequestHelper::post('traceno', '', '');
-        $mcode = RequestHelper::post('mcode', '', '');
-
-
-
+        $arr['MCode'] = $this->_createQueryMcode($arr);
 
 
-        $helper_hxt->query();
+        $helper_hxt->query($arr);
         return;
     }
 
@@ -97,6 +95,46 @@ class VasController extends Controller
     {
 
         return;
+    }
+
+
+    /**
+     * 生成Mcode
+     *
+     * Author zhengyu@iyangpin.com
+     *
+     * @param array $arr 参数
+     *
+     * @return string 返回生成的签名
+     */
+    private function _createQueryMcode($arr)
+    {
+        $str1 = $arr['TerminalID'] . $arr['KeyID'] . $arr['UserID'] . $arr['Account'] . $arr['EMail']
+            . $arr['CardNo'] . $arr['TotalFee'] . $arr['ShopCode'] . $arr['PaymentInfo'] . $arr['IPAddress']
+            . $arr['Source'] . $arr['TraceNo'];
+        $mackey = '';
+        $mcode = md5($str1 . md5($mackey));
+        return $mcode;
+    }
+
+    /**
+     * 生成Mcode
+     *
+     * Author zhengyu@iyangpin.com
+     *
+     * @param array $arr 参数
+     *
+     * @return string 返回生成的签名
+     */
+    private function _createPayMcode($arr)
+    {
+        $str1 = $arr['TerminalID'] . $arr['KeyID'] . $arr['UserID'] . $arr['Account']
+            . $arr['EMail'] . $arr['CardNo'] . $arr['SettlementDate'] . $arr['HostSerialNo']
+            . $arr['TotalFee'] . $arr['ShopCode'] . $arr['PaymentInfo'] . $arr['IPAddress']
+            . $arr['Source'] . $arr['TraceNo']. $arr['PromotionCode'];
+        $mackey = '';
+        $mcode = md5($str1 . md5($mackey));
+        return $mcode;
     }
 
 }
