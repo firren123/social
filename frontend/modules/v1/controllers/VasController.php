@@ -93,7 +93,15 @@ class VasController extends Controller
      */
     public function actionPay()
     {
+        $helper_hxt = new HxtHelper();
 
+        $arr = array();
+
+
+        $arr['MCode'] = $this->_createQueryMcode($arr);
+
+
+        $helper_hxt->query($arr);
         return;
     }
 
