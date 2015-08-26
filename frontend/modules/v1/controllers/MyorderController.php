@@ -345,6 +345,14 @@ class MyorderController extends BaseController
         $data['apply_time']  = date('Y-m-d H:i:s', time());
         $model = new Exchange();
         $rs = $model->insertInfo($data);
+        //更新订单表当前商品的退货数量
+        $order_model = new Order();
+        $order_where['order_sn']   = $data['order_sn'];
+        $order_where['mobile']     = $data['mobile'];
+        $order_where['product_id'] = $data['product_id'];
+        $order_update['is_exchange'] = '1';
+        $order_update['retread_num'] = $data['number'];
+        $order_model->updateInfo($order_update, $order_where);
         if (!$rs) {
             $this->returnJsonMsg('400', [], Common::C('code', '400'));
         }
@@ -429,7 +437,7 @@ class MyorderController extends BaseController
         $order_detail_model = new OrderDetail();
         $order_detail_where['mobile']   = $mobile;
         $order_detail_where['order_sn'] = $order_sn;
-        $order_detail_fields = 'shop_id,product_id,product_name,product_img,num,price';
+        $order_detail_fields = 'shop_id,product_id,product_name,product_img,num,price,activity_price,type,is_exchange,goods_type,retread_num,attribute_str,goods_type,remark';
         $order_detail_info = $order_detail_model->getList($order_detail_where, $order_detail_fields, 'id desc');
         if (!empty($order_detail_info)) {
             foreach ($order_detail_info as $k => $v) {
