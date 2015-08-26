@@ -17,9 +17,11 @@ namespace frontend\modules\v1\controllers;
 use Yii;
 use common\helpers\Common;
 use common\helpers\RequestHelper;
-use common\helpers\SsdbHelper;
 use frontend\models\i500_social\Order;
 use frontend\models\i500_social\OrderDetail;
+use frontend\models\i500_social\Exchange;
+use frontend\models\i500_social\ShopGrade;
+use frontend\models\i500m\RefundOrder;
 
 /**
  * 我的订单
@@ -61,10 +63,6 @@ class MyorderController extends BaseController
         if (!Common::validateMobile($mobile)) {
             $this->returnJsonMsg('605', [], Common::C('code', '605'));
         }
-        $shop_id = RequestHelper::get('shop_id', '', '');
-        if (empty($shop_id)) {
-            $this->returnJsonMsg('803', [], Common::C('code', '803'));
-        }
         $order_status = RequestHelper::get('order_status', '1', '');
         if (!in_array($order_status, ['1','2','3','4'])) {
             $this->returnJsonMsg('804', [], Common::C('code', '804'));
@@ -74,19 +72,11 @@ class MyorderController extends BaseController
         if ($page_size > Common::C('maxPageSize')) {
             $this->returnJsonMsg('705', [], Common::C('code', '705'));
         }
-        //get缓存
-        $cache_key = 'orders_'.$mobile.'_'.$shop_id.'_'.$order_status.'_'.$page;
-        $cache_rs = SsdbHelper::Cache('get', $cache_key);
-        if ($cache_rs) {
-            $this->returnJsonMsg('200', $cache_rs, Common::C('code', '200'));
-        }
         $info = [];
         if ($order_status != '4') {
             $order_model = new Order();
-            $order_where['shop_id'] = $shop_id;
             $order_where['mobile']  = $mobile;
-            $order_where['status']  = '1'; //已确认的订单
-            $order_fields = 'order_sn,create_time,total';
+            $order_fields = 'order_sn,create_time,total,status';
             $order_and_where = '';
             if ($order_status == '1') {
                 /**待支付**/
@@ -101,26 +91,164 @@ class MyorderController extends BaseController
                 $order_where['ship_status'] = '2';
             }
             $info = $order_model->getPageList($order_where, $order_fields, 'id desc', $page, $page_size, $order_and_where);
-            if (!empty($list)) {
-                foreach ($list as $k => $v) {
-                    $info[$k]['goods_info'] = $this->_getOrderGoodsInfo($mobile, $v['order_sn'], $shop_id);
+            if (!empty($info)) {
+                foreach ($info as $k => $v) {
+                    $info[$k]['goods_info'] = $this->_getOrderGoodsInfo($mobile, $v['order_sn']);
                 }
             }
         } else {
             /**退换货**/
+            $exchange_model = new Exchange();
+            $exchange_where['mobile'] = $mobile;
+            $exchange_fields = 'order_sn,apply_time as create_time,price,number as num,product_id,shop_id,product_name,product_img,type,status';
+            $info = $exchange_model->getPageList($exchange_where, $exchange_fields, 'id desc', $page, $page_size);
+            if (!empty($info)) {
+                foreach ($info as $k => $v) {
+                    $info[$k]['total']       = $v['price']*$v['num'];
+                    $info[$k]['product_img'] = $this->_formatImg($v['product_img']);
+                    $info[$k]['price']       = $v['price'];
+                    unset($info[$k]['price']);
+                }
+            }
         }
-        //set 缓存
-        SsdbHelper::Cache('set', $cache_key, $info, Common::C('SSDBCacheTime'));
         $this->returnJsonMsg('200', $info, Common::C('code', '200'));
     }
 
     /**
-     * 订单评价
+     * 取消订单
+     * @throws \Exception
+     */
+    public function actionCancel()
+    {
+        $uid = RequestHelper::get('uid', '', '');
+        if (empty($uid)) {
+            $this->returnJsonMsg('621', [], Common::C('code', '621'));
+        }
+        $mobile = RequestHelper::get('mobile', '', '');
+        if (empty($mobile)) {
+            $this->returnJsonMsg('604', [], Common::C('code', '604'));
+        }
+        if (!Common::validateMobile($mobile)) {
+            $this->returnJsonMsg('605', [], Common::C('code', '605'));
+        }
+        $order_sn = RequestHelper::get('order_sn', '', '');
+        if (empty($order_sn)) {
+            $this->returnJsonMsg('805', [], Common::C('code', '805'));
+        }
+        $order_model = new Order();
+        $order_where['mobile']   = $mobile;
+        $order_where['order_sn'] = $order_sn;
+        $order_fields = 'order_sn,status,pay_status,total,dis_amount';
+        $rs = $order_model->getInfo($order_where, true, $order_fields);
+        if ($rs['pay_status'] == '0') {
+            /**未支付**/
+            $order_update_data['status'] = '2';
+            $rs = $order_model->updateInfo($order_update_data, $order_where);
+        } elseif ($rs['pay_status'] == '1') {
+            /**已支付**/
+            $connection = \Yii::$app->db_social;
+            $transaction = $connection->beginTransaction();
+            try {
+                $refund_order_model = new RefundOrder();
+                $refund_order_add_data['order_sn']    = $order_sn;
+                $refund_order_add_data['type']        = '1';
+                $refund_order_add_data['add_time']    = date('Y-m-d H:i:s', time());
+                $refund_order_add_data['money']       = $rs['total'];
+                $refund_order_add_data['code_money']  = $rs['dis_amount'];
+                $refund_order_add_data['unionpay_tn'] = '';
+                $refund_order_add_data['from_data']   = '1';
+                $rs = $refund_order_model->insertInfo($refund_order_add_data);
+                $order_update_data['status'] = '2';
+                $rs = $order_model->updateInfo($order_update_data, $order_where);
+                $transaction->commit();
+            } catch (\Exception $e) {
+                $transaction->rollBack();
+                throw $e;
+            }
+        } else {
+            /**已退款**/
+            $this->returnJsonMsg('807', [], Common::C('code', '807'));
+        }
+        if (!$rs) {
+            $this->returnJsonMsg('400', [], Common::C('code', '400'));
+        }
+        $this->returnJsonMsg('200', [], Common::C('code', '200'));
+    }
+
+    /**
+     * 确认收货
+     * @return array
+     */
+    public function actionConfirmGoods()
+    {
+        $uid = RequestHelper::get('uid', '', '');
+        if (empty($uid)) {
+            $this->returnJsonMsg('621', [], Common::C('code', '621'));
+        }
+        $mobile = RequestHelper::get('mobile', '', '');
+        if (empty($mobile)) {
+            $this->returnJsonMsg('604', [], Common::C('code', '604'));
+        }
+        if (!Common::validateMobile($mobile)) {
+            $this->returnJsonMsg('605', [], Common::C('code', '605'));
+        }
+        $order_sn = RequestHelper::get('order_sn', '', '');
+        if (empty($order_sn)) {
+            $this->returnJsonMsg('805', [], Common::C('code', '805'));
+        }
+        $order_model = new Order();
+        $order_where['mobile']   = $mobile;
+        $order_where['order_sn'] = $order_sn;
+        $order_fields = 'order_sn,status,ship_status';
+        $rs = $order_model->getInfo($order_where, true, $order_fields);
+        /**只有发货中才能确认收货**/
+        if ($rs['ship_status'] != '1') {
+            $this->returnJsonMsg('806', [], Common::C('code', '806'));
+        }
+        $order_update_data['ship_status']   = '2';  //确定收货
+        $order_update_data['pay_status']    = '2';  //已支付
+        $order_update_data['delivery_time'] = date('Y-m-d H:i:s', time());
+        $rs = $order_model->updateInfo($order_update_data, $order_where);
+        if (empty($rs)) {
+            $this->returnJsonMsg('400', [], Common::C('code', '400'));
+        }
+        $this->returnJsonMsg('200', [], Common::C('code', '200'));
+    }
+
+    /**
+     * 商家评分
      * @return array
      */
     public function actionEvaluate()
     {
-
+        $uid = RequestHelper::post('uid', '', '');
+        if (empty($uid)) {
+            $this->returnJsonMsg('621', [], Common::C('code', '621'));
+        }
+        $data['mobile'] = RequestHelper::post('mobile', '', '');
+        if (empty($data['mobile'])) {
+            $this->returnJsonMsg('604', [], Common::C('code', '604'));
+        }
+        if (!Common::validateMobile($data['mobile'])) {
+            $this->returnJsonMsg('605', [], Common::C('code', '605'));
+        }
+        $data['shop_id'] = RequestHelper::post('shop_id', '', '');
+        if (empty($data['shop_id'])) {
+            $this->returnJsonMsg('803', [], Common::C('code', '803'));
+        }
+        $data['order_sn'] = RequestHelper::post('order_sn', '', '');
+        if (empty($data['order_sn'])) {
+            $this->returnJsonMsg('805', [], Common::C('code', '805'));
+        }
+        $data['grade']       = RequestHelper::post('grade', '0', '');
+        $data['content']     = RequestHelper::post('content', '0', '');
+        $data['create_time'] = date('Y-m-d H:i:s', time());
+        $model = new ShopGrade();
+        $rs = $model->insertInfo($data);
+        if (!$rs) {
+            $this->returnJsonMsg('400', [], Common::C('code', '400'));
+        }
+        $this->returnJsonMsg('200', [], Common::C('code', '200'));
     }
 
     /**
@@ -129,27 +257,95 @@ class MyorderController extends BaseController
      */
     public function actionAfterSales()
     {
-
+        $uid = RequestHelper::post('uid', '', '');
+        if (empty($uid)) {
+            $this->returnJsonMsg('621', [], Common::C('code', '621'));
+        }
+        $data['mobile'] = RequestHelper::post('mobile', '', '');
+        if (empty($data['mobile'])) {
+            $this->returnJsonMsg('604', [], Common::C('code', '604'));
+        }
+        if (!Common::validateMobile($data['mobile'])) {
+            $this->returnJsonMsg('605', [], Common::C('code', '605'));
+        }
+        $data['product_id'] = RequestHelper::post('product_id', '', '');
+        if (empty($data['product_id'])) {
+            $this->returnJsonMsg('808', [], Common::C('code', '808'));
+        }
+        $data['shop_id'] = RequestHelper::post('shop_id', '', '');
+        if (empty($data['shop_id'])) {
+            $this->returnJsonMsg('803', [], Common::C('code', '803'));
+        }
+        $data['order_sn'] = RequestHelper::post('order_sn', '', '');
+        if (empty($data['order_sn'])) {
+            $this->returnJsonMsg('805', [], Common::C('code', '805'));
+        }
+        $data['type'] = RequestHelper::post('type', '', '');
+        if (empty($data['type'])) {
+            $this->returnJsonMsg('810', [], Common::C('code', '810'));
+        }
+        $data['product_name'] = RequestHelper::post('product_name', '', '');
+        if (empty($data['product_name'])) {
+            $this->returnJsonMsg('809', [], Common::C('code', '809'));
+        }
+        $data['product_img'] = RequestHelper::post('product_img', '', '');
+        $data['number']      = RequestHelper::post('number', '1', '');
+        $data['price']       = RequestHelper::post('price', '0', '');
+        if (empty($data['price'])) {
+            $this->returnJsonMsg('811', [], Common::C('code', '811'));
+        }
+        $data['remark']      = RequestHelper::post('remark', '', '');
+        $data['apply_time']  = date('Y-m-d H:i:s', time());
+        $model = new Exchange();
+        $rs = $model->insertInfo($data);
+        if (!$rs) {
+            $this->returnJsonMsg('400', [], Common::C('code', '400'));
+        }
+        $this->returnJsonMsg('200', [], Common::C('code', '200'));
     }
 
     /**
      * 获取订单的商品信息
      * @param string $mobile   手机号
      * @param string $order_sn 订单号
-     * @param int    $shop_id  店铺ID
      * @return array
      */
-    private function _getOrderGoodsInfo($mobile = '', $order_sn = '', $shop_id = 0)
+    private function _getOrderGoodsInfo($mobile = '', $order_sn = '')
     {
         if (empty($order_sn)) {
             $this->returnJsonMsg('805', [], Common::C('code', '805'));
         }
         $order_detail_model = new OrderDetail();
         $order_detail_where['mobile']   = $mobile;
-        $order_detail_where['shop_id']  = $shop_id;
         $order_detail_where['order_sn'] = $order_sn;
-        $order_detail_fields = 'product_id,product_name,product_img,num,price';
+        $order_detail_fields = 'shop_id,product_id,product_name,product_img,num,price';
         $order_detail_info = $order_detail_model->getList($order_detail_where, $order_detail_fields, 'id desc');
+        if (!empty($order_detail_info)) {
+            foreach ($order_detail_info as $k => $v) {
+                $order_detail_info[$k]['product_img'] = $this->_formatImg($v['product_img']);
+            }
+        }
         return $order_detail_info;
+    }
+
+    /**
+     * 格式化图片
+     * @param string $img 图片
+     * @return array
+     */
+    private function _formatImg($img = '')
+    {
+        $img_data = [];
+        if (!empty($img)) {
+            $img_arr = @explode(",", $img);
+            foreach ($img_arr as $key => $value) {
+                if (!empty($value)) {
+                    if (!strstr($value, 'http')) {
+                        $img_data[]= Common::C('imgHost').$value;
+                    }
+                }
+            }
+        }
+        return $img_data;
     }
 }
