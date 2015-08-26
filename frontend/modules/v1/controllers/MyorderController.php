@@ -24,6 +24,8 @@ use frontend\models\i500_social\ShopGrade;
 use frontend\models\i500m\RefundOrder;
 use frontend\models\i500m\Shop;
 use frontend\models\i500m\PaySite;
+use frontend\models\i500m\OrdersSendCoupons;
+use frontend\models\i500m\CouponsType;
 
 /**
  * 我的订单
@@ -251,7 +253,7 @@ class MyorderController extends BaseController
             $this->returnJsonMsg('806', [], Common::C('code', '806'));
         }
         $order_update_data['ship_status']   = '2';  //确定收货
-        $order_update_data['pay_status']    = '2';  //已支付
+        $order_update_data['pay_status']    = '1';  //已支付
         $order_update_data['delivery_time'] = date('Y-m-d H:i:s', time());
         $rs = $order_model->updateInfo($order_update_data, $order_where);
         if (empty($rs)) {
@@ -347,6 +349,69 @@ class MyorderController extends BaseController
             $this->returnJsonMsg('400', [], Common::C('code', '400'));
         }
         $this->returnJsonMsg('200', [], Common::C('code', '200'));
+    }
+
+    /**
+     * 分享发福利(红包)
+     * @return array
+     */
+    public function actionShareWelfare()
+    {
+        $uid = RequestHelper::post('uid', '', '');
+        if (empty($uid)) {
+            $this->returnJsonMsg('621', [], Common::C('code', '621'));
+        }
+        $mobile = RequestHelper::post('mobile', '', '');
+        if (empty($mobile)) {
+            $this->returnJsonMsg('604', [], Common::C('code', '604'));
+        }
+        if (!Common::validateMobile($mobile)) {
+            $this->returnJsonMsg('605', [], Common::C('code', '605'));
+        }
+        $type = RequestHelper::post('type', '', '');
+        if (empty($type)) {
+            $this->returnJsonMsg('813', [], Common::C('code', '813'));
+        }
+        $order_sn = RequestHelper::post('order_sn', '', '');
+        if (empty($order_sn)) {
+            $this->returnJsonMsg('805', [], Common::C('code', '805'));
+        }
+        $send_config_model = new OrdersSendCoupons();
+        $send_config_where['status'] = '1';
+        $send_config_fields = 'num,min,max,validity';
+        $rs = $send_config_model->getInfo($send_config_where, true, $send_config_fields);
+        if (empty($rs)) {
+            $this->returnJsonMsg('814', [], Common::C('code', '814'));
+        }
+        $type_name = '';
+        if ($type == '1') {
+            $type_name = $order_sn.'_pay';
+        } elseif ($type == '2') {
+            $type_name = $order_sn.'_evaluation';
+        }
+        if (empty($type_name)) {
+            $this->returnJsonMsg('813', [], Common::C('code', '813'));
+        }
+        $coupons_type_model = new CouponsType();
+        $coupons_type_where['type_name'] = $type_name;
+        $coupons_type_fields = 'type_id';
+        $rs = $coupons_type_model->getInfo($coupons_type_where, true, $coupons_type_fields);
+        if (!empty($rs)) {
+            $this->returnJsonMsg('815', [], Common::C('code', '815'));
+        }
+        $data['type_name']  = $type_name;
+        $data['send_type']  = '2';
+        $data['add_time']   = date('Y-m-d H:i:s', time());
+        $data['use_system'] = '2';
+        $data['only_sign']  = md5(time().mt_rand(1000, 9999));
+        $rs = $coupons_type_model->insertInfo($data);
+        if (!$rs) {
+            $this->returnJsonMsg('400', [], Common::C('code', '400'));
+        }
+        $res['url']  = Common::C('hongBaoHost').$data['only_sign'];
+        $res['img']  = Common::C('hongBaoShareImg');
+        $res['text'] = Common::C('hongBaoShareText');
+        $this->returnJsonMsg('200', $res, Common::C('code', '200'));
     }
 
     /**
