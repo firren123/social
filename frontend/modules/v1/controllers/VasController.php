@@ -18,6 +18,7 @@ namespace frontend\modules\v1\controllers;
 use Yii;
 use yii\web\Controller;
 use common\helpers\HxtHelper;
+use common\helpers\RequestHelper;
 
 
 /**
@@ -60,6 +61,22 @@ class VasController extends Controller
     public function actionQuery()
     {
         $helper_hxt = new HxtHelper();
+
+
+        $terminalid = RequestHelper::post('terminalid', '', '');
+        $keyid = RequestHelper::post('keyid', '', '');
+        $userid = RequestHelper::post('userid', '', '');
+        $account = RequestHelper::post('account', '', '');
+        $email = RequestHelper::post('email', '', '');
+        $cardno = RequestHelper::post('cardno', '', '');
+        $totalfee = RequestHelper::post('totalfee', '', '');
+        $shopcode = RequestHelper::post('shopcode', '', '');
+        $paymentinfo = RequestHelper::post('paymentinfo', '', '');
+        $ipaddress = RequestHelper::post('ipaddress', '', '');
+        $source = RequestHelper::post('source', '', '');
+        $traceno = RequestHelper::post('traceno', '', '');
+        $mcode = RequestHelper::post('mcode', '', '');
+
 
 
 
