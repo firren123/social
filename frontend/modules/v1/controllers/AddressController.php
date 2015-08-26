@@ -14,12 +14,14 @@
  */
 namespace frontend\modules\v1\controllers;
 
+use frontend\models\i500m\Province;
 use Yii;
 use common\helpers\Common;
 use common\helpers\SsdbHelper;
 use common\helpers\CurlHelper;
 use common\helpers\RequestHelper;
 use frontend\models\i500_social\UserAddress;
+use frontend\models\i500m\OpenCity;
 
 /**
  * Address
@@ -44,6 +46,35 @@ class AddressController extends BaseController
         return parent::beforeAction($action);
     }
 
+    /**
+     * 获取开通省份
+     * @return array
+     */
+    public function actionGetOpenProvince()
+    {
+        $uid = RequestHelper::get('uid', '', '');
+        if (empty($uid)) {
+            $this->returnJsonMsg('621', [], Common::C('code', '621'));
+        }
+        $mobile = RequestHelper::get('mobile', '', '');
+        if (empty($mobile)) {
+            $this->returnJsonMsg('604', [], Common::C('code', '604'));
+        }
+        if (!Common::validateMobile($mobile)) {
+            $this->returnJsonMsg('605', [], Common::C('code', '605'));
+        }
+        $open_city_model = new OpenCity();
+        $open_city_where['status']  = '1';
+        $open_city_where['display'] = '1';
+        $open_city_fields = 'province as province_id';
+        $info = $open_city_model->getList($open_city_where, $open_city_fields);
+        if (!empty($info)) {
+            foreach ($info as $k => $v) {
+                $info[$k]['province_name'] = $this->_getProvinceName($v['province_id']);
+            }
+        }
+        $this->returnJsonMsg('200', $info, Common::C('code', '200'));
+    }
     /**
      * 添加
      * @return array
@@ -286,5 +317,22 @@ class AddressController extends BaseController
             $this->returnJsonMsg('200', [], Common::C('code', '200'));
         }
         $this->returnJsonMsg('200', $res['data'], Common::C('code', '200'));
+    }
+
+    /**
+     * 省份ID
+     * @param int $province_id 省份ID
+     * @return array
+     */
+    private function _getProvinceName($province_id = 0)
+    {
+        if (empty($province_id)) {
+            $this->returnJsonMsg('638', [], Common::C('code', '638'));
+        }
+        $province_model = new Province();
+        $province_where['id'] = $province_id;
+        $province_fields = 'name';
+        $info = $province_model->getInfo($province_where, true, $province_fields);
+        return $info['name'];
     }
 }
