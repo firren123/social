@@ -100,6 +100,7 @@ return [
     '809' => '缺少参数 product_name',
     '810' => '缺少参数 type(售后类型)',
     '811' => '缺少参数 price(商品价格)',
+    '812' => '缺少参数 pay_type_id(支付方式ID)',
 
     //SSDB KEY 备注
     'address_details_{id}_{mobile}' => '用户收货地址详情',
