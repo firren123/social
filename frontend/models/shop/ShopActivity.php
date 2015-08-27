@@ -81,11 +81,12 @@ class ShopActivity extends ShopBase
                 }
                 $g_model = new Product();
                 //var_dump($product_ids);
-                $goods = $g_model->getList(['id'=>$product_ids], 'id, name, image');
+                $goods = $g_model->getList(['id'=>$product_ids], 'id, name, image,attr_value');
                 //var_dump($goods);
                 $goods = ArrayHelper::index($goods, 'id');
                 foreach ($activity_products as $k => $v) {
                     $activity_products[$k]['name'] = ArrayHelper::getValue($goods, $v['product_id'].'.name');
+                    $activity_products[$k]['attr_value'] = ArrayHelper::getValue($goods, $v['product_id'].'.attr_value', '');
                     $activity_products[$k]['image'] = $img_path . ArrayHelper::getValue($goods, $v['product_id'].'.image');
                     $activity_products[$k]['init_num'] = 0;
                 }

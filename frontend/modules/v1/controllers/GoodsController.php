@@ -89,6 +89,7 @@ class GoodsController extends BaseController
 
             foreach ($data_list['list'] as $k => $v) {
                 $data_list['list'][$k]['name'] = ArrayHelper::getValue($goods, $k.'.name', '');
+                $data_list['list'][$k]['attr_value'] = ArrayHelper::getValue($goods, $k.'.attr_value', '');
                 $data_list['list'][$k]['image'] = $img_path . ArrayHelper::getValue($goods, $k.'.image', '');
                 $data_list['list'][$k]['purchase_num'] = ArrayHelper::getValue($activity_goods, $k.'.day_confine_num', 0);
                 $data_list['list'][$k]['init_num'] = 0;
@@ -182,7 +183,7 @@ class GoodsController extends BaseController
     {
         $model = new Product();
         $this->shop_id = RequestHelper::get('shop_id', 0, 'intval');
-        $list = $model->getList(['is_hot'=>1, 'single'=>1, 'status'=>1], 'id,name,image');
+        $list = $model->getList(['is_hot'=>1, 'single'=>1, 'status'=>1], 'id,name,image,attr_value');
         $new_list = $goods_list = [];
         if (!empty($list)) {
             $goods_id = [];
@@ -200,6 +201,7 @@ class GoodsController extends BaseController
                 if (!empty($goods_list)) {
                     foreach ($goods_list as $k => $v) {
                         $goods_list[$k]['name'] =  ArrayHelper::getValue($new_list, $v['product_id'].'.name', '');
+                        $goods_list[$k]['attr_value'] = ArrayHelper::getValue($new_list, $v['product_id'].'.attr_value', '');
                         $goods_list[$k]['image'] = $img_path . ArrayHelper::getValue($new_list, $v['product_id'].'.image', '');
                         $goods_list[$k]['purchase_num'] = 0;
                         $goods_list[$k]['init_num'] = 0;
