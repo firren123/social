@@ -73,9 +73,7 @@ class VasController extends Controller
         $arr['CardNo'] = '';
         $arr['TotalFee'] = RequestHelper::post('totalfee', '0', 'intval');
         $arr['ShopCode'] = RequestHelper::post('shopcode', '', 'trim');
-        //ShopCode  3102=抄表电用户信息查询 3202=智能电用户联机信息查询
         $arr['PaymentInfo'] = RequestHelper::post('paymentinfo', '', 'trim');
-        //PaymentInfo  用户编号
         $arr['IPAddress'] = RequestHelper::post('ip', '127.0.0.1', 'trim');
         $arr['Source'] = '';
         $arr['TraceNo'] = '';
@@ -119,9 +117,7 @@ class VasController extends Controller
         $arr['HostSerialNo'] = '999999999999';//银行扣费号
         $arr['TotalFee'] = RequestHelper::post('totalfee', '0', 'intval');
         $arr['ShopCode'] = RequestHelper::post('shopcode', '', 'trim');
-        //ShopCode  3102=抄表电用户信息查询 3202=智能电用户联机信息查询
         $arr['PaymentInfo'] = RequestHelper::post('paymentinfo', '', 'trim');
-        //PaymentInfo  用户编号
         $arr['IPAddress'] = RequestHelper::post('ip', '127.0.0.1', 'trim');
         $arr['Source'] = '';
         $arr['TraceNo'] = '';
