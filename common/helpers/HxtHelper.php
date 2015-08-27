@@ -112,7 +112,7 @@ class HxtHelper
 
 
     /**
-     * 查询接口
+     * 缴费接口
      *
      * Author zhengyu@iyangpin.com
      *
