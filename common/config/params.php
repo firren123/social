@@ -29,6 +29,8 @@ return [
     'hxClientSecret'  => 'YXA6vHECKE3XO06uVozdV9ceAjJBMhg',
     'hxTokenAPI'      => 'https://a1.easemob.com/iyangpin2015/i500social/token/', //环信登陆API
     'hxUsersAPI'      => 'https://a1.easemob.com/iyangpin2015/i500social/users/', //环信注册API
+    'regAddFriendCustomerService' => true,  //true = 注册添加客服为好友 false = 不添加
+    'customerServiceUserName'  => '13264185553',   //客服账号
 
     'sign_debug'      => false,                        //false = 开启验证 true 关闭验证
 

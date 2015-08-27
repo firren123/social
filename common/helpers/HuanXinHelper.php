@@ -72,7 +72,17 @@ class HuanXinHelper
             $response = $curl->setOption(CURLOPT_POSTFIELDS, $data)->post(Common::C('hxUsersAPI'));
             $list = json_decode($response, true);
             if (!empty($list['entities'])) {
-                return $list;
+                //注册并且添加好友
+                if (Common::C('regAddFriendCustomerService')) {
+                    $rs = self::hxAddFriend($mobile, Common::C('customerServiceUserName'));
+                    if (!empty($rs)) {
+                        return $rs;
+                    } else {
+                        return ['code'=>'101'];
+                    }
+                } else {
+                    return $list;
+                }
             } else {
                 return 0;
             }
@@ -110,6 +120,30 @@ class HuanXinHelper
             return [];
         }
     }
+
+    /**
+     * 添加好友
+     * @param string $username        用户名
+     * @param string $friend_username 好友用户名
+     * @return array
+     */
+    public static function hxAddFriend($username = '', $friend_username='')
+    {
+        if (Common::C('openHuanXin')) {
+            $token = self::token();
+            $Authorization = "Bearer " . $token['access_token'];
+            $header[] = 'Authorization: ' . $Authorization;
+            $curl = new Curl();
+            $response = $curl
+                ->setOption(CURLOPT_HTTPHEADER, $header)
+                ->POST(Common::C('hxUsersAPI') . $username.'/contacts/users/'.$friend_username);
+            $list = json_decode($response, true);
+            return $list;
+        } else {
+            return [];
+        }
+    }
+
     /**
      * 获取用户状态
      * @param string $username 用户名
