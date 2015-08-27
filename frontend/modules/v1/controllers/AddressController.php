@@ -74,7 +74,7 @@ class AddressController extends BaseController
                 $info[$k]['province_name'] = $this->_getProvinceName($v['province_id']);
             }
         }
-        $this->returnJsonMsg('200', $info, Common::C('code', '200'));
+        $this->returnJsonMsg('200', array_values($info), Common::C('code', '200'));
     }
     /**
      * 添加
