@@ -147,7 +147,7 @@ class GoodsController extends BaseController
             'attribute'=>$info['attr_value'],
         ];
         $p_img = new ProductImage();
-        $image_list = $p_img->getList(['product_id'=>$product_id]);
+        $image_list = $p_img->getList(['product_id'=>$product_id], 'image');
         $activity = $shop_model->getActivity($this->shop_id, $product_id);
         if (!empty($activity)) {
             $p_info['activity_id'] = $activity['activity_id'];
