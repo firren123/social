@@ -80,7 +80,7 @@ class MyorderController extends BaseController
         if ($order_status != '4') {
             $order_model = new Order();
             $order_where['mobile']  = $mobile;
-            $order_fields = 'order_sn,create_time,total,status';
+            $order_fields = 'order_sn,create_time,total,status,pay_status,ship_status';
             $order_and_where = '';
             if ($order_status == '1') {
                 /**待支付**/
@@ -97,7 +97,8 @@ class MyorderController extends BaseController
             $info = $order_model->getPageList($order_where, $order_fields, 'id desc', $page, $page_size, $order_and_where);
             if (!empty($info)) {
                 foreach ($info as $k => $v) {
-                    $info[$k]['goods_info'] = $this->_getOrderGoodsInfo($mobile, $v['order_sn']);
+                    $rs = $this->_getOrderGoodsInfo($mobile, $v['order_sn']);
+                    $info[$k]['goods_info'] = $rs['order_detail_info'];
                 }
             }
         } else {
@@ -154,7 +155,9 @@ class MyorderController extends BaseController
                 $info['delivery_man']        = $shop_info['contact_name'];
                 $info['delivery_man_mobile'] = $shop_info['mobile'];
             }
-            $info['goods_info'] = $this->_getOrderGoodsInfo($mobile, $order_sn);
+            $rs = $this->_getOrderGoodsInfo($mobile, $order_sn);
+            $info['goods_total'] = $rs['goods_total'];
+            $info['goods_info']  = $rs['order_detail_info'];
             unset($info['id']);
             unset($info['mobile']);
         }
@@ -439,12 +442,16 @@ class MyorderController extends BaseController
         $order_detail_where['order_sn'] = $order_sn;
         $order_detail_fields = 'shop_id,product_id,product_name,product_img,num,price,activity_price,type,is_exchange,goods_type,retread_num,attribute_str,goods_type,remark';
         $order_detail_info = $order_detail_model->getList($order_detail_where, $order_detail_fields, 'id desc');
+        $goods_total = 0;
         if (!empty($order_detail_info)) {
             foreach ($order_detail_info as $k => $v) {
                 $order_detail_info[$k]['product_img'] = $this->_formatImg($v['product_img']);
+                $goods_total += $v['price'] * $v['num'];
             }
         }
-        return $order_detail_info;
+        $rs['goods_total'] = $goods_total;
+        $rs['order_detail_info'] = $order_detail_info;
+        return $rs;
     }
 
     /**
