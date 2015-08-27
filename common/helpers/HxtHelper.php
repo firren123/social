@@ -186,7 +186,7 @@ class HxtHelper
 
         $str_today = date("Ymd", time());
 
-        $content = date("H:i:s ") . $str;
+        $content = date("H:i:s ") . $str . "\n\n";
 
         if ($type == '') {
             //记录返回值非成功记录
