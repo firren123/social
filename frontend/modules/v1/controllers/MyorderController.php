@@ -80,7 +80,7 @@ class MyorderController extends BaseController
         if ($order_status != '4') {
             $order_model = new Order();
             $order_where['mobile']  = $mobile;
-            $order_fields = 'order_sn,create_time,total,status';
+            $order_fields = 'order_sn,create_time,total,status,pay_status,ship_status';
             $order_and_where = '';
             if ($order_status == '1') {
                 /**待支付**/
