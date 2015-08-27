@@ -68,6 +68,7 @@ class AddressController extends BaseController
         $open_city_where['display'] = '1';
         $open_city_fields = 'province as province_id';
         $info = $open_city_model->getList($open_city_where, $open_city_fields);
+        $info = Common::arrUnique($info, 'province_id');
         if (!empty($info)) {
             foreach ($info as $k => $v) {
                 $info[$k]['province_name'] = $this->_getProvinceName($v['province_id']);
