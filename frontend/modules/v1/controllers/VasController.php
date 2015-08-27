@@ -107,7 +107,7 @@ class VasController extends Controller
 
 
     /**
-     * 生成Mcode
+     * 生成查询接口Mcode
      *
      * Author zhengyu@iyangpin.com
      *
@@ -126,7 +126,7 @@ class VasController extends Controller
     }
 
     /**
-     * 生成Mcode
+     * 生成缴费接口Mcode
      *
      * Author zhengyu@iyangpin.com
      *
