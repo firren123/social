@@ -71,8 +71,8 @@ class HxtHelper
         $client->decode_utf8 = false;
         $client->xml_encoding = 'utf-8';
 
-        //$param = array('param1'=>'1', 'param2'=>'2');
         $param = $arr;
+        $this->_zlog(json_encode($param), 'hxt_log');
         //echo "<pre>";print_r($param);echo "</pre>";exit;
 
         $result = $client->__soapCall("HXTServiceQuery", array($param));
@@ -86,10 +86,11 @@ class HxtHelper
             //var_dump($result);exit;
             if (!isset($result->HXTServiceQueryResult->any)) {
                 $str = "[SOAP error],no result->HXTServiceQueryResult->any";
-                $this->_zlog($str, 'soap_exception');
+                $this->_zlog($str . "\n" . var_dump($result), 'soap_exception');
                 return array('code' => 0, 'data' => array(), 'msg' => 'SOAP return error');
             }
             $xml = $result->HXTServiceQueryResult->any;
+            $this->_zlog($xml, 'hxt_log');
             $arr_data = (array)simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA);
 
             if (isset($arr_data['PaymentOrderID'])) {
@@ -102,6 +103,7 @@ class HxtHelper
             if (isset($arr_data['ResultCode']) && $arr_data['ResultCode'] == '00') {
                 return array('code' => 1, 'data' => $arr_data, 'msg' => '');
             } else {
+                $this->_zlog(json_encode($arr_data));
                 return array('code' => 0, 'data' => $arr_data, 'msg' => '');
             }
         }
@@ -126,8 +128,8 @@ class HxtHelper
         $client->decode_utf8 = false;
         $client->xml_encoding = 'utf-8';
 
-        //$param = array('param1'=>'1', 'param2'=>'2');
         $param = $arr;
+        $this->_zlog(json_encode($param), 'hxt_log');
         //echo "<pre>";print_r($param);echo "</pre>";exit;
 
         $result = $client->__soapCall("HXTServicePay", array($param));
@@ -141,10 +143,11 @@ class HxtHelper
             //var_dump($result);exit;
             if (!isset($result->HXTServicePayResult->any)) {
                 $str = "[SOAP error],no result->HXTServicePayResult->any";
-                $this->_zlog($str, 'soap_exception');
+                $this->_zlog($str . "\n" . var_dump($result), 'soap_exception');
                 return array('code' => 0, 'data' => array(), 'msg' => 'SOAP return error');
             }
             $xml = $result->HXTServicePayResult->any;
+            $this->_zlog($xml, 'hxt_log');
             $arr_data = (array)simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA);
             //echo "<pre>";print_r($arr_data);echo "</pre>";exit;
 
@@ -158,6 +161,7 @@ class HxtHelper
             if (isset($arr_data['ResultCode']) && $arr_data['ResultCode'] == '00') {
                 return array('code' => 1, 'data' => $arr_data, 'msg' => '');
             } else {
+                $this->_zlog(json_encode($arr_data));
                 return array('code' => 0, 'data' => $arr_data, 'msg' => '');
             }
         }
@@ -185,18 +189,27 @@ class HxtHelper
         $content = date("H:i:s ") . $str;
 
         if ($type == '') {
-            $log_dir = "/tmp/soaplog";
+            //记录返回值非成功记录
+            $log_dir = "/tmp/hxtlog";
             if (!is_dir($log_dir)) {
                 @mkdir($log_dir, 0700);
             }
-            file_put_contents($log_dir . '/tmp_soap_' . $str_today, $content, FILE_APPEND);
+            file_put_contents($log_dir . '/tmp_hxt_error_' . $str_today, $content, FILE_APPEND);
         } elseif ($type == 'soap_exception') {
+            //记录soap返回异常
             $log_dir = "/tmp/zlog";
             if (!is_dir($log_dir)) {
                 @mkdir($log_dir, 0700);
             }
             $content = date("Y-m-d_H:i:s ") . $str;
-            file_put_contents($log_dir . '/tmp_ssdb_exception', $content, FILE_APPEND);
+            file_put_contents($log_dir . '/tmp_soap_exception', $content, FILE_APPEND);
+        } elseif ($type == 'hxt_log') {
+            //记录和恒信通接口的全部发送、返回
+            $log_dir = "/tmp/hxtlog";
+            if (!is_dir($log_dir)) {
+                @mkdir($log_dir, 0700);
+            }
+            file_put_contents($log_dir . '/not_tmp_hxt_log_' . $str_today, $content, FILE_APPEND);
         } else {
         }
 
