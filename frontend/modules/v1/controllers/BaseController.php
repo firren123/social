@@ -35,6 +35,7 @@ use yii\web\Controller;
 class BaseController extends Controller
 {
     protected $params = null;
+    public $shop_id;
 
     /**
      * 初始化
