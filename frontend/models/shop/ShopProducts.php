@@ -14,6 +14,9 @@
  * @link      renyineng@iyangpin.com
  */
 namespace frontend\models\shop;
+
+use yii\data\Pagination;
+
 /**
  * 商家商品表
  *
@@ -32,5 +35,24 @@ class ShopProducts extends ShopBase
     public static function tableName()
     {
         return '{{%shop_products}}';
+    }
+    /**
+     * 带分页的商品列表
+     * @param array  $map      查询条件
+     * @param string $field    查询字段
+     * @param int    $pageSize 每页多少条
+     * @param string $order    排序
+     * @param int    $sort     升序降序
+     * @return array
+     */
+    public function getGoodsList($map = [], $field = '*', $pageSize = 20, $order = 'id', $sort = SORT_DESC)
+    {
+        $query = $this->find()->where($map);
+        $count = $query->count();
+        $query->select($field);
+        $pages = new Pagination(['totalCount' =>$count, 'pageSize' => $pageSize]);
+        $list = $query->orderBy([$order=>$sort])->offset($pages->offset)->limit($pages->limit)->asArray()->all();
+        //var_dump($list);
+        return ['list'=>$list, 'count'=>$count, 'pageCount'=>$pages->pageCount];
     }
 }
