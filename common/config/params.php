@@ -10,6 +10,9 @@ return [
     'openLog'         => false, //true = 开始日志 false = 关闭日志
     'returnLogFile'   => '/tmp/return_log.txt', //返回值日志文件
     'paramsLogFile'   => '/tmp/params_log.txt', //客户端传递参数日志
+    'hongBaoShareImg'     => 'https://www.baidu.com/img/bd_logo1.png',  //红包分享图片
+    'hongBaoShareText'     => '大红包正在逼近，快来抢吧~',  //红包分享文字
+    'hongBaoHost'     => 'http://social.test.i500m.com/hongbao?sign=',  //红包路径
     'imgHost'         => 'http://img.test.i500m.com/', //图片服务器
     'channelHost'     => 'http://channel.test.i500m.com/', //通道服务器
     'saveSms'         => true, //true = 保存短信内容入库 false = 不保存短信入库
@@ -26,6 +29,8 @@ return [
     'hxClientSecret'  => 'YXA6vHECKE3XO06uVozdV9ceAjJBMhg',
     'hxTokenAPI'      => 'https://a1.easemob.com/iyangpin2015/i500social/token/', //环信登陆API
     'hxUsersAPI'      => 'https://a1.easemob.com/iyangpin2015/i500social/users/', //环信注册API
+    'regAddFriendCustomerService' => true,  //true = 注册添加客服为好友 false = 不添加
+    'customerServiceUserName'  => '13264185553',   //客服账号
 
     'sign_debug'      => false,                        //false = 开启验证 true 关闭验证
 

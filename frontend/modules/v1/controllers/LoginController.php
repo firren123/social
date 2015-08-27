@@ -253,6 +253,9 @@ class LoginController extends BaseController
         if (empty($hx_rs)) {
             $this->returnJsonMsg('626', [], Common::C('code', '626'));
         }
+        if ($hx_rs['code'] == '101') {
+            $this->returnJsonMsg('639', [], Common::C('code', '639'));
+        }
         $this->returnJsonMsg('200', [], Common::C('code', '200'));
     }
 
@@ -503,6 +506,9 @@ class LoginController extends BaseController
             if (empty($hx_rs)) {
                 $this->returnJsonMsg('626', ['first_login'=>'1'], Common::C('code', '626'));
             }
+            if ($hx_rs['code'] == '101') {
+                $this->returnJsonMsg('639', [], Common::C('code', '639'));
+            }
             $this->returnJsonMsg('200', ['first_login'=>'1'], Common::C('code', '200'));
         } else {
             $this->returnJsonMsg('200', ['first_login'=>'2'], Common::C('code', '200'));
@@ -534,6 +540,9 @@ class LoginController extends BaseController
             $hx_rs = HuanXinHelper::hxRegister($mobile, Common::C('passwordCode'), $mobile);
             if (empty($hx_rs)) {
                 $this->returnJsonMsg('626', ['first_login'=>'1'], Common::C('code', '626'));
+            }
+            if ($hx_rs['code'] == '101') {
+                $this->returnJsonMsg('639', [], Common::C('code', '639'));
             }
         }
         /**发送验证码**/

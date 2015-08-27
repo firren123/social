@@ -22,6 +22,10 @@ use frontend\models\i500_social\OrderDetail;
 use frontend\models\i500_social\Exchange;
 use frontend\models\i500_social\ShopGrade;
 use frontend\models\i500m\RefundOrder;
+use frontend\models\i500m\Shop;
+use frontend\models\i500m\PaySite;
+use frontend\models\i500m\OrdersSendCoupons;
+use frontend\models\i500m\CouponsType;
 
 /**
  * 我的订单
@@ -115,6 +119,49 @@ class MyorderController extends BaseController
     }
 
     /**
+     * 订单详情
+     * @return array
+     */
+    public function actionDetails()
+    {
+        $uid = RequestHelper::get('uid', '', '');
+        if (empty($uid)) {
+            $this->returnJsonMsg('621', [], Common::C('code', '621'));
+        }
+        $mobile = RequestHelper::get('mobile', '', '');
+        if (empty($mobile)) {
+            $this->returnJsonMsg('604', [], Common::C('code', '604'));
+        }
+        if (!Common::validateMobile($mobile)) {
+            $this->returnJsonMsg('605', [], Common::C('code', '605'));
+        }
+        $order_sn = RequestHelper::get('order_sn', '', '');
+        if (empty($order_sn)) {
+            $this->returnJsonMsg('805', [], Common::C('code', '805'));
+        }
+        $order_model = new Order();
+        $order_where['mobile']   = $mobile;
+        $order_where['order_sn'] = $order_sn;
+        $order_fields = '*';
+        $info = $order_model->getInfo($order_where, true, $order_fields);
+        if (!empty($info)) {
+            if (!empty($info['pay_method_id'])) {
+                $pay_site_info = $this->_getPayInfo($info['pay_method_id']);
+                $info['pay_method_name'] = $pay_site_info['name'];
+            }
+            if (!empty($info['shop_id'])) {
+                $shop_info = $this->_getShopInfo($info['shop_id']);
+                $info['delivery_man']        = $shop_info['contact_name'];
+                $info['delivery_man_mobile'] = $shop_info['mobile'];
+            }
+            $info['goods_info'] = $this->_getOrderGoodsInfo($mobile, $order_sn);
+            unset($info['id']);
+            unset($info['mobile']);
+        }
+        $this->returnJsonMsg('200', $info, Common::C('code', '200'));
+    }
+
+    /**
      * 取消订单
      * @throws \Exception
      */
@@ -155,7 +202,7 @@ class MyorderController extends BaseController
                 $refund_order_add_data['add_time']    = date('Y-m-d H:i:s', time());
                 $refund_order_add_data['money']       = $rs['total'];
                 $refund_order_add_data['code_money']  = $rs['dis_amount'];
-                $refund_order_add_data['unionpay_tn'] = '';
+                $refund_order_add_data['unionpay_tn'] = ''; //@todo 未做完
                 $refund_order_add_data['from_data']   = '1';
                 $rs = $refund_order_model->insertInfo($refund_order_add_data);
                 $order_update_data['status'] = '2';
@@ -206,7 +253,7 @@ class MyorderController extends BaseController
             $this->returnJsonMsg('806', [], Common::C('code', '806'));
         }
         $order_update_data['ship_status']   = '2';  //确定收货
-        $order_update_data['pay_status']    = '2';  //已支付
+        $order_update_data['pay_status']    = '1';  //已支付
         $order_update_data['delivery_time'] = date('Y-m-d H:i:s', time());
         $rs = $order_model->updateInfo($order_update_data, $order_where);
         if (empty($rs)) {
@@ -298,10 +345,82 @@ class MyorderController extends BaseController
         $data['apply_time']  = date('Y-m-d H:i:s', time());
         $model = new Exchange();
         $rs = $model->insertInfo($data);
+        //更新订单表当前商品的退货数量
+        $order_model = new Order();
+        $order_where['order_sn']   = $data['order_sn'];
+        $order_where['mobile']     = $data['mobile'];
+        $order_where['product_id'] = $data['product_id'];
+        $order_update['is_exchange'] = '1';
+        $order_update['retread_num'] = $data['number'];
+        $order_model->updateInfo($order_update, $order_where);
         if (!$rs) {
             $this->returnJsonMsg('400', [], Common::C('code', '400'));
         }
         $this->returnJsonMsg('200', [], Common::C('code', '200'));
+    }
+
+    /**
+     * 分享发福利(红包)
+     * @return array
+     */
+    public function actionShareWelfare()
+    {
+        $uid = RequestHelper::post('uid', '', '');
+        if (empty($uid)) {
+            $this->returnJsonMsg('621', [], Common::C('code', '621'));
+        }
+        $mobile = RequestHelper::post('mobile', '', '');
+        if (empty($mobile)) {
+            $this->returnJsonMsg('604', [], Common::C('code', '604'));
+        }
+        if (!Common::validateMobile($mobile)) {
+            $this->returnJsonMsg('605', [], Common::C('code', '605'));
+        }
+        $type = RequestHelper::post('type', '', '');
+        if (empty($type)) {
+            $this->returnJsonMsg('813', [], Common::C('code', '813'));
+        }
+        $order_sn = RequestHelper::post('order_sn', '', '');
+        if (empty($order_sn)) {
+            $this->returnJsonMsg('805', [], Common::C('code', '805'));
+        }
+        $send_config_model = new OrdersSendCoupons();
+        $send_config_where['status'] = '1';
+        $send_config_fields = 'num,min,max,validity';
+        $rs = $send_config_model->getInfo($send_config_where, true, $send_config_fields);
+        if (empty($rs)) {
+            $this->returnJsonMsg('814', [], Common::C('code', '814'));
+        }
+        $type_name = '';
+        if ($type == '1') {
+            $type_name = $order_sn.'_pay';
+        } elseif ($type == '2') {
+            $type_name = $order_sn.'_evaluation';
+        }
+        if (empty($type_name)) {
+            $this->returnJsonMsg('813', [], Common::C('code', '813'));
+        }
+        $coupons_type_model = new CouponsType();
+        $coupons_type_where['type_name'] = $type_name;
+        $coupons_type_fields = 'type_id';
+        $rs = $coupons_type_model->getInfo($coupons_type_where, true, $coupons_type_fields);
+        if (!empty($rs)) {
+            $this->returnJsonMsg('815', [], Common::C('code', '815'));
+        }
+        $data['type_name']  = $type_name;
+        $data['send_type']  = '2';
+        $data['number']     = $rs['num'];
+        $data['add_time']   = date('Y-m-d H:i:s', time());
+        $data['use_system'] = '2';
+        $data['only_sign']  = md5(time().mt_rand(1000, 9999));
+        $rs = $coupons_type_model->insertInfo($data);
+        if (!$rs) {
+            $this->returnJsonMsg('400', [], Common::C('code', '400'));
+        }
+        $res['url']  = Common::C('hongBaoHost').$data['only_sign'];
+        $res['img']  = Common::C('hongBaoShareImg');
+        $res['text'] = Common::C('hongBaoShareText');
+        $this->returnJsonMsg('200', $res, Common::C('code', '200'));
     }
 
     /**
@@ -318,7 +437,7 @@ class MyorderController extends BaseController
         $order_detail_model = new OrderDetail();
         $order_detail_where['mobile']   = $mobile;
         $order_detail_where['order_sn'] = $order_sn;
-        $order_detail_fields = 'shop_id,product_id,product_name,product_img,num,price';
+        $order_detail_fields = 'shop_id,product_id,product_name,product_img,num,price,activity_price,type,is_exchange,goods_type,retread_num,attribute_str,goods_type,remark';
         $order_detail_info = $order_detail_model->getList($order_detail_where, $order_detail_fields, 'id desc');
         if (!empty($order_detail_info)) {
             foreach ($order_detail_info as $k => $v) {
@@ -328,6 +447,39 @@ class MyorderController extends BaseController
         return $order_detail_info;
     }
 
+    /**
+     * 获取商家信息
+     * @param int $shop_id 商家ID
+     * @return array
+     */
+    private function _getShopInfo($shop_id = 0)
+    {
+        if (empty($shop_id)) {
+            $this->returnJsonMsg('803', [], Common::C('code', '803'));
+        }
+        $shop_model = new Shop();
+        $shop_where['id'] = $shop_id;
+        $shop_fields = 'contact_name,mobile';
+        $rs = $shop_model->getInfo($shop_id, true, $shop_fields);
+        return $rs;
+    }
+
+    /**
+     * 获取支付信息
+     * @param int $pay_type_id 支付方式ID
+     * @return array
+     */
+    private  function _getPayInfo($pay_type_id = 0)
+    {
+        if (empty($pay_type_id)) {
+            $this->returnJsonMsg('812', [], Common::C('code', '812'));
+        }
+        $pay_site_model = new PaySite();
+        $pay_site_where['id'] = $pay_type_id;
+        $pay_site_fields = 'name';
+        $rs = $pay_site_model->getInfo($pay_site_where, true, $pay_site_fields);
+        return $rs;
+    }
     /**
      * 格式化图片
      * @param string $img 图片

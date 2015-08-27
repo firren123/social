@@ -61,6 +61,27 @@ class Common
     }
 
     /**
+     * 二维数组去重
+     * @param array  $arr 数组
+     * @param string $key 键
+     * @return mixed
+     */
+    public static function arrUnique($arr = [], $key = '')
+    {
+        $tmp_arr = array();
+        foreach ($arr as $k => $v) {
+            if (in_array($v[$key], $tmp_arr)) {
+                //搜索$v[$key]是否在$tmp_arr数组中存在，若存在返回true
+                unset($arr[$k]);
+            } else {
+                $tmp_arr[] = $v[$key];
+            }
+        }
+        //sort($arr); //sort函数对数组进行排序
+        return $arr;
+    }
+
+    /**
      * 验证手机号
      * @param string $mobile 手机号
      * @return bool
