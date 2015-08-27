@@ -156,8 +156,8 @@ class MyorderController extends BaseController
                 $info['delivery_man_mobile'] = $shop_info['mobile'];
             }
             $rs = $this->_getOrderGoodsInfo($mobile, $order_sn);
-            $info['goods_info']  = $rs['order_detail_info'];
             $info['goods_total'] = $rs['goods_total'];
+            $info['goods_info']  = $rs['order_detail_info'];
             unset($info['id']);
             unset($info['mobile']);
         }
