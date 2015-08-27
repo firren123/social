@@ -104,7 +104,9 @@ class ShopController extends BaseController
         $shop_where['id'] = $shop_id;
         $info = $shop_model->getInfo($shop_where, true, $shop_fields);
         if (!empty($info)) {
-            $info['logo'] = Common::C('imgHost').$info['logo'];
+            if (!empty($info['logo'])) {
+                $info['logo'] = Common::C('imgHost').$info['logo'];
+            }
         }
         return $info;
     }
