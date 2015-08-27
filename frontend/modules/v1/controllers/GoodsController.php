@@ -147,7 +147,17 @@ class GoodsController extends BaseController
             'attribute'=>$info['attr_value'],
         ];
         $p_img = new ProductImage();
+        $image_data = [];
         $image_list = $p_img->getList(['product_id'=>$product_id], 'image');
+        $img_path = Yii::$app->params['imgHost'];
+        if (substr($img_path, -1) == '/') {
+            $img_path = substr($img_path, 0, -1);
+        }
+        if (!empty($image_list)) {
+            foreach($image_list as $k => $v) {
+                $image_data[] = $img_path . $v['image'];
+            }
+        }
         $activity = $shop_model->getActivity($this->shop_id, $product_id);
         if (!empty($activity)) {
             $p_info['activity_id'] = $activity['activity_id'];
@@ -158,7 +168,7 @@ class GoodsController extends BaseController
         }
         $data = [
             'info'=> $p_info,
-            'photo'=>$image_list,
+            'photo'=>$image_data,
         ];
         $this->returnJsonMsg(200, $data, 'SUCCESS');
 
