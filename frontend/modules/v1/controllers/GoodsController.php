@@ -133,7 +133,7 @@ class GoodsController extends BaseController
             }
             if (!empty($goods_id)) {
                 $shop_model = new ShopProducts();
-                $goods_list = $shop_model->getList(['product_id'=>$goods_id, 'shop_id'=>$this->shop_id, 'status'=>1], 'product_id,product_number');
+                $goods_list = $shop_model->getList(['product_id'=>$goods_id, 'shop_id'=>$this->shop_id, 'status'=>1], 'product_id,product_number,price');
                 if (!empty($goods_list)) {
                     foreach ($goods_list as $k => $v) {
                         $goods_list[$k]['name'] =  ArrayHelper::getValue($new_list, $v['product_id'].'.name', '');
