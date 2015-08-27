@@ -55,4 +55,43 @@ class ShopProducts extends ShopBase
         //var_dump($list);
         return ['list'=>$list, 'count'=>$count, 'pageCount'=>$pages->pageCount];
     }
+    /**
+     * 根据商品id和商家id 获取这个商品所属活动
+     */
+    public function getActivity($shop_id, $product_id)
+    {
+        $activity = new ShopActivity();
+        //获取正在进行的活动
+        $list = $activity->getCurrentActivity($shop_id);
+
+        foreach ($activity as $k => $v) {
+            $activity_ids[] = $v['id'];
+        }
+
+        $a_model = new ActivityGoods();
+        $activity_products = $a_model->getInfo(['shop_id'=>$shop_id, 'product_id'=>$product_id]);
+        $info = $activity->getInfo(['id'=>$activity_products['activity_id'], 'status'=>1]);
+        $time = date("Y-m-d H:i:s", time());
+        $data = [];
+        if (!empty($info)) {
+            if ($info['start_time'] <= $time && $info['end_time'] > $time) {
+                $data = [
+                    'subtitle'=>$info['subtitle'],
+                    'activity_price'=>$activity_products['price'],
+                    'purchase_num'=>$activity_products['day_confine_num'],
+                ];
+            }
+        }
+        return $data;
+
+
+
+//        if (!empty($activity_products)) {
+//            foreach ($activity_products as $k => $v) {
+//                $product_ids[] = $v['product_id'];
+//            }
+//
+//        }
+        return $activity_products;
+    }
 }

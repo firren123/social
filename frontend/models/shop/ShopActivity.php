@@ -87,6 +87,7 @@ class ShopActivity extends ShopBase
                 foreach ($activity_products as $k => $v) {
                     $activity_products[$k]['name'] = ArrayHelper::getValue($goods, $v['product_id'].'.name');
                     $activity_products[$k]['image'] = $img_path . ArrayHelper::getValue($goods, $v['product_id'].'.image');
+                    $activity_products[$k]['init_num'] = 0;
                 }
             }
 

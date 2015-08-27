@@ -151,6 +151,22 @@ class Base extends ActiveRecord
         return $re !== false;
     }
 
+    /**
+     * 根据字段名称 和条件获取一个字段信息
+     * @param string $field 查询字段
+     * @param array  $map   查询条件
+     * @return string
+     */
+    public function getField($field, $map)
+    {
+        $name = '';
+        if ($map) {
+            $name = $this->find()->select($field)->where($map)->scalar();
+        }
+        return $name;
+
+    }
+
 
 
     /**

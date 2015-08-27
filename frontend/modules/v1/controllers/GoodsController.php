@@ -15,7 +15,10 @@
 namespace frontend\modules\v1\controllers;
 
 
+use frontend\models\i500m\Brand;
+use frontend\models\i500m\Category;
 use frontend\models\i500m\Product;
+use frontend\models\i500m\ProductImage;
 use frontend\models\shop\ActivityGoods;
 use frontend\models\shop\ShopActivity;
 use frontend\models\shop\ShopProducts;
@@ -88,6 +91,7 @@ class GoodsController extends BaseController
                 $data_list['list'][$k]['name'] = ArrayHelper::getValue($goods, $k.'.name', '');
                 $data_list['list'][$k]['image'] = $img_path . ArrayHelper::getValue($goods, $k.'.image', '');
                 $data_list['list'][$k]['purchase_num'] = ArrayHelper::getValue($activity_goods, $k.'.day_confine_num', 0);
+                $data_list['list'][$k]['init_num'] = 0;
 
             }
             //var_dump($data_list);exit();
@@ -108,6 +112,55 @@ class GoodsController extends BaseController
      */
     public function actionDetail()
     {
+        $product_id = RequestHelper::get('id', 0, 'intval');
+        $this->shop_id = RequestHelper::get('shop_id', 0, 'intval');
+        if (empty($product_id)) {
+            $this->returnJsonMsg(101, [], '无效的商品id!');
+        }
+        if (empty($this->shop_id)) {
+            $this->returnJsonMsg(102, [], '无效的商家id!');
+        }
+        $shop_model = new ShopProducts();
+        $goods_info = $shop_model->getInfo(['shop_id'=>$this->shop_id, 'product_id'=>$product_id]);
+        if ($goods_info['status'] != 1) {
+            $this->returnJsonMsg(102, [], '此商品已经下架!');
+        }
+        $model = new Product();
+        $info = $model->getInfo(['id'=>$product_id], 'name,description,status,attr_value');
+        if ($info['status'] != 1) {
+            $this->returnJsonMsg(102, [], '官方下架!');
+        }
+        $cat_model = new Category();
+        //$cat_model->
+        $cat_name = $cat_model->getField('name', ['id'=>$info['cate_first_id']]);
+        $brand_model = new Brand();
+        $brand_name = $brand_model->getField('name', ['id'=>$info['brand_id']]);
+        $p_info = [
+            'name'=>$info['name'],
+            'price'=>$goods_info['price'],
+            'cat_name'=>$cat_name,
+            'brand'=>$brand_name,
+            'activity_id'=>0,
+            'subtitle'=>'',
+            'activity_price'=>0,
+            'purchase_num'=>0,
+            'attribute'=>$info['attr_value'],
+        ];
+        $p_img = new ProductImage();
+        $image_list = $p_img->getList(['product_id'=>$product_id]);
+        $activity = $shop_model->getActivity($this->shop_id, $product_id);
+        if (!empty($activity)) {
+            $p_info['activity_id'] = $activity['activity_id'];
+            $p_info['activity_name'] = $activity['activity_id'];
+            $p_info['subtitle'] = $activity['subtitle'];
+            $p_info['activity_price'] = $activity['activity_price'];
+            $p_info['purchase_num'] = $activity['purchase_num'];
+        }
+        $data = [
+            'info'=> $p_info,
+            'photo'=>$image_list,
+        ];
+        $this->returnJsonMsg(200, $data, 'SUCCESS');
 
     }
 
@@ -139,6 +192,7 @@ class GoodsController extends BaseController
                         $goods_list[$k]['name'] =  ArrayHelper::getValue($new_list, $v['product_id'].'.name', '');
                         $goods_list[$k]['image'] = $img_path . ArrayHelper::getValue($new_list, $v['product_id'].'.image', '');
                         $goods_list[$k]['purchase_num'] = 0;
+                        $goods_list[$k]['init_num'] = 0;
                     }
                 }
             }
@@ -166,6 +220,10 @@ class GoodsController extends BaseController
        // var_dump($goods);
     }
 
+    /**
+     * Banner图片
+     * @return json
+     */
     public function actionBanner()
     {
         $this->shop_id = RequestHelper::get('shop_id', 0, 'intval');
