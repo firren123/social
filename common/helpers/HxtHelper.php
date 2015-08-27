@@ -61,7 +61,7 @@ class HxtHelper
      *
      * @param array $arr 接口所需参数
      *
-     * @return void
+     * @return array array(code=0/1,data=>array,msg=>xxx)  code 0=失败 1=成功
      */
     public function query($arr)
     {
@@ -73,19 +73,95 @@ class HxtHelper
 
         //$param = array('param1'=>'1', 'param2'=>'2');
         $param = $arr;
+        //echo "<pre>";print_r($param);echo "</pre>";exit;
 
         $result = $client->__soapCall("HXTServiceQuery", array($param));
 
         if (is_soap_fault($result)) {
             $str = "[SOAP Fault],faultcode=" . $result->faultcode . ",faultstring=" . $result->faultstring;
             $this->_zlog($str, 'soap_exception');
+
+            return array('code' => 0, 'data' => array(), 'msg' => 'SOAP Fault');
         } else {
-            var_dump($result);exit;
-            var_dump($result->HXTServiceQueryResult);exit;
-            var_dump($result->HXTServiceQueryResult->any);exit;
+            //var_dump($result);exit;
+            if (!isset($result->HXTServiceQueryResult->any)) {
+                $str = "[SOAP error],no result->HXTServiceQueryResult->any";
+                $this->_zlog($str, 'soap_exception');
+                return array('code' => 0, 'data' => array(), 'msg' => 'SOAP return error');
+            }
+            $xml = $result->HXTServiceQueryResult->any;
+            $arr_data = (array)simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA);
+
+            if (isset($arr_data['PaymentOrderID'])) {
+                unset($arr_data['PaymentOrderID']);
+            }
+            if (isset($arr_data['MCode'])) {
+                unset($arr_data['MCode']);
+            }
+
+            if (isset($arr_data['ResultCode']) && $arr_data['ResultCode'] == '00') {
+                return array('code' => 1, 'data' => $arr_data, 'msg' => '');
+            } else {
+                return array('code' => 0, 'data' => $arr_data, 'msg' => '');
+            }
         }
     }
 
+
+
+    /**
+     * 查询接口
+     *
+     * Author zhengyu@iyangpin.com
+     *
+     * @param array $arr 接口所需参数
+     *
+     * @return array array(code=0/1,data=>array,msg=>xxx)  code 0=失败 1=成功
+     */
+    public function pay($arr)
+    {
+        $client = new \SoapClient($this->service);
+
+        $client->soap_defencoding = 'utf-8';
+        $client->decode_utf8 = false;
+        $client->xml_encoding = 'utf-8';
+
+        //$param = array('param1'=>'1', 'param2'=>'2');
+        $param = $arr;
+        //echo "<pre>";print_r($param);echo "</pre>";exit;
+
+        $result = $client->__soapCall("HXTServicePay", array($param));
+
+        if (is_soap_fault($result)) {
+            $str = "[SOAP Fault],faultcode=" . $result->faultcode . ",faultstring=" . $result->faultstring;
+            $this->_zlog($str, 'soap_exception');
+
+            return array('code' => 0, 'data' => array(), 'msg' => 'SOAP Fault');
+        } else {
+            //var_dump($result);exit;
+            if (!isset($result->HXTServicePayResult->any)) {
+                $str = "[SOAP error],no result->HXTServicePayResult->any";
+                $this->_zlog($str, 'soap_exception');
+                return array('code' => 0, 'data' => array(), 'msg' => 'SOAP return error');
+            }
+            $xml = $result->HXTServicePayResult->any;
+            $arr_data = (array)simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA);
+            //echo "<pre>";print_r($arr_data);echo "</pre>";exit;
+
+            if (isset($arr_data['PaymentOrderID'])) {
+                unset($arr_data['PaymentOrderID']);
+            }
+            if (isset($arr_data['MCode'])) {
+                unset($arr_data['MCode']);
+            }
+
+            if (isset($arr_data['ResultCode']) && $arr_data['ResultCode'] == '00') {
+                return array('code' => 1, 'data' => $arr_data, 'msg' => '');
+            } else {
+                return array('code' => 0, 'data' => $arr_data, 'msg' => '');
+            }
+        }
+    }
 
 
     /**

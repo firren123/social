@@ -55,6 +55,8 @@ class VasController extends Controller
      * 查询接口
      *
      * Author zhengyu@iyangpin.com
+     * echo数组格式 array(code=0/1,data=>array,msg=>xxx)
+     *   code 0=失败 1=成功
      *
      * @return void
      */
@@ -63,23 +65,34 @@ class VasController extends Controller
         $helper_hxt = new HxtHelper();
 
         $arr = array();
-        $arr['TerminalID'] = RequestHelper::post('terminalid', '', '');
-        $arr['KeyID'] = RequestHelper::post('keyid', '', '');
-        $arr['UserID'] = RequestHelper::post('userid', '', '');
-        $arr['Account'] = RequestHelper::post('account', '', '');
-        $arr['EMail'] = RequestHelper::post('email', '', '');
-        $arr['CardNo'] = RequestHelper::post('cardno', '', '');
-        $arr['TotalFee'] = RequestHelper::post('totalfee', '', '');
-        $arr['ShopCode'] = RequestHelper::post('shopcode', '', '');
-        $arr['PaymentInfo'] = RequestHelper::post('paymentinfo', '', '');
-        $arr['IPAddress'] = RequestHelper::post('ipaddress', '', '');
-        $arr['Source'] = RequestHelper::post('source', '', '');
-        $arr['TraceNo'] = RequestHelper::post('traceno', '', '');
+        $arr['TerminalID'] = Yii::$app->params['hxt_TerminalID'];
+        $arr['KeyID'] = Yii::$app->params['hxt_KeyID'];
+        $arr['UserID'] = '';
+        $arr['Account'] = '';
+        $arr['EMail'] = '';
+        $arr['CardNo'] = '';
+        $arr['TotalFee'] = RequestHelper::post('totalfee', '0', 'intval');
+        $arr['ShopCode'] = RequestHelper::post('shopcode', '', 'trim');
+        //ShopCode  3102=抄表电用户信息查询 3202=智能电用户联机信息查询
+        $arr['PaymentInfo'] = RequestHelper::post('paymentinfo', '', 'trim');
+        //PaymentInfo  用户编号
+        $arr['IPAddress'] = RequestHelper::post('ip', '127.0.0.1', 'trim');
+        $arr['Source'] = '';
+        $arr['TraceNo'] = '';
 
         $arr['MCode'] = $this->_createQueryMcode($arr);
 
 
-        $helper_hxt->query($arr);
+        $arr_result = $helper_hxt->query($arr);
+        if (isset($arr_result['PaymentOrderID'])) {
+            unset($arr_result['PaymentOrderID']);
+        }
+        if (isset($arr_result['MCode'])) {
+            unset($arr_result['MCode']);
+        }
+        //print_r($arr_result);
+
+        echo json_encode($arr_result);
         return;
     }
 
@@ -96,12 +109,37 @@ class VasController extends Controller
         $helper_hxt = new HxtHelper();
 
         $arr = array();
+        $arr['TerminalID'] = Yii::$app->params['hxt_TerminalID'];
+        $arr['KeyID'] = Yii::$app->params['hxt_KeyID'];
+        $arr['UserID'] = '';
+        $arr['Account'] = '';
+        $arr['EMail'] = '';
+        $arr['CardNo'] = '';
+        $arr['SettlementDate'] = date("md", time());//银行清算日
+        $arr['HostSerialNo'] = '999999999999';//银行扣费号
+        $arr['TotalFee'] = RequestHelper::post('totalfee', '0', 'intval');
+        $arr['ShopCode'] = RequestHelper::post('shopcode', '', 'trim');
+        //ShopCode  3102=抄表电用户信息查询 3202=智能电用户联机信息查询
+        $arr['PaymentInfo'] = RequestHelper::post('paymentinfo', '', 'trim');
+        //PaymentInfo  用户编号
+        $arr['IPAddress'] = RequestHelper::post('ip', '127.0.0.1', 'trim');
+        $arr['Source'] = '';
+        $arr['TraceNo'] = '';
+        $arr['PromotionCode'] = '';
 
 
-        $arr['MCode'] = $this->_createQueryMcode($arr);
+        $arr['MCode'] = $this->_createPayMcode($arr);
 
+        $arr_result = $helper_hxt->pay($arr);
+        if (isset($arr_result['PaymentOrderID'])) {
+            unset($arr_result['PaymentOrderID']);
+        }
+        if (isset($arr_result['MCode'])) {
+            unset($arr_result['MCode']);
+        }
+        //print_r($arr_result);
 
-        $helper_hxt->query($arr);
+        echo json_encode($arr_result);
         return;
     }
 
@@ -120,7 +158,7 @@ class VasController extends Controller
         $str1 = $arr['TerminalID'] . $arr['KeyID'] . $arr['UserID'] . $arr['Account'] . $arr['EMail']
             . $arr['CardNo'] . $arr['TotalFee'] . $arr['ShopCode'] . $arr['PaymentInfo'] . $arr['IPAddress']
             . $arr['Source'] . $arr['TraceNo'];
-        $mackey = '';
+        $mackey = Yii::$app->params['hxt_MacKey'];
         $mcode = md5($str1 . md5($mackey));
         return $mcode;
     }
@@ -140,7 +178,7 @@ class VasController extends Controller
             . $arr['EMail'] . $arr['CardNo'] . $arr['SettlementDate'] . $arr['HostSerialNo']
             . $arr['TotalFee'] . $arr['ShopCode'] . $arr['PaymentInfo'] . $arr['IPAddress']
             . $arr['Source'] . $arr['TraceNo']. $arr['PromotionCode'];
-        $mackey = '';
+        $mackey = Yii::$app->params['hxt_MacKey'];
         $mcode = md5($str1 . md5($mackey));
         return $mcode;
     }
