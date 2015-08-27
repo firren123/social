@@ -138,6 +138,7 @@ class GoodsController extends BaseController
                     foreach ($goods_list as $k => $v) {
                         $goods_list[$k]['name'] =  ArrayHelper::getValue($new_list, $v['product_id'].'.name', '');
                         $goods_list[$k]['image'] = $img_path . ArrayHelper::getValue($new_list, $v['product_id'].'.image', '');
+                        $goods_list[$k]['purchase_num'] = 0;
                     }
                 }
             }
