@@ -92,7 +92,7 @@ class GoodsController extends BaseController
                 $data_list['list'][$k]['attr_value'] = ArrayHelper::getValue($goods, $k.'.attr_value', '');
                 $data_list['list'][$k]['image'] = $img_path . ArrayHelper::getValue($goods, $k.'.image', '');
                 $data_list['list'][$k]['purchase_num'] = ArrayHelper::getValue($activity_goods, $k.'.day_confine_num', 0);
-                $data_list['list'][$k]['init_num'] = 0;
+                $data_list['list'][$k]['origin_num'] = 0;
 
             }
             //var_dump($data_list);exit();
@@ -206,7 +206,7 @@ class GoodsController extends BaseController
                         $goods_list[$k]['attr_value'] = ArrayHelper::getValue($new_list, $v['product_id'].'.attr_value', '');
                         $goods_list[$k]['image'] = $img_path . ArrayHelper::getValue($new_list, $v['product_id'].'.image', '');
                         $goods_list[$k]['purchase_num'] = 0;
-                        $goods_list[$k]['init_num'] = 0;
+                        $goods_list[$k]['origin_num'] = 0;
                     }
                 }
             }

@@ -38,7 +38,7 @@ class ShopActivity extends ShopBase
         $map['shop_id'] = $shop_id;
         $map['status'] = 1;
         $time = date("Y-m-d H:i:s", time());
-        $activity = $this->find()->select('id,name,shop_id,images')
+        $activity = $this->find()->select('id,name,shop_id,images,type')
             ->where($map)
             ->andWhere(['<', 'start_time', $time])
             ->andWhere(['>', 'end_time', $time])
@@ -74,9 +74,9 @@ class ShopActivity extends ShopBase
                 $activity_ids[] = $v['id'];
             }
             $a_model = new ActivityGoods();
-            $activity_products = $a_model->getList(['activity_id'=>$activity_ids, 'shop_id'=>$shop_id]);
-            if (!empty($activity_products)) {
-                foreach ($activity_products as $k => $v) {
+            $data_arr = $a_model->getList(['activity_id'=>$activity_ids, 'shop_id'=>$shop_id]);
+            if (!empty($data_arr)) {
+                foreach ($data_arr as $k => $v) {
                     $product_ids[] = $v['product_id'];
                 }
                 $g_model = new Product();
@@ -84,11 +84,15 @@ class ShopActivity extends ShopBase
                 $goods = $g_model->getList(['id'=>$product_ids], 'id, name, image,attr_value');
                 //var_dump($goods);
                 $goods = ArrayHelper::index($goods, 'id');
-                foreach ($activity_products as $k => $v) {
+                foreach ($data_arr as $k => $v) {
+                    $activity_products[$k]['activity_id'] = $v['activity_id'];
+                    $activity_products[$k]['product_id'] = $v['product_id'];
+                    $activity_products[$k]['price'] = $v['price'];
+                    $activity_products[$k]['purchase_num'] = $v['day_confine_num'];
                     $activity_products[$k]['name'] = ArrayHelper::getValue($goods, $v['product_id'].'.name');
                     $activity_products[$k]['attr_value'] = ArrayHelper::getValue($goods, $v['product_id'].'.attr_value', '');
                     $activity_products[$k]['image'] = $img_path . ArrayHelper::getValue($goods, $v['product_id'].'.image');
-                    $activity_products[$k]['init_num'] = 0;
+                    $activity_products[$k]['origin_num'] = 0;
                 }
             }
 
