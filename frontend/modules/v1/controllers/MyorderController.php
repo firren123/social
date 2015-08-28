@@ -349,14 +349,14 @@ class MyorderController extends BaseController
         $data['apply_time']  = date('Y-m-d H:i:s', time());
         $model = new Exchange();
         $rs = $model->insertInfo($data);
-        //更新订单表当前商品的退货数量
-        $order_model = new Order();
-        $order_where['order_sn']   = $data['order_sn'];
-        $order_where['mobile']     = $data['mobile'];
-        $order_where['product_id'] = $data['product_id'];
-        $order_update['is_exchange'] = '1';
-        $order_update['retread_num'] = $data['number'];
-        $order_model->updateInfo($order_update, $order_where);
+        //更新订单详情表当前商品的退货数量
+        $order_detail_model = new OrderDetail();
+        $order_detail_where['order_sn']   = $data['order_sn'];
+        $order_detail_where['mobile']     = $data['mobile'];
+        $order_detail_where['product_id'] = $data['product_id'];
+        $order_detail_update['is_exchange'] = '1';
+        $order_detail_update['retread_num'] = $data['number'];
+        $order_detail_model->updateInfo($order_detail_update, $order_detail_where);
         if (!$rs) {
             $this->returnJsonMsg('400', [], Common::C('code', '400'));
         }
