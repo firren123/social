@@ -80,7 +80,7 @@ class BaseController extends Controller
             if (!isset($this->params['dev'])) {
                 $this->returnJsonMsg('509', [], Common::C('code', '509'));
             }
-            if (!in_array($this->params['dev'], array('1', '2', '3'))) {
+            if (!in_array($this->params['dev'], array('1', '2', '3', '4'))) {
                 $this->returnJsonMsg('510', [], Common::C('code', '510'));
             }
             $dev = $this->params['dev'];
