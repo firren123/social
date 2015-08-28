@@ -89,6 +89,7 @@ class ShopActivity extends ShopBase
                     $activity_products[$k]['product_id'] = $v['product_id'];
                     $activity_products[$k]['price'] = $v['price'];
                     $activity_products[$k]['purchase_num'] = $v['day_confine_num'];
+                    $activity_products[$k]['product_number'] = $v['day_confine_num'];
                     $activity_products[$k]['name'] = ArrayHelper::getValue($goods, $v['product_id'].'.name');
                     $activity_products[$k]['attr_value'] = ArrayHelper::getValue($goods, $v['product_id'].'.attr_value', '');
                     $activity_products[$k]['image'] = $img_path . ArrayHelper::getValue($goods, $v['product_id'].'.image');
