@@ -147,6 +147,8 @@ class PostController extends BaseController
                 $list[$k]['user_nickname'] = $user_info['nickname'];
                 $list[$k]['user_avatar'] = $user_info['avatar'];
             }
+            $list[$k]['thumbs'] = Common::formatNumber($v['thumbs']);
+            $list[$k]['views']  = Common::formatNumber($v['views']);
         }
         $this->returnJsonMsg('200', $list, Common::C('code', '200'));
     }
@@ -191,6 +193,8 @@ class PostController extends BaseController
             $rs['user_nickname'] = $user_info['nickname'];
             $rs['user_avatar']   = $user_info['avatar'];
         }
+        $rs['thumbs'] = Common::formatNumber($rs['thumbs']);
+        $rs['views']  = Common::formatNumber($rs['views']);
         $post_info = $this->_getPostContent($post_id);
         $rs['content'] = $post_info['content'];
         $rs_arr['post_info'] = $rs;  //帖子信息
@@ -475,6 +479,7 @@ class PostController extends BaseController
                 $list[$k]['user_nickname'] = $user_info['nickname'];
                 $list[$k]['user_avatar']   = $user_info['avatar'];
             }
+            $list[$k]['thumbs'] = Common::formatNumber($v['thumbs']);
         }
         if ($type == '1') {
             return $list;

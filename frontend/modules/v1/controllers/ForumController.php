@@ -117,6 +117,7 @@ class ForumController extends BaseController
         if (!empty($rs)) {
             foreach ($rs as $k => $v) {
                 $rs[$k]['forum_number'] = $this->_getForumNumber($v['id']);
+                $rs[$k]['forum_number'] = Common::formatNumber($rs[$k]['forum_number']);
                 if (!strstr($v['forum_img'], 'http')) {
                     $rs[$k]['forum_img'] = Common::C('imgHost').$v['forum_img'];
                 }

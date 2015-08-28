@@ -116,6 +116,19 @@ class Common
     }
 
     /**
+     * 格式化数字
+     * @param int $num 数字
+     * @return string
+     */
+    public static function formatNumber($num = 0)
+    {
+        /**当数字超过万的时候进行格式化**/
+        if ($num > 10000) {
+            $num = round(($num/10000), 2).'w';
+        }
+        return $num;
+    }
+    /**
      * 获取6位随机数
      * @return int
      */
