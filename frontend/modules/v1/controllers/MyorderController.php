@@ -85,14 +85,15 @@ class MyorderController extends BaseController
             if ($order_status == '1') {
                 /**待支付**/
                 $order_where['pay_status'] = '0';
+                $order_where['status']     = '0';
             }
             if ($order_status == '2') {
                 /**待收货**/
-                $order_and_where = ['!=', 'ship_status' , '2'];
+                $order_and_where = ['and', ['!=', 'ship_status', '2'], ['=', 'status', '1']];
             }
             if ($order_status == '3') {
                 /**已完成**/
-                $order_where['ship_status'] = '2';
+                $order_and_where = ['or', ['=', 'ship_status', '2'], ['=', 'status', '2']];
             }
             $info = $order_model->getPageList($order_where, $order_fields, 'id desc', $page, $page_size, $order_and_where);
             if (!empty($info)) {
