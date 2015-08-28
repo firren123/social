@@ -142,10 +142,12 @@ class GoodsController extends BaseController
             'cat_name'=>$cat_name,
             'brand'=>$brand_name,
             'activity_id'=>0,
+            'activity_name'=>'',
             'subtitle'=>'',
             'activity_price'=>0,
             'purchase_num'=>0,
             'attribute'=>$info['attr_value'],
+            'description'=>$info['description'],
         ];
         $p_img = new ProductImage();
         $image_data = [];
@@ -162,7 +164,7 @@ class GoodsController extends BaseController
         $activity = $shop_model->getActivity($this->shop_id, $product_id);
         if (!empty($activity)) {
             $p_info['activity_id'] = $activity['activity_id'];
-            $p_info['activity_name'] = $activity['activity_id'];
+            $p_info['activity_name'] = $activity['name'];
             $p_info['subtitle'] = $activity['subtitle'];
             $p_info['activity_price'] = $activity['activity_price'];
             $p_info['purchase_num'] = $activity['purchase_num'];
