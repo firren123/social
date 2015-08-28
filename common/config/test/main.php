@@ -2,6 +2,19 @@
 return [
     'vendorPath' => dirname(dirname(__DIR__)) . '/vendor',
     'components' => [
+        //缓存配置 SSDB
+        'cache' => [
+            'class' => 'yii\caching\SsdbCache',
+            'servers' => [
+                [
+                    'host' => '118.186.247.55',
+                    'port' => 8888,
+                    'auth' => 'kakvi6Zfjsqvddwourzr0wfZjeckqtxj',
+                    'timeout' => 2000,
+                    'keyPrefix' => 'SOCIAL_API_'
+                ]
+            ],
+        ],
         //数据库配置
         'db_social'=> [
             'class'=>'yii\db\Connection',
@@ -10,8 +23,19 @@ return [
             'password'=>'500m',
             'charset'=>'utf8',
         ],
-        'cache' => [
-            'class' => 'yii\caching\FileCache',
+        'db_shop'  => [
+            'class'=>'yii\db\Connection',
+            'dsn'=>'mysql:host=118.186.247.55;dbname=shop',
+            'username'=>'shop',
+            'password'=>'shop',
+            'charset'=>'utf8',
+        ],
+        'db_500m'  => [
+            'class'=>'yii\db\Connection',
+            'dsn'=>'mysql:host=118.186.247.55;dbname=500m_new',
+            'username'=>'500m',
+            'password'=>'500m',
+            'charset'=>'utf8',
         ],
         'user' => [
             'identityClass' => 'common\models\User',
