@@ -67,7 +67,7 @@ class ShopController extends BaseController
         }
         $dis = Common::C('shopScope');
         $url = Common::C('channelHost').'lbs/near-shop?lng='.$lng.'&lat='.$lat.'&dis='.$dis;
-        $rs = CurlHelper::get($url);
+        $rs = CurlHelper::get($url, true);
         if ($rs['code'] == '404' || empty($rs['data'])) {
             $this->returnJsonMsg('200', [], Common::C('code', '200'));
         }

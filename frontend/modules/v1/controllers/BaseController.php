@@ -205,7 +205,7 @@ class BaseController extends Controller
             $url = Common::C('channelHost').'sms/get-add';
             $arr['mobile']  = $mobile;
             $arr['content'] = $content;
-            $rs = CurlHelper::post($url, $arr);
+            $rs = CurlHelper::post($url, $arr, true);
             if ($rs['code']=='200') {
                 return true;
             }

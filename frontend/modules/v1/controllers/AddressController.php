@@ -317,7 +317,7 @@ class AddressController extends BaseController
             $this->returnJsonMsg('640', [], Common::C('code', '640'));
         }
         $url = Common::C('channelHost').'lbs/get-suggest?keywords='.$keywords.'&province='.$province_name;
-        $res = CurlHelper::get($url);
+        $res = CurlHelper::get($url, true);
         if ($res['code'] != '200' || empty($res['data'])) {
             $this->returnJsonMsg('200', [], Common::C('code', '200'));
         }
