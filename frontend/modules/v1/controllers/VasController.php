@@ -16,7 +16,6 @@
 namespace frontend\modules\v1\controllers;
 
 use Yii;
-use yii\web\Controller;
 use common\helpers\HxtHelper;
 use common\helpers\RequestHelper;
 
@@ -30,7 +29,7 @@ use common\helpers\RequestHelper;
  * @license  http://www.i500m.com/ license
  * @link     zhengyu@iyangpin.com
  */
-class VasController extends Controller
+class VasController extends BaseController
 {
 
     /**
