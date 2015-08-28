@@ -228,6 +228,192 @@ class VasController extends BaseController
     }
 
 
+
+
+    /**
+     * 接口-查询抄表信息
+     *
+     * Author zhengyu@iyangpin.com
+     * post
+     *   userid 用户在本网站的id
+     *   yhbh   用户编号
+     *   ip     可选参数
+     *
+     * @return void
+     */
+    public function actionQuerycb()
+    {
+        $helper_hxt = new HxtHelper();
+
+        $userid = RequestHelper::post('userid', 0, 'int');
+        if ($userid == 0) {
+            echo json_encode(array('code' => 0, 'data' => array(), 'msg' => '缺少参数:userid'));
+            return;
+        }
+        $yhbh = RequestHelper::post('yhbh', '', 'trim');
+        if ($yhbh == '') {
+            echo json_encode(array('code' => 0, 'data' => array(), 'msg' => '缺少参数:用户编号'));
+            return;
+        }
+
+        $arr = array();
+        $arr['TerminalID'] = Yii::$app->params['hxt_TerminalID'];
+        $arr['KeyID'] = Yii::$app->params['hxt_KeyID'];
+        $arr['UserID'] = '';
+        $arr['Account'] = '';
+        $arr['EMail'] = '';
+        $arr['CardNo'] = '';
+        $arr['TotalFee'] = 0;
+        $arr['ShopCode'] = '3102';
+        $arr['PaymentInfo'] = $yhbh;
+        $arr['IPAddress'] = RequestHelper::post('ip', '127.0.0.1', 'trim');
+        $arr['Source'] = '';
+        $arr['TraceNo'] = '';
+
+        $arr['MCode'] = $this->_createQueryMcode($arr);
+
+        $arr_result = $helper_hxt->query($arr);
+        if (isset($arr_result['PaymentOrderID'])) {
+            unset($arr_result['PaymentOrderID']);
+        }
+        if (isset($arr_result['MCode'])) {
+            unset($arr_result['MCode']);
+        }
+        //print_r($arr_result);
+
+        echo json_encode($arr_result);
+        return;
+    }
+
+    /**
+     * 接口-抄表缴费
+     *
+     * Author zhengyu@iyangpin.com
+     * post
+     *   userid 用户在本网站的id
+     *   yhbh   用户编号
+     *   money  缴费金额,单位：分
+     *   ip     可选参数
+     *
+     * @return void
+     */
+    public function actionPaycb()
+    {
+        $helper_hxt = new HxtHelper();
+
+        $userid = RequestHelper::post('userid', 0, 'int');
+        if ($userid == 0) {
+            echo json_encode(array('code' => 0, 'data' => array(), 'msg' => '缺少参数:userid'));
+            return;
+        }
+        $yhbh = RequestHelper::post('yhbh', '', 'trim');
+        if ($yhbh == '') {
+            echo json_encode(array('code' => 0, 'data' => array(), 'msg' => '缺少参数:用户编号'));
+            return;
+        }
+        $money = RequestHelper::post('money', 0, 'int');
+        if ($yhbh == 0) {
+            echo json_encode(array('code' => 0, 'data' => array(), 'msg' => '缺少参数:缴费金额'));
+            return;
+        }
+        $ip = RequestHelper::post('ip', '127.0.0.1', 'trim');
+
+        //4100 查询交易
+        $arr = array();
+        $arr['TerminalID'] = Yii::$app->params['hxt_TerminalID'];
+        $arr['KeyID'] = Yii::$app->params['hxt_KeyID'];
+        $arr['UserID'] = '';
+        $arr['Account'] = '';
+        $arr['EMail'] = '';
+        $arr['CardNo'] = '';
+        $arr['TotalFee'] = $money;
+        $arr['ShopCode'] = '4100';
+        $arr['PaymentInfo'] = $yhbh;
+        $arr['IPAddress'] = $ip;
+        $arr['Source'] = '';
+        $arr['TraceNo'] = '';
+
+        $arr['MCode'] = $this->_createQueryMcode($arr);
+
+        $arr_result = $helper_hxt->query($arr);
+        if (isset($arr_result['code']) && $arr_result['code'] == 0) {
+            echo json_encode(array('code' => 0, 'data' => array(), 'msg' => '错误代码:11'));
+            return;
+        }
+        if (isset($arr_result['data']) && isset($arr_result['data']['PaymentInfo'])) {
+            $arr_tmp = explode('$', $arr_result['data']['PaymentInfo']);
+            $order_id = $arr_tmp[0];//中心流水号
+        } else {
+            echo json_encode(array('code' => 0, 'data' => array(), 'msg' => '错误代码:12'));
+            return;
+        }
+
+
+        $arr_data = array(
+            'userid' => $userid,
+            'yhbh' => $yhbh,
+            'money' => $money,
+            'orderid' => $order_id,
+        );
+
+
+        //4100 缴费
+        $arr = array();
+        $arr['TerminalID'] = Yii::$app->params['hxt_TerminalID'];
+        $arr['KeyID'] = Yii::$app->params['hxt_KeyID'];
+        $arr['UserID'] = '';
+        $arr['Account'] = '';
+        $arr['EMail'] = '';
+        $arr['CardNo'] = '';
+        $arr['SettlementDate'] = date("md", time());//银行清算日
+        $arr['HostSerialNo'] = '999999999999';//银行扣费号
+        $arr['TotalFee'] = $money;
+        $arr['ShopCode'] = '4100';
+        $arr['PaymentInfo'] = $yhbh . '$' . $order_id;
+        $arr['IPAddress'] = $ip;
+        $arr['Source'] = '';
+        $arr['TraceNo'] = '';
+        $arr['PromotionCode'] = '';
+
+        $arr['MCode'] = $this->_createPayMcode($arr);
+
+        $arr_result = $helper_hxt->pay($arr);
+        if (isset($arr_result['PaymentOrderID'])) {
+            unset($arr_result['PaymentOrderID']);
+        }
+        if (isset($arr_result['MCode'])) {
+            unset($arr_result['MCode']);
+        }
+
+        if (isset($arr_result['code']) && $arr_result['code'] == 0) {
+            echo json_encode(array('code' => 0, 'data' => $arr_data, 'msg' => '错误代码:21'));
+            return;
+        }
+        if (isset($arr_result['data']) && isset($arr_result['data']['ResultCode'])) {
+            $str_code = $arr_result['data']['ResultCode'];
+            if ($str_code === '00') {
+                echo json_encode(array('code' => 1, 'data' => $arr_data, 'msg' => ''));
+                return;
+            } elseif ($str_code === 'G0' || $str_code === '30') {
+                echo json_encode(array('code' => 0, 'data' => $arr_data, 'msg' => '错误代码:23'));
+                return;
+            } else {
+                echo json_encode(array('code' => 0, 'data' => $arr_data, 'msg' => '错误代码:24'));
+                return;
+            }
+        } else {
+            echo json_encode(array('code' => 0, 'data' => $arr_data, 'msg' => '错误代码:22'));
+            return;
+        }
+    }
+
+
+
+
+
+
+
+
     /**
      * 查询接口
      *
