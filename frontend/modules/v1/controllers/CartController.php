@@ -120,6 +120,7 @@ class CartController extends BaseController
 
     /**
      * 判断购物车合法性
+     * @return json
      */
     public function actionAddCartCheck()
     {
