@@ -169,11 +169,12 @@ class GoodsController extends BaseController
             $p_info['activity_price'] = $activity['activity_price'];
             $p_info['purchase_num'] = $activity['purchase_num'];
         }
-        $data = [
-            'info'=> $p_info,
-            'photo'=>$image_data,
-        ];
-        $this->returnJsonMsg(200, $data, 'SUCCESS');
+        $p_info['photo'] = $image_data;
+//        $data = [
+//            'info'=> $p_info,
+//            'photo'=>$image_data,
+//        ];
+        $this->returnJsonMsg(200, $p_info, 'SUCCESS');
 
     }
 
