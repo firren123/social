@@ -438,6 +438,9 @@ class OrderController extends BaseController
                             $m_detail = new OrderDetail();
                             $res = $m_detail->insertDetail($order_detail);
                             if ($res) {
+                                //修改默认收货地址
+                                $address_model->updateInfo(['is_default'=>0], ['mobile'=>$mobile]);
+                                $address_model->updateInfo(['is_default'=>1], ['id'=>$address_id, 'mobile'=>$mobile]);
                                 $this->returnJsonMsg(200, [], 'SUCCESS');
                             } else {
                                 $this->returnJsonMsg(108, [], '订单详情数据插入失败');
