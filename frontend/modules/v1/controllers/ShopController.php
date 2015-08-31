@@ -110,4 +110,24 @@ class ShopController extends BaseController
         }
         return $info;
     }
+
+    /**
+     * 初始化商家信息
+     * @return json
+     */
+    public function actionIndex()
+    {
+        $this->shop_id = RequestHelper::get('shop_id', 0, 'intval');
+        if (empty($this->shop_id)) {
+            $this->returnJsonMsg('803', [], Common::C('code', '803'));
+        }
+        $shop_model  = new Shop();
+        $shop_fields = 'sent_fee,free_money,freight,address';
+        $info = $shop_model->getInfo(['id'=>$this->shop_id], true, $shop_fields);
+        if (!empty($info)) {
+            $this->returnJsonMsg('200', $info, Common::C('code', '200'));
+        } else {
+            $this->returnJsonMsg('101', [], '此商家不存在');
+        }
+    }
 }

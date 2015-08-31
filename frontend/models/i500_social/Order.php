@@ -14,6 +14,8 @@
  */
 
 namespace frontend\models\i500_social;
+use frontend\models\i500m\Shop;
+use common\helpers\CurlHelper;
 
 /**
  * 订单表
@@ -33,5 +35,32 @@ class Order extends SocialBase
     public static function tableName()
     {
         return '{{%i500_order}}';
+    }
+
+    /**
+     * 根据商家id，和商品金额 获取运费
+     * @param int   $shop_id 商家id
+     * @param float $total   商品金额
+     * @return string
+     */
+    public function checkAddress($mobile, $address_id, $shop_id)
+    {
+        if (!empty($mobile) && !empty($address_id)) {
+            $model = new UserAddress();
+            $address = $model->getInfo(['mobile'=>$mobile, 'id'=>$address_id], 'lng,lat');
+            //var_dump($address);
+            if (!empty($address)) {
+                $channelUrl = \Yii::$app->params['channelHost'];
+                $url = $channelUrl.'lbs/check-address?shop_id='.$shop_id.'&lng='.$address['lng'].'&lat='.$address['lat'];
+                $re = CurlHelper::get($url, true);
+                if ($re['code'] == 200) {
+                    return true;
+                }
+                return false;
+            }
+        }
+        return false;
+
+
     }
 }

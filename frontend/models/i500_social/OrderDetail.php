@@ -34,4 +34,34 @@ class OrderDetail extends SocialBase
     {
         return '{{%i500_order_detail}}';
     }
+
+    /**
+     * 插入订单详情数据
+     * @param array $order_detail 商品输数据
+     * @return int
+     */
+    public function insertDetail($order_detail)
+    {
+        if (!empty($order_detail)) {
+            $fields = [
+                'order_sn',
+                'mobile','shop_id',
+                'product_id',
+                'product_name',
+                'product_img',
+                'num',
+                'price',
+                'attribute_str',
+                'total',
+                'remark',
+                'retread_num',
+                'goods_type',
+                'activity_id',
+                'is_gift'
+            ];
+
+            $re = self::getDB()->createCommand()->batchInsert('order_detail', $fields, $order_detail)->execute();
+            return $re;
+        }
+    }
 }

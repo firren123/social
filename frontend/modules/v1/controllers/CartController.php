@@ -16,6 +16,8 @@ namespace frontend\modules\v1\controllers;
 
 use frontend\models\i500_social\Cart;
 use frontend\models\i500m\Product;
+use frontend\models\shop\ActivityGoods;
+use frontend\models\shop\ShopActivity;
 use frontend\models\shop\ShopProducts;
 use Yii;
 use common\helpers\Common;
@@ -114,5 +116,47 @@ class CartController extends BaseController
             $this->returnJsonMsg(101, [], '购物车数据为空');
         }
 
+    }
+
+    /**
+     * 判断购物车合法性
+     */
+    public function actionAddCartCheck()
+    {
+        $product_id = RequestHelper::get('product_id', 0, 'intval');
+        $shop_id = RequestHelper::get('shop_id', 0, 'intval');
+        $num = RequestHelper::get('num', 0, 'intval');
+        if (empty($product_id)) {
+            $this->returnJsonMsg(101, [], '无效的商品id');
+        }
+
+        if (empty($shop_id)) {
+            $this->returnJsonMsg(102, [], '无效的商家id');
+        }
+
+        if (empty($num)) {
+            $this->returnJsonMsg(103, [], '购物车数量不合法');
+        }
+        $s_products = new ShopProducts();
+        $info = $s_products->getInfo(['shop_id'=>$shop_id, 'product_id'=>$product_id], 'product_number,status');
+        if (!empty($info)) {
+            if ($info['status'] != 1) {
+                $this->returnJsonMsg(104, [], '此商品已经下架或者删除');
+            }
+            if ($info['product_number'] < $num) {
+                $this->returnJsonMsg(105, [], '库存不足');
+            }
+            //判断是否达到限购数量
+            $shop_model = new ShopProducts();
+            $activity = $shop_model->getActivity($this->shop_id, $product_id);
+            if (!empty($activity)) {
+                if ($activity['purchase_num'] < $num) {
+                    $this->returnJsonMsg(106, [], '已经达到限购数量!');
+                }
+            }
+        } else {
+            $this->returnJsonMsg(107, [], '此商品不存在');
+        }
+        $this->returnJsonMsg(200, [], '购物车合法');
     }
 }
