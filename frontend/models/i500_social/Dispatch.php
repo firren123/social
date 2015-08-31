@@ -55,8 +55,17 @@ class Dispatch extends SocialBase
         if ($end_time <= 21 && $end_time >= 18) {
             $over_time = $end_time;
         }
-        $dispatch_time[] = '10-12';
-        for ($i=15; $i<18; $i++) {
+        $now = time();
+        $hours = date("H", $now);
+        $dispatch_time[] ='立即配送';
+        $start = 15;
+        if ($hours < 9) {
+            $dispatch_time[] = '10-12';
+        }
+        if ($hours >= 15) {
+            $start = $hours + 1;
+        }
+        for ($i=$start; $i<18; $i++) {
             $dispatch_time[] = $i.'-'.($i+1);
         }
         if ($over_time != 18) {
