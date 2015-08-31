@@ -60,7 +60,7 @@ class OrderDetail extends SocialBase
                 'is_gift'
             ];
 
-            $re = self::getDB()->createCommand()->batchInsert('order_detail', $fields, $order_detail)->execute();
+            $re = self::getDB()->createCommand()->batchInsert('i500_order_detail', $fields, $order_detail)->execute();
             return $re;
         }
     }

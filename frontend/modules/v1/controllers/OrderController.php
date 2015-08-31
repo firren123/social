@@ -254,16 +254,15 @@ class OrderController extends BaseController
      */
     public function actionSave()
     {
-        $cart_goods = RequestHelper::get('goods', '');//购物车商品数据
-        $this->shop_id = RequestHelper::get('shop_id', 0, 'intval');
-        $mobile = RequestHelper::get('mobile', '', '');//手机号
+        $cart_goods = RequestHelper::post('goods', '');//购物车商品数据
+        $this->shop_id = RequestHelper::post('shop_id', 0, 'intval');
+        $mobile = RequestHelper::post('mobile', '', '');//手机号
         $send_time = RequestHelper::post('send_time', '');//配送时间
         $address_id = RequestHelper::post('address_id', 0, 'intval');//收货地址id
         $coupon_id = RequestHelper::post('coupon_id', '', 'intval');//优惠劵id
         $pay_method_id = RequestHelper::post('pay_method_id', 0, 'intval');//支付方式id
         $dispatch_id = RequestHelper::post('dispatch_id', 0, 'intval');//配送方式id
         //$mobile = RequestHelper::post('mobile', '', '');
-
         if (empty($this->shop_id)) {
             $this->returnJsonMsg(101, [], '无效的商家id');
         }
@@ -320,6 +319,8 @@ class OrderController extends BaseController
         ];
         $order_detail = '';
         $goods_total = 0;
+        $dis_amount = 0;
+        $coupon_id = 0;
         if (!empty($cart_goods)) {
             $product_ids = $cart_list = $goods_lists = [];
             foreach ($cart_goods as $k=>$v) {
@@ -346,6 +347,7 @@ class OrderController extends BaseController
                     }
                     $goods_arr[$k]['name'] =  ArrayHelper::getValue($p_list, $v['product_id'].'.name', '');
                     $goods_arr[$k]['image'] = ArrayHelper::getValue($p_list, $v['product_id'].'.image', '');
+                    $goods_arr[$k]['attr_value'] = ArrayHelper::getValue($p_list, $v['product_id'].'.attr_value', '');
                     $goods_arr[$k]['activity_id'] = 0;
                     //$cart_list[$v['product_id']]['total'] = $v['total'];
                     $goods_total += ($v['price'] * $buy_num);
@@ -408,8 +410,8 @@ class OrderController extends BaseController
                     $dis_amount = $coupons->checkCoupon($coupon_id, $goods_total);
                     //$dis_amount = $coupons->getField(['mobile'=>$mobile, 'id'=>$coupon_id], 'par_value');
                     if (!empty($dis_amount)) {
-                        $data['coupon_id'] = $coupon_id;
-                        $data['dis_amount'] = $dis_amount;
+                        $order['coupon_id'] = $coupon_id;
+                        $dis_amount = $dis_amount;
                     }
 
                 }
@@ -424,14 +426,14 @@ class OrderController extends BaseController
                     $order['freight'] = $info['freight'];
                 }
                 //商品总价
-                $order['goods_total'] = $goods_total;
+                //$order['goods_total'] = $goods_total;
                 //支付总价
-                $order['total'] = $goods_total + $data['freight'] - $data['dis_amount'];
-
+                $order['total'] = $goods_total + $order['freight'] - $dis_amount;
                 //插入订单表
                 if (!empty($order)) {
                     $m_order = new Order();
                     $re = $m_order->insertInfo($order);
+                    //var_dump($re);exit();
                     if ($re) {
                         //插入订单详情表
                         if (!empty($order_detail)) {
