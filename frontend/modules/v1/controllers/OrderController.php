@@ -445,8 +445,6 @@ class OrderController extends BaseController
                             } else {
                                 $this->returnJsonMsg(108, [], '订单详情数据插入失败');
                             }
-
-
                         } else {
                             $this->returnJsonMsg(107, [], '数据不合法');
                         }
