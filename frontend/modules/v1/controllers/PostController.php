@@ -283,7 +283,8 @@ class PostController extends BaseController
         if (!$rs || !$add_rs) {
             $this->returnJsonMsg('400', [], Common::C('code', '400'));
         }
-        $this->returnJsonMsg('200', [], Common::C('code', '200'));
+        $rs_data['thumbs'] = Common::formatNumber($rs['thumbs']+1);
+        $this->returnJsonMsg('200', $rs_data, Common::C('code', '200'));
     }
 
     /**
@@ -330,7 +331,8 @@ class PostController extends BaseController
         if ($del_rs['result'] != '1' || empty($rs)) {
             $this->returnJsonMsg('400', [], Common::C('code', '400'));
         }
-        $this->returnJsonMsg('200', [], Common::C('code', '200'));
+        $rs_data['thumbs'] = Common::formatNumber($rs['thumbs']-1);
+        $this->returnJsonMsg('200', $rs_data, Common::C('code', '200'));
     }
 
     /**
@@ -377,7 +379,8 @@ class PostController extends BaseController
         if (!$rs || !$add_rs) {
             $this->returnJsonMsg('400', [], Common::C('code', '400'));
         }
-        $this->returnJsonMsg('200', [], Common::C('code', '200'));
+        $rs_data['thumbs'] = Common::formatNumber($post_comments_update['thumbs']);
+        $this->returnJsonMsg('200', $rs_data, Common::C('code', '200'));
     }
 
     /**
@@ -424,7 +427,8 @@ class PostController extends BaseController
         if (empty($rs) || $del_rs['result']!='1') {
             $this->returnJsonMsg('400', [], Common::C('code', '400'));
         }
-        $this->returnJsonMsg('200', [], Common::C('code', '200'));
+        $rs_data['thumbs'] = Common::formatNumber($post_comments_update['thumbs']);
+        $this->returnJsonMsg('200', $rs_data, Common::C('code', '200'));
     }
 
     /**
