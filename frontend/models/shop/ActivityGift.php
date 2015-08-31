@@ -34,4 +34,21 @@ class ActivityGift extends ShopBase
     {
         return '{{%shop_activity_gift}}';
     }
+    /**
+     * 减去库存
+     * @param array  $map  查询条件
+     * @param string $type 减or 加
+     * @return bool
+     */
+    public function editNumber($map, $type = '-')
+    {
+        $model = $this->findOne($map);
+        if ($type == '-') {
+            $model->number = $model->number - 1;
+        } elseif ($type == '+') {
+            $model->number = $model->number + 1;
+        }
+        $re = $model->save();
+        return $re;
+    }
 }

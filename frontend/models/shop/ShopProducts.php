@@ -36,6 +36,7 @@ class ShopProducts extends ShopBase
     {
         return '{{%shop_products}}';
     }
+
     /**
      * 带分页的商品列表
      * @param array  $map      查询条件
@@ -93,5 +94,23 @@ class ShopProducts extends ShopBase
 //
 //        }
         return $activity_products;
+    }
+
+    /**
+     * 减去库存
+     * @param array  $map  查询条件
+     * @param string $type 减or 加
+     * @return bool
+     */
+    public function editNumber($map, $type = '-')
+    {
+        $model = $this->findOne($map);
+        if ($type == '-') {
+            $model->product_number = $model->product_number - 1;
+        } elseif ($type == '+') {
+            $model->product_number = $model->product_number + 1;
+        }
+        $re = $model->save();
+        return $re;
     }
 }

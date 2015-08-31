@@ -364,6 +364,7 @@ class OrderController extends BaseController
                     $gift_goods = $data_activity['gift_list'];
                 }
                 $goods = $data_activity['goods_list'];
+                $activity_products = [];
                 foreach ($goods as $k => $v) {
                     $order_detail[] = [
                         'order_sn'=>$time,
@@ -382,6 +383,11 @@ class OrderController extends BaseController
                         'activity_id'=>$v['activity_id'],
                         'is_gift'=>0,
                     ];
+                    if ($v['activity_id'] != 0) {
+                        $activity_products[] = ['activity_id'=>$v['activity_id'], 'product_id'=>$v['product_id']];
+                    }
+
+
                 }
                 if (!empty($gift_goods)) {
                     foreach ($gift_goods as $k => $v) {
@@ -399,9 +405,10 @@ class OrderController extends BaseController
                             'remark'=>'',
                             'retread_num'=>0,
                             'goods_type'=>$v['type'],
-                            'activity_id'=>0,
+                            'activity_id'=>['activity_id'],
                             'is_gift'=>1,
                         ];
+
                     }
                 }
                 //获取优惠劵
@@ -443,6 +450,21 @@ class OrderController extends BaseController
                                 //修改默认收货地址
                                 $address_model->updateInfo(['is_default'=>0], ['mobile'=>$mobile]);
                                 $address_model->updateInfo(['is_default'=>1], ['id'=>$address_id, 'mobile'=>$mobile]);
+                                //减商品库存
+                                if (!empty($order_detail)) {
+                                    //减库存
+                                    $s_products->editNumber(['shop_id'=>$this->shop_id, 'product_id'=>$v['product_id']]);
+                                }
+                                //减活动库存
+                                if (!empty($activity_products)) {
+
+                                    $s_products->editNumber(['activity_id'=>$v['activity_id'], 'product_id'=>$v['product_id']]);
+                                }
+                                //减赠品库存
+                                if (!empty($gift_goods)) {
+                                    $gift_model = new ActivityGift();
+                                    $gift_model->editNumber(['activity_id'=>$v['activity_id'], 'product_id'=>$v['product_id']]);
+                                }
                                 $this->returnJsonMsg(200, [], 'SUCCESS');
                             } else {
                                 $this->returnJsonMsg(108, [], '订单详情数据插入失败');
