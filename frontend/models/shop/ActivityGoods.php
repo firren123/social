@@ -51,4 +51,27 @@ class ActivityGoods extends ShopBase
         $re = $model->save();
         return $re;
     }
+
+    /**
+     * 根据商品id
+     * @param $shop_id
+     * @param $product_id
+     * @return array
+     */
+    public function getActivitygoods($shop_id, $product_id)
+    {
+        $info = $this->getInfo(['shop_id'=>$shop_id, 'product_id'=>$product_id]);
+        $data = [];
+        if (!empty($info)) {
+            $activity = new ShopActivity();
+            $act_info = $activity->getInfo(['id'=>$info['activity_id'], 'shop_id'=>$shop_id]);
+            $time = date("Y-m-d H:i:s");
+            if (!empty($act_info)) {
+                if ($act_info['status'] == 1 && $act_info['start_time'] <= $time && $act_info['end_time'] >= $time) {
+                    $data = ['price'=>$info['price'], 'num'=>$info['day_confine_num']];
+                }
+            }
+        }
+        return $data;
+    }
 }

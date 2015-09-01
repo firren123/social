@@ -140,19 +140,28 @@ class CartController extends BaseController
         }
         $s_products = new ShopProducts();
         $info = $s_products->getInfo(['shop_id'=>$shop_id, 'product_id'=>$product_id], 'product_number,status');
+        //判断这个商品是否属于活动
+        $activity_model = new ActivityGoods();
+        $re = $activity_model->getActivitygoods($shop_id, $product_id);
+        $data['num'] = $info['product_number'];
+        $data['status'] = $info['status'];
+        if (!empty($re)) {
+            $data['num'] = $re['num'];
+        }
+
         if (!empty($info)) {
             if ($info['status'] != 1) {
-                $this->returnJsonMsg(104, [], '此商品已经下架或者删除');
+                $this->returnJsonMsg(104, $data, '此商品已经下架或者删除');
             }
             if ($info['product_number'] < $num) {
-                $this->returnJsonMsg(105, [], '库存不足');
+                $this->returnJsonMsg(105, $data, '库存不足');
             }
             //判断是否达到限购数量
             $shop_model = new ShopProducts();
             $activity = $shop_model->getActivity($this->shop_id, $product_id);
             if (!empty($activity)) {
                 if ($activity['purchase_num'] < $num) {
-                    $this->returnJsonMsg(106, [], '已经达到限购数量!');
+                    $this->returnJsonMsg(106, $data, '已经达到限购数量!');
                 }
             }
         } else {
