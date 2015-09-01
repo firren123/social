@@ -198,6 +198,7 @@ class VasController extends BaseController
         $arr['MCode'] = $this->_createPayMcode($arr);
 
         $arr_result = $helper_hxt->pay($arr);
+        //echo "<pre>";print_r($arr_result);echo "</pre>";exit;
         if (isset($arr_result['PaymentOrderID'])) {
             unset($arr_result['PaymentOrderID']);
         }
@@ -206,23 +207,37 @@ class VasController extends BaseController
         }
 
         if (isset($arr_result['code']) && $arr_result['code'] == 0) {
-            echo json_encode(array('code' => 0, 'data' => $arr_data, 'msg' => '错误代码:21'));
-            return;
-        }
-        if (isset($arr_result['data']) && isset($arr_result['data']['ResultCode'])) {
-            $str_code = $arr_result['data']['ResultCode'];
-            if ($str_code === '00') {
-                echo json_encode(array('code' => 1, 'data' => $arr_data, 'msg' => ''));
-                return;
-            } elseif ($str_code === 'G0' || $str_code === '30') {
-                echo json_encode(array('code' => 0, 'data' => $arr_data, 'msg' => '错误代码:23'));
-                return;
+            if (isset($arr_result['data']) && isset($arr_result['data']['ResultCode'])) {
+                $arr_data = $arr_result['data'];
+                $str_code = $arr_result['data']['ResultCode'];
+                if ($str_code === 'G0' || $str_code === '30') {
+                    echo json_encode(array('code' => 0, 'data' => $arr_data, 'msg' => '错误代码:202'));
+                    return;
+                } else {
+                    echo json_encode(array('code' => 0, 'data' => $arr_data, 'msg' => '错误代码:203'));
+                    return;
+                }
             } else {
-                echo json_encode(array('code' => 0, 'data' => $arr_data, 'msg' => '错误代码:24'));
+                echo json_encode(array('code' => 0, 'data' => $arr_data, 'msg' => '错误代码:201'));
+                return;
+            }
+        } elseif (isset($arr_result['code']) && $arr_result['code'] == 1) {
+            if (isset($arr_result['data']) && isset($arr_result['data']['ResultCode'])) {
+                $arr_data = $arr_result['data'];
+                $str_code = $arr_result['data']['ResultCode'];
+                if ($str_code === '00') {
+                    echo json_encode(array('code' => 1, 'data' => $arr_data, 'msg' => ''));
+                    return;
+                } else {
+                    echo json_encode(array('code' => 0, 'data' => $arr_data, 'msg' => '错误代码:212'));
+                    return;
+                }
+            } else {
+                echo json_encode(array('code' => 0, 'data' => $arr_data, 'msg' => '错误代码:211'));
                 return;
             }
         } else {
-            echo json_encode(array('code' => 0, 'data' => $arr_data, 'msg' => '错误代码:22'));
+            echo json_encode(array('code' => 0, 'data' => $arr_data, 'msg' => '错误代码:231'));
             return;
         }
     }

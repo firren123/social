@@ -38,7 +38,6 @@ class HxtHelper
     //private $_default_int_limit = -1;
 
     private $_switch_log = 1;//1=开启 0=关闭
-    private $_service = '';
 
     /**
      * 构造函数
