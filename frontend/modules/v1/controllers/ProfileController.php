@@ -232,7 +232,7 @@ class ProfileController extends BaseController
         $info = $user_coupons_model->getList($user_coupons_where, $user_coupons_fields, 'id desc');
         foreach ($info as $k => $v) {
             if (strtotime($v['end_time']) < time()) {
-                $info['status'] = '3';
+                $info[$k]['status'] = '3';
             }
         }
         //set 缓存
