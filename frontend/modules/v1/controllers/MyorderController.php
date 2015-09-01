@@ -412,8 +412,8 @@ class MyorderController extends BaseController
         $coupons_type_model = new CouponsType();
         $coupons_type_where['type_name'] = $type_name;
         $coupons_type_fields = 'type_id';
-        $rs = $coupons_type_model->getInfo($coupons_type_where, true, $coupons_type_fields);
-        if (!empty($rs)) {
+        $coupons_type_rs = $coupons_type_model->getInfo($coupons_type_where, true, $coupons_type_fields);
+        if (!empty($coupons_type_rs)) {
             $this->returnJsonMsg('815', [], Common::C('code', '815'));
         }
         $data['type_name']  = $type_name;
