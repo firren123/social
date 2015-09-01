@@ -189,8 +189,9 @@ class MyorderController extends BaseController
         $order_model = new Order();
         $order_where['mobile']   = $mobile;
         $order_where['order_sn'] = $order_sn;
-        $order_fields = 'order_sn,status,pay_status,total,dis_amount';
+        $order_fields = 'order_sn,status,pay_status,total,dis_amount,unionpay_tn';
         $rs = $order_model->getInfo($order_where, true, $order_fields);
+        //@todo 库存操作
         if ($rs['pay_status'] == '0') {
             /**未支付**/
             $order_update_data['status'] = '2';
@@ -206,7 +207,7 @@ class MyorderController extends BaseController
                 $refund_order_add_data['add_time']    = date('Y-m-d H:i:s', time());
                 $refund_order_add_data['money']       = $rs['total'];
                 $refund_order_add_data['code_money']  = $rs['dis_amount'];
-                $refund_order_add_data['unionpay_tn'] = ''; //@todo 未做完
+                $refund_order_add_data['unionpay_tn'] = $rs['unionpay_tn'];
                 $refund_order_add_data['from_data']   = '1';
                 $rs = $refund_order_model->insertInfo($refund_order_add_data);
                 $order_update_data['status'] = '2';
