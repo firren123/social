@@ -57,20 +57,26 @@ class Dispatch extends SocialBase
         }
         $now = time();
         $hours = date("H", $now);
-        $dispatch_time[] ='立即配送';
+        $today[] ='立即配送';
         $start = 15;
         if ($hours < 9) {
-            $dispatch_time[] = '10-12';
+            $today[] = '10-12';
         }
         if ($hours >= 15) {
             $start = $hours + 1;
         }
         for ($i=$start; $i<18; $i++) {
-            $dispatch_time[] = $i.'-'.($i+1);
+            $today[] = $i.'-'.($i+1);
         }
         if ($over_time != 18) {
-            $dispatch_time[] = '18-'.$over_time;
+            $today[] = '18-'.$over_time;
         }
+        $tomorry[] = '10-12';
+        for ($i=15; $i<18; $i++) {
+            $tomorry[] = $i.'-'.($i+1);
+        }
+        $tomorry[] = '18-21';
+        $dispatch_time = [$today, $tomorry];
         return $dispatch_time;
     }
 }

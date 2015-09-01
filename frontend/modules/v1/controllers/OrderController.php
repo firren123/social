@@ -260,7 +260,7 @@ class OrderController extends BaseController
         $send_time = RequestHelper::post('send_time', '');//配送时间
         $address_id = RequestHelper::post('address_id', 0, 'intval');//收货地址id
         $coupon_id = RequestHelper::post('coupon_id', '', 'intval');//优惠劵id
-        $pay_method_id = RequestHelper::post('pay_method_id', 0, 'intval');//支付方式id
+        //$pay_method_id = RequestHelper::post('pay_method_id', 0, 'intval');//支付方式id
         $dispatch_id = RequestHelper::post('dispatch_id', 0, 'intval');//配送方式id
         //$mobile = RequestHelper::post('mobile', '', '');
         if (empty($this->shop_id)) {
@@ -300,7 +300,7 @@ class OrderController extends BaseController
             'remark'=>'',
             'status'=>0,
             'pay_status'=>0,
-            'pay_method_id'=>$pay_method_id,
+            'pay_method_id'=>0,
             'ship_status'=>0,
             'create_time'=>date("Y-m-d H:i:s", $time),
             'consignee'=>$address_info['consignee'],
@@ -320,7 +320,7 @@ class OrderController extends BaseController
         $order_detail = '';
         $goods_total = 0;
         $dis_amount = 0;
-        $coupon_id = 0;
+        //$coupon_id = 0;
         if (!empty($cart_goods)) {
             $product_ids = $cart_list = $goods_lists = [];
             foreach ($cart_goods as $k=>$v) {
