@@ -191,11 +191,13 @@ class MyorderController extends BaseController
         $order_where['order_sn'] = $order_sn;
         $order_fields = 'order_sn,status,pay_status,total,dis_amount,unionpay_tn';
         $rs = $order_model->getInfo($order_where, true, $order_fields);
-        //@todo 库存操作
+        $order_detail_model = new OrderDetail();
         if ($rs['pay_status'] == '0') {
             /**未支付**/
             $order_update_data['status'] = '2';
             $rs = $order_model->updateInfo($order_update_data, $order_where);
+            //@todo 更新库存
+            $order_detail_rs = $order_detail_model->cancleOrder($order_sn, $mobile);
         } elseif ($rs['pay_status'] == '1') {
             /**已支付**/
             $connection = \Yii::$app->db_social;
@@ -213,6 +215,8 @@ class MyorderController extends BaseController
                 $order_update_data['status'] = '2';
                 $rs = $order_model->updateInfo($order_update_data, $order_where);
                 $transaction->commit();
+                //@todo 更新库存
+                $order_detail_rs = $order_detail_model->cancleOrder($order_sn, $mobile);
             } catch (\Exception $e) {
                 $transaction->rollBack();
                 throw $e;
