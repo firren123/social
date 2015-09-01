@@ -458,7 +458,7 @@ class OrderController extends BaseController
                                 //减活动库存
                                 if (!empty($activity_products)) {
 
-                                    $s_products->editNumber(['activity_id'=>$v['activity_id'], 'product_id'=>$v['product_id']]);
+                                    $activity_products->editNumber(['activity_id'=>$v['activity_id'], 'product_id'=>$v['product_id']]);
                                 }
                                 //减赠品库存
                                 if (!empty($gift_goods)) {
@@ -488,6 +488,7 @@ class OrderController extends BaseController
 
     /**
      * 检查收货地址是否在商家配送范围之内
+     * @return json
      */
     public function actionCheckAddress()
     {
@@ -502,5 +503,10 @@ class OrderController extends BaseController
             $this->returnJsonMsg(101, [], '收货地址不在商家配送范围之内');
         }
 
+    }
+    public function actionTest()
+    {
+        $model = new OrderDetail();
+        $model->cancleOrder('1441010766', '13617258652');
     }
 }

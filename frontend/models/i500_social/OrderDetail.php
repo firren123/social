@@ -14,6 +14,8 @@
  */
 
 namespace frontend\models\i500_social;
+use frontend\models\shop\ActivityGoods;
+use frontend\models\shop\ShopProducts;
 
 /**
  * 订单详情表
@@ -63,5 +65,40 @@ class OrderDetail extends SocialBase
             $re = self::getDB()->createCommand()->batchInsert('i500_order_detail', $fields, $order_detail)->execute();
             return $re;
         }
+    }
+
+    /**
+     * 根据订单号取消订单
+     * @param string $order_sn 订单号号
+     * @param string $mobile   手机号
+     * @return bool;
+     */
+    public function cancleOrder($order_sn, $mobile)
+    {
+        if (!empty($order_sn) && !empty($mobile)) {
+            $order_detail = $this->getList(['order_sn'=>$order_sn, 'mobile'=>$mobile]);
+            var_dump($order_detail);
+            if (!empty($order_detail)) {
+                $model = new ShopProducts();
+                $activity_model = new ActivityGoods();
+                foreach ($order_detail as $k => $v) {
+
+                    $model->editNumber(['product_id'=>$v['product_id'], 'shop_id'=>$v['shop_id']], '+');
+                    if ($v['activity_id'] != 0) {
+                        //活动的库存增加
+                        $activity_model->editNumber(['product_id'=>$v['product_id'], 'shop_id'=>$v['shop_id']], '+');
+                    }
+                    if ($v['is_gift'] == 1) {
+                        $activity_gift = new ActivityGoods();
+                        $activity_gift->editNumber(['product_id'=>$v['product_id'], 'shop_id'=>$v['shop_id']], '+');
+                    }
+
+                }
+            }
+            return true;
+        } else {
+            return false;
+        }
+
     }
 }
