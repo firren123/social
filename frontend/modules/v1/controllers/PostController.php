@@ -265,8 +265,8 @@ class PostController extends BaseController
         $post_where['status']     = '2';
         $post_where['is_deleted'] = '2';
         $post_fields = 'id,thumbs';
-        $rs = $post_model->getInfo($post_where, true, $post_fields);
-        if (empty($rs)) {
+        $post_rs = $post_model->getInfo($post_where, true, $post_fields);
+        if (empty($post_rs)) {
             $this->returnJsonMsg('707', [], Common::C('code', '707'));
         }
         $post_thumbs = new PostThumbs();
@@ -276,14 +276,14 @@ class PostController extends BaseController
         if (!empty($post_thumbs_info)) {
             $this->returnJsonMsg('718', [], Common::C('code', '718'));
         }
-        $rs = $this->_setPostNumber($post_id, $rs['thumbs']+1, '1');
+        $rs = $this->_setPostNumber($post_id, $post_rs['thumbs']+1, '1');
         $post_thumbs_add_data['mobile']  = $mobile;
         $post_thumbs_add_data['post_id'] = $post_id;
         $add_rs = $post_thumbs->insertInfo($post_thumbs_add_data);
         if (!$rs || !$add_rs) {
             $this->returnJsonMsg('400', [], Common::C('code', '400'));
         }
-        $rs_data['thumbs'] = Common::formatNumber($rs['thumbs']+1);
+        $rs_data['thumbs'] = Common::formatNumber($post_rs['thumbs']+1);
         $this->returnJsonMsg('200', $rs_data, Common::C('code', '200'));
     }
 
@@ -313,8 +313,8 @@ class PostController extends BaseController
         $post_where['status']     = '2';
         $post_where['is_deleted'] = '2';
         $post_fields = 'id,thumbs';
-        $rs = $post_model->getInfo($post_where, true, $post_fields);
-        if (empty($rs)) {
+        $post_rs = $post_model->getInfo($post_where, true, $post_fields);
+        if (empty($post_rs)) {
             $this->returnJsonMsg('707', [], Common::C('code', '707'));
         }
         $post_thumbs = new PostThumbs();
@@ -324,14 +324,14 @@ class PostController extends BaseController
         if (empty($post_thumbs_info)) {
             $this->returnJsonMsg('719', [], Common::C('code', '719'));
         }
-        $rs = $this->_setPostNumber($post_id, $rs['thumbs']-1, '1');
+        $rs = $this->_setPostNumber($post_id, $post_rs['thumbs']-1, '1');
         $post_thumbs_where['mobile']  = $mobile;
         $post_thumbs_where['post_id'] = $post_id;
         $del_rs = $post_thumbs->delOneRecord($post_thumbs_where);
         if ($del_rs['result'] != '1' || empty($rs)) {
             $this->returnJsonMsg('400', [], Common::C('code', '400'));
         }
-        $rs_data['thumbs'] = Common::formatNumber($rs['thumbs']-1);
+        $rs_data['thumbs'] = Common::formatNumber($post_rs['thumbs']-1);
         $this->returnJsonMsg('200', $rs_data, Common::C('code', '200'));
     }
 
