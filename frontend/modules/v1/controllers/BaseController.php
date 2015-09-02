@@ -128,9 +128,11 @@ class BaseController extends Controller
             $params = $this->params;
             //ksort($params);
             foreach ($params as $k=>$v) {
-                $v = strtolower($v);
+
                 if ($k == 'goods') {
                     $v = urldecode($v);
+                } else {
+                    $v = strtolower($v);
                 }
                 $val .= $v;
             }
