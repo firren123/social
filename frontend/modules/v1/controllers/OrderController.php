@@ -88,7 +88,7 @@ class OrderController extends BaseController
             }
         }
         $data['default_address'] = $default_address;
-        $cart_goods = urldecode($cart_goods);
+        //$cart_goods = urldecode($cart_goods);
         $cart_goods = htmlspecialchars_decode($cart_goods);
         $cart_goods = json_decode($cart_goods, true);
         $total =  0;
