@@ -127,6 +127,9 @@ class BaseController extends Controller
         if ($this->params) {
             $params = $this->params;
             //ksort($params);
+            if (isset($params['goods'])) {
+                $params['goods'] = $_POST['goods'];
+            }
             foreach ($params as $k=>$v) {
                 $v = strtolower($v);
                 $val .= $v;
