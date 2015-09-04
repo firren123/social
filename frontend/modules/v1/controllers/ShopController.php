@@ -80,6 +80,9 @@ class ShopController extends BaseController
             $info[$k]['star']       = '5';
             $info[$k]['address']    = $shopInfo['address'];
             $info[$k]['distance']   = $v['dis'];
+            $info[$k]['sent_fee']   = $shopInfo['sent_fee'];
+            $info[$k]['free_money'] = $shopInfo['free_money'];
+            $info[$k]['freight']    = $shopInfo['freight'];
         }
         if (empty($info)) {
             //set缓存
@@ -100,7 +103,7 @@ class ShopController extends BaseController
             $this->returnJsonMsg('803', [], Common::C('code', '803'));
         }
         $shop_model  = new Shop();
-        $shop_fields = 'logo,address';
+        $shop_fields = 'logo,address,sent_fee,free_money,freight';
         $shop_where['id'] = $shop_id;
         $info = $shop_model->getInfo($shop_where, true, $shop_fields);
         if (!empty($info)) {
