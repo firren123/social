@@ -239,4 +239,24 @@ class ProfileController extends BaseController
         SsdbHelper::Cache('set', $cache_key, $info, Common::C('SSDBCacheTime'));
         $this->returnJsonMsg('200', $info, Common::C('code', '200'));
     }
+
+    /**
+     * 验证token是否过期
+     * @return array
+     */
+    public function actionCheckToken()
+    {
+        $uid = RequestHelper::post('uid', '', '');
+        if (empty($uid)) {
+            $this->returnJsonMsg('621', [], Common::C('code', '621'));
+        }
+        $mobile = RequestHelper::post('mobile', '', '');
+        if (empty($mobile)) {
+            $this->returnJsonMsg('604', [], Common::C('code', '604'));
+        }
+        if (!Common::validateMobile($mobile)) {
+            $this->returnJsonMsg('605', [], Common::C('code', '605'));
+        }
+        $this->returnJsonMsg('200', [], Common::C('code', '200'));
+    }
 }
