@@ -130,13 +130,15 @@ class OrderController extends BaseController
                     //$cart_list[$v['product_id']]['total'] = $v['total'];
                     $goods_total += ($v['price'] * $buy_num);
                 }
+               // var_dump($goods_arr);
                 //判断活动商品
                 //获取正在进行的活动
                // $re = $this->_checkActivity($cart_list, $this->shop_id);
                 $data_activity = $this->_checkActivity($goods_arr, $this->shop_id);
-                if ($data_activity == 0) {
+                //var_dump($data_activity);
+                if ($data_activity === 0) {
                     $this->returnJsonMsg(107, [], '购物车数据为空');
-                } elseif ($data_activity == 1) {
+                } elseif ($data_activity === 1) {
                     $this->returnJsonMsg(108, [], '库存不足');
                 } else {
                     $gift_goods = $data_activity['gift_list'];
@@ -191,9 +193,11 @@ class OrderController extends BaseController
         }
         $data['goods_list'] = $goods_list;
         $data['gift_list'] = [];
+        //var_dump($goods_list);
         //获取正在进行的活动
         $shop_activity = new ShopActivity();
         $activity_list = $shop_activity->getCurrentActivity($shop_id);
+        //var_dump($activity_list);
         $gift_goods = $activity_ids = []; //购物车中的商品参与的活动id
         if (!empty($activity_list)) {
             $buy_activity_ids = $full_goods = $purchase_goods = [];
@@ -201,19 +205,18 @@ class OrderController extends BaseController
             //判断购物车中是否有正在进行的活动
             $activity_list = ArrayHelper::index($activity_list, 'id');
             $activity_goods = $activity->getList(['shop_id'=>$this->shop_id, 'product_id'=>$product_ids]);
-            $new_goods = ArrayHelper::index($activity_goods, 'product_id');
-            if (!empty($goods_list)) {
+            //var_dump($activity_goods);
+            if (!empty($activity_goods)) {
+                $new_goods = ArrayHelper::index($activity_goods, 'product_id');
                 foreach ($goods_list as $k => $v) {
                     $product_ids[] = $v['product_id'];
                     $purchase_num = ArrayHelper::getValue($new_goods, $v['product_id'].'.day_confine_num', 0);
                     $goods_list[$k]['price'] = ArrayHelper::getValue($new_goods, $v['product_id'].'.price', 0);
                     $goods_list[$k]['activity_id'] = ArrayHelper::getValue($new_goods, $v['product_id'].'.activity_id', 0);
-//                    if ($v['product_number'] > $purchase_num) {
-//                        return 1;//库存超过最大限制
-//                    }
+                    if ($v['buy_num'] > $purchase_num) {
+                        return 1;//库存超过最大限制
+                    }
                 }
-            }
-            if (!empty($activity_goods)) {
                 $gift_model = new ActivityGift();
 
                 foreach ($activity_goods as $k => $v) {
@@ -247,8 +250,9 @@ class OrderController extends BaseController
                 $data['gift_list'] = $gift_goods;
             }
         } else {
-            return $data;
+
         }
+        return $data;
     }
     /**
      * 保存订单 {["product_id":"10","num":10],["product_id":"10","num":10]}
