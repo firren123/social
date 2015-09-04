@@ -208,9 +208,9 @@ class OrderController extends BaseController
                     $purchase_num = ArrayHelper::getValue($new_goods, $v['product_id'].'.day_confine_num', 0);
                     $goods_list[$k]['price'] = ArrayHelper::getValue($new_goods, $v['product_id'].'.price', 0);
                     $goods_list[$k]['activity_id'] = ArrayHelper::getValue($new_goods, $v['product_id'].'.activity_id', 0);
-                    if ($v['num'] > $purchase_num) {
-                        return 1;//库存超过最大限制
-                    }
+//                    if ($v['product_number'] > $purchase_num) {
+//                        return 1;//库存超过最大限制
+//                    }
                 }
             }
             if (!empty($activity_goods)) {
