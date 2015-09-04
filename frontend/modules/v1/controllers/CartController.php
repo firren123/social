@@ -68,7 +68,7 @@ class CartController extends BaseController
      */
     public function actionCheckCart()
     {
-        $cart = RequestHelper::post('cart', '');
+        $cart = RequestHelper::post('json_str', '');
         $shop_id = RequestHelper::post('shop_id', 0, 'intval');
         if (empty($shop_id)) {
             $this->returnJsonMsg(101, [], '无效的商家id');

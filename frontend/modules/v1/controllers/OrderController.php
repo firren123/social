@@ -384,7 +384,7 @@ class OrderController extends BaseController
                     $gift_goods = $data_activity['gift_list'];
                 }
                 $goods = $data_activity['goods_list'];
-                $activity_products = [];
+                $activity_products = $activity_gift = [];
                 foreach ($goods as $k => $v) {
                     $order_detail[] = [
                         'order_sn'=>$time,
@@ -405,6 +405,7 @@ class OrderController extends BaseController
                     ];
                     if ($v['activity_id'] != 0) {
                         $activity_products[] = ['activity_id'=>$v['activity_id'], 'product_id'=>$v['product_id']];
+                        //$activity_products_ids[] = $v['product_id'];
                     }
 
 
@@ -420,17 +421,21 @@ class OrderController extends BaseController
                             'product_img'=>$v['product_img'],
                             'num'=>1,
                             'price'=>0,
-                            'attribute_str'=>$v['attr_value'],
-                            'total'=>$v['price'],
+                            //'attribute_str'=>$v['attr_value'],
+                            'attribute_str'=>'',
+                            'total'=>0,
                             'remark'=>'',
                             'retread_num'=>0,
-                            'goods_type'=>$v['type'],
-                            'activity_id'=>['activity_id'],
+                            'goods_type'=>0,
+                            'activity_id'=>$v['activity_id'],
                             'is_gift'=>1,
                         ];
+                        $activity_gift[] = ['activity_id'=>$v['activity_id'], 'product_id'=>$v['product_id']];
 
                     }
+                   // $order_detail = array_merge($order_detail, $gift_detail);
                 }
+               // var_dump($order_detail);exit();
                 //获取优惠劵
                 if (!empty($coupon_id)) {
                     $coupons = new UserCoupons();
@@ -452,6 +457,7 @@ class OrderController extends BaseController
                 if ($info['free_money'] > $goods_total) {
                     $order['freight'] = $info['freight'];
                 }
+
                 //商品总价
                 //$order['goods_total'] = $goods_total;
                 //支付总价
@@ -464,8 +470,10 @@ class OrderController extends BaseController
                     if ($re) {
                         //插入订单详情表
                         if (!empty($order_detail)) {
+
                             $m_detail = new OrderDetail();
                             $res = $m_detail->insertDetail($order_detail);
+                            //var_dump($res);exit();
                             if ($res) {
                                 //修改默认收货地址
                                 $address_model->updateInfo(['is_default'=>0], ['mobile'=>$mobile]);
@@ -473,17 +481,26 @@ class OrderController extends BaseController
                                 //减商品库存
                                 if (!empty($order_detail)) {
                                     //减库存
-                                    $s_products->editNumber(['shop_id'=>$this->shop_id, 'product_id'=>$v['product_id']]);
+                                    foreach ($order_detail as $v) {
+                                        $s_products->editNumber(['shop_id'=>$this->shop_id, 'product_id'=>$v['product_id']]);
+                                    }
+
                                 }
                                 //减活动库存
                                 if (!empty($activity_products)) {
+                                    $activity_product_model = new ActivityGoods();
+                                    foreach ($activity_products as $v) {
+                                        $activity_product_model->editNumber(['activity_id'=>$v['activity_id'], 'product_id'=>$v['product_id']]);
+                                    }
 
-                                    $activity_products->editNumber(['activity_id'=>$v['activity_id'], 'product_id'=>$v['product_id']]);
                                 }
                                 //减赠品库存
                                 if (!empty($gift_goods)) {
                                     $gift_model = new ActivityGift();
-                                    $gift_model->editNumber(['activity_id'=>$v['activity_id'], 'product_id'=>$v['product_id']]);
+                                    foreach ($activity_gift as $v) {
+                                        $gift_model->editNumber(['activity_id'=>$v['activity_id'], 'product_id'=>$v['product_id']]);
+                                    }
+
                                 }
                                 $this->returnJsonMsg(200, [], 'SUCCESS');
                             } else {
