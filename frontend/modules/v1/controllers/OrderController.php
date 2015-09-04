@@ -53,7 +53,7 @@ class OrderController extends BaseController
     {
         $this->shop_id = RequestHelper::post('shop_id', 0, 'intval');
         $mobile = RequestHelper::post('mobile', '');
-        $cart_goods = RequestHelper::post('goods', '');
+        $cart_goods = RequestHelper::post('json_str', '');
         if (empty($this->shop_id)) {
             $this->returnJsonMsg(101, [], '无效的商家id');
         }
@@ -274,7 +274,7 @@ class OrderController extends BaseController
      */
     public function actionSave()
     {
-        $cart_goods = RequestHelper::post('goods', '');//购物车商品数据
+        $cart_goods = RequestHelper::post('json_str', '');//购物车商品数据
         $this->shop_id = RequestHelper::post('shop_id', 0, 'intval');
         $mobile = RequestHelper::post('mobile', '', '');//手机号
         $send_time = RequestHelper::post('send_time', '');//配送时间
@@ -416,10 +416,10 @@ class OrderController extends BaseController
                             'mobile'=>$mobile,
                             'shop_id'=>$this->shop_id,
                             'product_id'=>$v['product_id'],
-                            'product_name'=>$v['name'],
-                            'product_img'=>$v['image'],
+                            'product_name'=>$v['product_name'],
+                            'product_img'=>$v['product_img'],
                             'num'=>1,
-                            'price'=>$v['price'],
+                            'price'=>0,
                             'attribute_str'=>$v['attr_value'],
                             'total'=>$v['price'],
                             'remark'=>'',
