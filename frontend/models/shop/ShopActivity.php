@@ -38,7 +38,7 @@ class ShopActivity extends ShopBase
         $map['shop_id'] = $shop_id;
         $map['status'] = 1;
         $time = date("Y-m-d H:i:s", time());
-        $activity = $this->find()->select('id,name,shop_id,images,type')
+        $activity = $this->find()->select('id,name,shop_id,images,type,meet_amount')
             ->where($map)
             ->andWhere(['<', 'start_time', $time])
             ->andWhere(['>', 'end_time', $time])

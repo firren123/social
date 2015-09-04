@@ -127,6 +127,7 @@ class OrderController extends BaseController
                     }
                     $goods_arr[$k]['name'] =  ArrayHelper::getValue($p_list, $v['product_id'].'.name', '');
                     $goods_arr[$k]['image'] =  $img_path . ArrayHelper::getValue($p_list, $v['product_id'].'.image', '');
+                    $goods_arr[$k]['activity_price'] = 0;
                     //$cart_list[$v['product_id']]['total'] = $v['total'];
                     $goods_total += ($v['price'] * $buy_num);
                 }
@@ -211,42 +212,56 @@ class OrderController extends BaseController
                 foreach ($goods_list as $k => $v) {
                     $product_ids[] = $v['product_id'];
                     $purchase_num = ArrayHelper::getValue($new_goods, $v['product_id'].'.day_confine_num', 0);
-                    $goods_list[$k]['price'] = ArrayHelper::getValue($new_goods, $v['product_id'].'.price', 0);
+                    $goods_list[$k]['activity_price'] = ArrayHelper::getValue($new_goods, $v['product_id'].'.price', 0);
                     $goods_list[$k]['activity_id'] = ArrayHelper::getValue($new_goods, $v['product_id'].'.activity_id', 0);
                     if ($v['buy_num'] > $purchase_num) {
                         return 1;//库存超过最大限制
                     }
                 }
                 $gift_model = new ActivityGift();
-
                 foreach ($activity_goods as $k => $v) {
                     //$activity_goods[$k]['type'] = ArrayHelper::getValue($activity_list, $v['activity_id'].'.type', 0);
                     $type = ArrayHelper::getValue($activity_list, $v['activity_id'].'.type', 0);
+
                     if ($type == 1) {
                         $buy_activity_ids[] = $v['activity_id'];
                     } elseif ($type == 2) {
-                        $v['meet_amount'] = $v['meet_amount'];
-                        $full_goods[$v['activity_id']][] = $v;//以活动为单元的商品列表
+                        $meet_amount = ArrayHelper::getValue($activity_list, $v['activity_id'].'.meet_amount', 10);
+                        //$v['meet_amount'] = $meet_amount;
+                        //var_dump($v);
+                        $full_goods[$v['activity_id']]['amount'] = $meet_amount;//以活动为单元的商品列表
+                        $full_goods[$v['activity_id']]['list'][] = $v;//以活动为单元的商品列表
                     }
 
                     $activity_data[$v['activity_id']][] = $v;//以活动为单元的商品列表
                 }
+                //var_dump($buy_activity_ids);
                 //获取买赠的赠品
                 if (!empty($buy_activity_ids)) {
-                    $gift_goods[] = $gift_model->getInfo(['activity_id'=>$buy_activity_ids, 'shop_id'=>$shop_id]);
+                    $gift_goods = $gift_model->getList(['activity_id'=>$buy_activity_ids, 'shop_id'=>$shop_id]);
                 }
+                //var_dump($gift_goods);
                 //获取满赠的赠品
+                //var_dump($full_goods);exit();
+                $gift = [];
                 if (!empty($full_goods)) {
                     foreach ($full_goods as $key => $item) {
                         $full_total = 0;
-                        foreach ($item as $v) {
+                        //var_dump($item['list']);exit();
+                        foreach ($item['list'] as $v) {
                             $full_total +=$v['price'];
                         }
-                        if ($item['meet_amount'] >= $full_total) {
-                            $gift_goods[] = $gift_model->getInfo(['activity_id'=>$key, 'shop_id'=>$shop_id]);
+                        //echo $full_total;
+                        if ($item['amount'] <= $full_total) {
+                            //echo 13;exit();
+                            $gift[] = $gift_model->getInfo(['activity_id'=>$key, 'shop_id'=>$shop_id]);
+
                         }
                     }
                 }
+                //var_dump($gift);
+                $gift_goods = array_merge($gift_goods, $gift);
+                $data['goods_list'] = $goods_list;
                 $data['gift_list'] = $gift_goods;
             }
         } else {
