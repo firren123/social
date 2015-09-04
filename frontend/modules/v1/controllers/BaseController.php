@@ -127,8 +127,8 @@ class BaseController extends Controller
         if ($this->params) {
             $params = $this->params;
             //ksort($params);
-            if (isset($params['goods'])) {
-                $params['goods'] = $_POST['goods'];
+            if (isset($params['json_str'])) {
+                $params['json_str'] = $_POST['json_str'];
             }
             foreach ($params as $k=>$v) {
                 $v = strtolower($v);
