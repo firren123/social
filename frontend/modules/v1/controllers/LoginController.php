@@ -63,7 +63,7 @@ class LoginController extends BaseController
         $channel         = RequestHelper::post('channel', '1', '');
         $channel_user_id = RequestHelper::post('channel_user_id', '0', '');
         $source          = RequestHelper::post('dev', '1', '');
-        $login_ua        = RequestHelper::post('login_ua', '', '');
+        $login_ua        = RequestHelper::post('json_str', '', '');
         $mobile          = RequestHelper::post('mobile', '', 'trim');
         $password        = RequestHelper::post('password', '', 'trim');
         $code            = RequestHelper::post('code', '', 'trim');
