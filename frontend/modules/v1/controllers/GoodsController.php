@@ -136,6 +136,16 @@ class GoodsController extends BaseController
         $cat_name = $cat_model->getField('name', ['id'=>$info['cate_first_id']]);
         $brand_model = new Brand();
         $brand_name = $brand_model->getField('name', ['id'=>$info['brand_id']]);
+        //过滤商品介绍
+        $html = '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd"><html><head><meta http-equiv="content-type" content="text/html; charset=UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+            <style type="text/css">
+            img{max-width: 100%;}
+</style>
+            </head>
+            <body>';
+        $html .= $info['description'];
+        $html .= '</body></html>';
+        $p_info['description'] = urlencode(str_replace('\"', '', htmlspecialchars_decode($html)));
         $p_info = [
             'name'=>$info['name'],
             'price'=>$goods_info['price'],
@@ -157,7 +167,7 @@ class GoodsController extends BaseController
             $img_path = substr($img_path, 0, -1);
         }
         if (!empty($image_list)) {
-            foreach($image_list as $k => $v) {
+            foreach ($image_list as $k => $v) {
                 $image_data[] = $img_path . $v['image'];
             }
         }
