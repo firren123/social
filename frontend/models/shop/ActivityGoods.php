@@ -74,4 +74,50 @@ class ActivityGoods extends ShopBase
         }
         return $data;
     }
+
+    /**
+     * 根据 商家id 商品id  活动id 获取活动信息
+     * @param int $shop_id     商家id
+     * @param int $product_id  商品id
+     * @param int $activity_id 活动id
+     * @return array
+     */
+    public function getActivityGood($shop_id, $product_id, $activity_id)
+    {
+        $now = date("Y-m-d H:i:s");
+        //此活动有效
+        $data = [];
+        $activity = new ShopActivity();
+        $activity_info = $activity->getInfo(['id'=>$activity_id]);
+        if ($activity_info['status'] == 1) {
+            if ($activity_info['start_time'] < $now && $activity_info['end_time'] > $now) {
+                $activity_products_model = new ActivityGoods();
+                $activity_products = $activity_products_model->getInfo(['shop_id'=>$shop_id, 'product_id'=>$product_id]);
+                $data = [
+                    'activity_id'=>$activity_id,
+                    'name'=>$activity_info['name'],
+                    'subtitle'=>$activity_info['subtitle'],
+                    'activity_price'=>$activity_products['price'],
+                    'purchase_num'=>$activity_products['day_confine_num'],
+                ];
+            }
+        }
+        return $data;
+
+    }
+    public function getActivityGoodsList($activity_ids, $products_id, $shop_id)
+    {
+        $activity = new ShopActivity();
+        $activity_id = [];
+        $activity_list = $activity->getList(['id'=>$activity_ids, 'status'=>1]);
+        foreach ($activity_list as $v) {
+            $activity_id[] = $v['id'];
+        }
+        $goods_list = [];
+        if (!empty($activity_id)) {
+            $goods_list = $this->getList(['activity_id'=>$activity_id, 'product_id'=>$products_id, 'shop_id'=>$shop_id]);
+        }
+        return $goods_list;
+
+    }
 }

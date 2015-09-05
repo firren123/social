@@ -59,47 +59,61 @@ class GoodsController extends BaseController
         }
         $shop_models = new ShopProducts();
         $map = ['shop_id'=>$this->shop_id, 'cat_id'=>$cat_id, 'status'=>1];
-        $data_list = $shop_models->getGoodsList($map, 'product_id,price,product_number,status', $this->pageSize);
+        $data_list = $shop_models->getGoodsList($map, 'product_id,price,product_number,status,activity_id,activity_json', $this->pageSize);
         //var_dump($data_list);exit();
-        $goods_id = $goods_list = $goods = $data_goods = $shop_products = [];
+        $goods_id = $goods_list = $goods = $shop_products = [];
+        $activity_product_ids = $activity_ids = $activity_goods = [];
+        $goods_arr = [];
         if (!empty($data_list['list'])) {
+            $now = date("Y-m-d H:i:s");
             foreach ($data_list['list'] as $k => $v) {
+
+                if (!empty($v['activity_id']) && !empty($v['activity_json'])) {
+
+                    $data_arr = json_decode($v['activity_json'], true);
+                    if (!empty($data_arr)) {
+
+                        //此活动有效
+                        if ($data_arr['start_time'] < $now && $data_arr['end_time'] > $now ) {
+                            $activity_ids[] = $v['activity_id'];
+                            $activity_product_ids[] = $v['product_id'];
+                        }
+                    }
+
+                }
                 $goods_id[] = $v['product_id'];
                 //$shop_products[$v['product_id']] = $v;
             }
-            //var_dump($shop_products);
+            if (!empty($activity_product_ids) && !empty($activity_ids)) {
+                $activity_model = new ActivityGoods();
+                $activity_goods = $activity_model->getActivityGoodsList($activity_ids, $activity_product_ids, $this->shop_id);
+            }
             if (!empty($goods_id)) {
                 $models = new Product();
                 $goods = $models->getList(['id'=>$goods_id, 'status'=>1], 'id,name,image,bar_code,attr_value');
             }
-            if (!empty($goods)) {
-                foreach ($goods as $k => $v) {
-                    $data_goods[$v['id']] = $v;
-                }
-            }
-            //获取商家正在进行的限购的商品
-            $a_model = new ShopActivity();
-            $activity_goods = $a_model->getPurchaseGoods($this->shop_id, 3);
-
-            $activity_goods = ArrayHelper::index($activity_goods, 'product_id');
             $img_path = Yii::$app->params['imgHost'];
             if (substr($img_path, -1) == '/') {
                 $img_path = substr($img_path, 0, -1);
             }
 
             foreach ($data_list['list'] as $k => $v) {
-                $data_list['list'][$k]['name'] = ArrayHelper::getValue($goods, $k.'.name', '');
-                $data_list['list'][$k]['attr_value'] = ArrayHelper::getValue($goods, $k.'.attr_value', '');
-                $data_list['list'][$k]['image'] = $img_path . ArrayHelper::getValue($goods, $k.'.image', '');
-                $data_list['list'][$k]['purchase_num'] = ArrayHelper::getValue($activity_goods, $k.'.day_confine_num', 0);
-                $data_list['list'][$k]['origin_num'] = 0;
+                $goods_arr[$k]['product_id'] = $v['product_id'];
+                $goods_arr[$k]['product_number'] = $v['product_number'];
+
+                $goods_arr[$k]['price'] = ArrayHelper::getValue($activity_goods, $k.'.price', $v['price']);
+                $goods_arr[$k]['name'] = ArrayHelper::getValue($goods, $k.'.name', '');
+                $goods_arr[$k]['attr_value'] = ArrayHelper::getValue($goods, $k.'.attr_value', '');
+                $goods_arr[$k]['image'] = $img_path . ArrayHelper::getValue($goods, $k.'.image', '');
+                $goods_arr[$k]['purchase_num'] = ArrayHelper::getValue($activity_goods, $k.'.day_confine_num', 0);
+
+                $goods_arr[$k]['origin_num'] = 0;
+
 
             }
-            //var_dump($data_list);exit();
-            $item = ArrayHelper::getValue($data_list, 'list', []);
             $pageCount = ArrayHelper::getValue($data_list, 'pageCount', 0);
             $count = ArrayHelper::getValue($data_list, 'count', 0);
-            $this->returnJsonMsg(200, ['item'=>$item, 'pageCount'=>$pageCount, 'count'=>$count], '获取成功');
+            $this->returnJsonMsg(200, ['item'=>$goods_arr, 'pageCount'=>$pageCount, 'count'=>$count], '获取成功');
 
         } else {
             $this->returnJsonMsg(101, [], '无商品!');
@@ -171,34 +185,29 @@ class GoodsController extends BaseController
                 $image_data[] = $img_path . $v['image'];
             }
         }
-       // var_dump($goods_info);
-        if (!empty($goods_info['activity_id'])) {
-            if (!empty($goods_info['activity_json'])) {
-                $data_arr = json_decode($goods_info['activity_json'], true);
-                if (!empty($data_arr)) {
-                    $now = date("Y-m-d H:i:s");
-                    if ($data_arr['start_time'] < $now && $data_arr['end_time'] > $now ) {
-
-                    }
+        $activity_info = [];
+        if (!empty($goods_info['activity_id']) && !empty($goods_info['activity_json'])) {
+            $data_arr = json_decode($goods_info['activity_json'], true);
+            if (!empty($data_arr)) {
+                $now = date("Y-m-d H:i:s");
+                //此活动有效
+                if ($data_arr['start_time'] < $now && $data_arr['end_time'] > $now ) {
+                    $activity_model = new ActivityGoods();
+                    $activity_info = $activity_model->getActivityGood($this->shop_id, $product_id, $goods_info['activity_id']);
                 }
             }
 
+
         }
-        $activity = $shop_model->getActivity($this->shop_id, $product_id);
-        if (!empty($activity)) {
-            $p_info['activity_id'] = $activity['activity_id'];
-            $p_info['activity_name'] = $activity['name'];
-            $p_info['subtitle'] = $activity['subtitle'];
-            $p_info['activity_price'] = $activity['activity_price'];
-            $p_info['purchase_num'] = $activity['purchase_num'];
+        if (!empty($activity_info)) {
+            $p_info['activity_id'] = $activity_info['activity_id'];
+            $p_info['activity_name'] = $activity_info['name'];
+            $p_info['subtitle'] = $activity_info['subtitle'];
+            $p_info['activity_price'] = $activity_info['activity_price'];
+            $p_info['purchase_num'] = $activity_info['purchase_num'];
         }
         $p_info['photo'] = $image_data;
-//        $data = [
-//            'info'=> $p_info,
-//            'photo'=>$image_data,
-//        ];
         $this->returnJsonMsg(200, $p_info, 'SUCCESS');
-
     }
 
     /**

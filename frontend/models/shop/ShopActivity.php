@@ -58,10 +58,8 @@ class ShopActivity extends ShopBase
         $map['status'] = 1;
         $map['type'] = $type;
         $time = date("Y-m-d H:i:s", time());
-        $activity = $this->find()->select('id,name,shop_id')
+        $activity = $this->find()->select('id,name,shop_id,start_time,end_time')
             ->where($map)
-            ->andWhere(['<', 'start_time', $time])
-            ->andWhere(['>', 'end_time', $time])
             ->asArray()->all();
         //return $activity;
         $activity_ids = $activity_products = $product_ids = [];
@@ -71,7 +69,10 @@ class ShopActivity extends ShopBase
                 $img_path = substr($img_path, 0, -1);
             }
             foreach ($activity as $k => $v) {
-                $activity_ids[] = $v['id'];
+                if ($v['start_time'] < $time && $v['end_time'] > $time) {
+                    $activity_ids[] = $v['id'];
+                }
+
             }
             $a_model = new ActivityGoods();
             $data_arr = $a_model->getList(['activity_id'=>$activity_ids, 'shop_id'=>$shop_id]);
@@ -80,9 +81,7 @@ class ShopActivity extends ShopBase
                     $product_ids[] = $v['product_id'];
                 }
                 $g_model = new Product();
-                //var_dump($product_ids);
                 $goods = $g_model->getList(['id'=>$product_ids], 'id, name, image,attr_value');
-                //var_dump($goods);
                 $goods = ArrayHelper::index($goods, 'id');
                 foreach ($data_arr as $k => $v) {
                     $activity_products[$k]['activity_id'] = $v['activity_id'];

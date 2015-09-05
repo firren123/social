@@ -62,13 +62,7 @@ class ShopProducts extends ShopBase
     public function getActivity($shop_id, $product_id)
     {
         $activity = new ShopActivity();
-//        //获取正在进行的活动
-//        $list = $activity->getCurrentActivity($shop_id);
-//
-//        foreach ($activity as $k => $v) {
-//            $activity_ids[] = $v['id'];
-//        }
-
+        //获取正在进行的活动
         $a_model = new ActivityGoods();
         $activity_products = $a_model->getInfo(['shop_id'=>$shop_id, 'product_id'=>$product_id]);
         $info = $activity->getInfo(['id'=>$activity_products['activity_id'], 'status'=>1]);
