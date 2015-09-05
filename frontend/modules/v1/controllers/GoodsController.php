@@ -145,7 +145,7 @@ class GoodsController extends BaseController
             <body>';
         $html .= $info['description'];
         $html .= '</body></html>';
-        $p_info['description'] = urlencode(str_replace('\"', '', htmlspecialchars_decode($html)));
+        $info['description'] = urlencode(str_replace('\"', '', htmlspecialchars_decode($html)));
         $p_info = [
             'name'=>$info['name'],
             'price'=>$goods_info['price'],
@@ -170,6 +170,19 @@ class GoodsController extends BaseController
             foreach ($image_list as $k => $v) {
                 $image_data[] = $img_path . $v['image'];
             }
+        }
+       // var_dump($goods_info);
+        if (!empty($goods_info['activity_id'])) {
+            if (!empty($goods_info['activity_json'])) {
+                $data_arr = json_decode($goods_info['activity_json'], true);
+                if (!empty($data_arr)) {
+                    $now = date("Y-m-d H:i:s");
+                    if ($data_arr['start_time'] < $now && $data_arr['end_time'] > $now ) {
+
+                    }
+                }
+            }
+
         }
         $activity = $shop_model->getActivity($this->shop_id, $product_id);
         if (!empty($activity)) {
