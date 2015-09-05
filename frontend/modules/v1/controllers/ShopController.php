@@ -80,9 +80,9 @@ class ShopController extends BaseController
             $info[$k]['star']       = '5';
             $info[$k]['address']    = $shopInfo['address'];
             $info[$k]['distance']   = $v['dis'];
-            $info[$k]['sent_fee']   = $shopInfo['sent_fee'];
-            $info[$k]['free_money'] = $shopInfo['free_money'];
-            $info[$k]['freight']    = $shopInfo['freight'];
+            $info[$k]['sent_fee']   = number_format($shopInfo['sent_fee']);
+            $info[$k]['free_money'] = number_format($shopInfo['free_money']);
+            $info[$k]['freight']    = number_format($shopInfo['freight']);
         }
         if (empty($info)) {
             //set缓存
