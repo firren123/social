@@ -19,6 +19,7 @@ use common\helpers\Common;
 use common\helpers\RequestHelper;
 use common\helpers\CurlHelper;
 use frontend\models\i500_social\User;
+use frontend\models\i500_social\UserActiveTime;
 use frontend\models\i500_social\UserToken;
 use frontend\models\i500_social\UserSms;
 use yii\web\Controller;
@@ -229,6 +230,34 @@ class BaseController extends Controller
         if (Common::C('saveSms')) {
             $user_sms_model = new UserSms();
             return $user_sms_model->insertInfo($data);
+        } else {
+            return true;
+        }
+    }
+
+    /**
+     * 记录用户活跃信息
+     * @param array $data 数据
+     * @return bool
+     */
+    public function saveUserActiveTime($data = array())
+    {
+        if (Common::C('openUserActiveTime')) {
+            if (!empty($data['mobile'])) {
+                $user_user_active_time_model = new UserActiveTime();
+                $user_user_active_time_where['mobile'] = $data['mobile'];
+                $info = $user_user_active_time_model->getInfo($user_user_active_time_where, true, 'id');
+                if (empty($info)) {
+                    //新增
+                    return $user_user_active_time_model->insertInfo($data);
+                } else {
+                    //编辑
+                    $user_user_active_time_data['create_time'] = date('Y-m-d H:i:s', time());
+                    return $user_user_active_time_model->updateInfo($user_user_active_time_data, $user_user_active_time_where);
+                }
+            } else {
+                return true;
+            }
         } else {
             return true;
         }

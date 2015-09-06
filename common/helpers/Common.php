@@ -190,4 +190,45 @@ class Common
         }
         return $temp;
     }
+
+    /**
+     * 距离当前时间展示方法
+     * @param string $datetime 活跃时间
+     * @param int    $nowtime  当前时间
+     * @return bool|string
+     */
+    function timeAgo($datetime='', $nowtime = 0)
+    {
+        $datetime = strtotime($datetime);
+        if (empty($nowtime)) {
+            $nowtime = time();
+        }
+        $timediff = $nowtime - $datetime;
+        $timediff = $timediff >= 0 ? $timediff : $datetime - $nowtime;
+        // 秒
+        if ($timediff < 60) {
+            return $timediff . '秒前';
+        }
+        // 分
+        if ($timediff < 3600 && $timediff >= 60) {
+            return intval($timediff / 60) . '分钟前';
+        }
+        // 今天
+        $today = mktime(0, 0, 0, date('m'), date('d'), date('Y'));
+        if ($datetime >= $today) {
+            return date('今天 H:i', $datetime);
+        }
+        // 昨天
+        $yestoday = mktime(0, 0, 0, date('m'), date('d') - 1, date('Y'));
+        if ($datetime >= $yestoday) {
+            return date('昨天 H:i', $datetime);
+        }
+        // 今年月份
+        $this_year = mktime(0, 0, 0, 1, 1, date('Y'));
+        if ($datetime >= $this_year) {
+            return date('m月d日 H:i', $datetime);
+        }
+        // 往年
+        return date('Y年m月d日', $datetime);
+    }
 }

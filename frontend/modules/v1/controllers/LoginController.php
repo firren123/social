@@ -198,6 +198,8 @@ class LoginController extends BaseController
         $rs_u_info['id']     = $user_info['id'];
         $rs_u_info['mobile'] = $mobile;
         $rs_u_info['token']  = $user_token_data['token'];
+        //记录用户活跃时间
+        $this->saveUserActiveTime(['mobile'=>$mobile]);
         $this->returnJsonMsg('200', $rs_u_info, Common::C('code', '200'));
     }
 
@@ -258,6 +260,8 @@ class LoginController extends BaseController
         if ($hx_rs['code'] == '101') {
             $this->returnJsonMsg('639', [], Common::C('code', '639'));
         }
+        //记录用户活跃时间
+        $this->saveUserActiveTime(['mobile'=>$mobile]);
         $this->returnJsonMsg('200', [], Common::C('code', '200'));
     }
 
