@@ -52,12 +52,16 @@ class UserCoupons extends SocialBase
 //        $max = $this->find()
 //            ->select('serial_number,min_amount,type_name,min_amount,')
 //            ->where($map)->andWhere($andMap)->andWhere(['<=', 'min_amount', $total])->asArray()->one();
-        //$list = $this->getList($map,'serial_number,min_amount,type_name,min_amount,expired_time', 'par_value desc');
-        $max = $this->find()->where($map)->andWhere($andMap)->andWhere(['<=', 'min_amount', $total])->max('par_value');
+//        $max = $this->find()->where($map)->andWhere($andMap)->andWhere(['<=', 'min_amount', $total])->max('par_value');
+        $list = $this->find()->select('id,par_value')
+            ->where($map)->andWhere($andMap)->andWhere(['<=', 'min_amount', $total])->orderBy("par_value desc")
+            ->asArray()->one();
 
-        $max = !empty($max) ? $max : 0;
-
-        return $max;
+        //$max = !empty($max) ? $max : 0;
+        if (!empty($list)) {
+            return $list;
+        }
+        return [];
             //->asArray()->all();
     }
     public function checkCoupon($coupon_id, $total) {
