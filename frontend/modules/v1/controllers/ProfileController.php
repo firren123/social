@@ -224,6 +224,7 @@ class ProfileController extends BaseController
         $user_coupons_model = new UserCoupons();
         $user_coupons_where['mobile'] = $mobile;
         $user_coupons_fields = '
+        id,
         type_name as name,
         par_value as amount,
         get_time as start_time,
