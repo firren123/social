@@ -15,6 +15,7 @@
 namespace frontend\modules\v1\controllers;
 
 use Yii;
+use yii\helpers\ArrayHelper;
 use common\helpers\Common;
 use common\helpers\RequestHelper;
 use common\helpers\HuanXinHelper;
@@ -253,6 +254,7 @@ class LoginController extends BaseController
         if (empty($hx_rs)) {
             $this->returnJsonMsg('626', [], Common::C('code', '626'));
         }
+        $hx_rs['code'] = ArrayHelper::getValue($hx_rs, 'code', '0');
         if ($hx_rs['code'] == '101') {
             $this->returnJsonMsg('639', [], Common::C('code', '639'));
         }
