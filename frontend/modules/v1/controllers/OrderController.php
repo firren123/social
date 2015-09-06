@@ -502,7 +502,7 @@ class OrderController extends BaseController
                                     }
 
                                 }
-                                $this->returnJsonMsg(200, [], 'SUCCESS');
+                                $this->returnJsonMsg(200, ['order_sn'=>$time], 'SUCCESS');
                             } else {
                                 $this->returnJsonMsg(108, [], '订单详情数据插入失败');
                             }
