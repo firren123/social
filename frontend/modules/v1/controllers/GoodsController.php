@@ -41,7 +41,7 @@ use yii\helpers\ArrayHelper;
 class GoodsController extends BaseController
 {
     public $enableCsrfValidation = false;
-    public $pageSize = 6;
+    public $pageSize = 20;
 
     /**
      * 商品列表
