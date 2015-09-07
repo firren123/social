@@ -92,6 +92,9 @@ class GoodsController extends BaseController
                 $models = new Product();
                 $goods = $models->getList(['id'=>$goods_id, 'status'=>1], 'id,name,image,bar_code,attr_value');
             }
+            //var_dump($goods);
+            $goods = ArrayHelper::index($goods, 'id');
+            //var_dump($goods);
             $img_path = Yii::$app->params['imgHost'];
             if (substr($img_path, -1) == '/') {
                 $img_path = substr($img_path, 0, -1);
@@ -101,11 +104,11 @@ class GoodsController extends BaseController
                 $goods_arr[$k]['product_id'] = $v['product_id'];
                 $goods_arr[$k]['product_number'] = $v['product_number'];
 
-                $goods_arr[$k]['price'] = ArrayHelper::getValue($activity_goods, $k.'.price', $v['price']);
-                $goods_arr[$k]['name'] = ArrayHelper::getValue($goods, $k.'.name', '');
-                $goods_arr[$k]['attr_value'] = ArrayHelper::getValue($goods, $k.'.attr_value', '');
-                $goods_arr[$k]['image'] = $img_path . ArrayHelper::getValue($goods, $k.'.image', '');
-                $goods_arr[$k]['purchase_num'] = ArrayHelper::getValue($activity_goods, $k.'.day_confine_num', 0);
+                $goods_arr[$k]['price'] = ArrayHelper::getValue($activity_goods, $v['product_id'].'.price', $v['price']);
+                $goods_arr[$k]['name'] = ArrayHelper::getValue($goods, $v['product_id'].'.name', '');
+                $goods_arr[$k]['attr_value'] = ArrayHelper::getValue($goods, $v['product_id'].'.attr_value', '');
+                $goods_arr[$k]['image'] = $img_path . ArrayHelper::getValue($goods, $v['product_id'].'.image', '');
+                $goods_arr[$k]['purchase_num'] = ArrayHelper::getValue($activity_goods, $v['product_id'].'.day_confine_num', 0);
 
                 $goods_arr[$k]['origin_num'] = 0;
 
