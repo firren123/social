@@ -63,4 +63,15 @@ class Order extends SocialBase
 
 
     }
+    public function createSn($province_id, $mobile)
+    {
+        $channelUrl = \Yii::$app->params['channelHost'];
+        $url = $channelUrl.'order/create-order-sn?province_id='.$province_id.'&mobile='.$mobile;
+        $re = CurlHelper::get($url, true);
+        if (isset($re['code']) && $re['code'] == 200) {
+            return $re['data'];
+        } else {
+            return false;
+        }
+    }
 }

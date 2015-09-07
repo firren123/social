@@ -317,8 +317,14 @@ class OrderController extends BaseController
         $address = $address_info['search_address'] . ' ' . $address_info['details_address'];
         $goods = [];
         $time = time();
+        $m_order = new Order();
+        //var_dump($m_order);
+        $order_sn = $m_order->createSn($address_info['province_id'], $mobile);
+        if (empty($order_sn)) {
+            $this->returnJsonMsg(103, [], '订单号生成失败！');
+        }
         $order = [
-            'order_sn'=>$time,
+            'order_sn'=>$order_sn,
             'mobile'=>$mobile,
             'shop_id'=>$this->shop_id,
             'total'=>0,
@@ -392,7 +398,7 @@ class OrderController extends BaseController
                 $activity_products = $activity_gift = [];
                 foreach ($goods as $k => $v) {
                     $order_detail[] = [
-                        'order_sn'=>$time,
+                        'order_sn'=>$order_sn,
                         'mobile'=>$mobile,
                         'shop_id'=>$this->shop_id,
                         'product_id'=>$v['product_id'],
@@ -469,7 +475,6 @@ class OrderController extends BaseController
                 $order['total'] = $goods_total + $order['freight'] - $dis_amount;
                 //插入订单表
                 if (!empty($order)) {
-                    $m_order = new Order();
                     $re = $m_order->insertInfo($order);
                     //var_dump($re);exit();
                     if ($re) {
@@ -507,7 +512,7 @@ class OrderController extends BaseController
                                     }
 
                                 }
-                                $this->returnJsonMsg(200, ['order_sn'=>$time], 'SUCCESS');
+                                $this->returnJsonMsg(200, ['order_sn'=>$order_sn], 'SUCCESS');
                             } else {
                                 $this->returnJsonMsg(108, [], '订单详情数据插入失败');
                             }
