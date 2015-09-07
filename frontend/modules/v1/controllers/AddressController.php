@@ -126,6 +126,8 @@ class AddressController extends BaseController
         if (empty($rs)) {
             $this->returnJsonMsg('400', [], Common::C('code', '400'));
         }
+        //记录用户活跃时间
+        $this->saveUserActiveTime(['mobile'=>$data['mobile']]);
         $this->returnJsonMsg('200', [], Common::C('code', '200'));
     }
 
@@ -187,6 +189,8 @@ class AddressController extends BaseController
         //del缓存
         $cache_key = 'address_details_'.$where['id'].'_'.$data['mobile'];
         SsdbHelper::Cache('del', $cache_key);
+        //记录用户活跃时间
+        $this->saveUserActiveTime(['mobile'=>$data['mobile']]);
         $this->returnJsonMsg('200', [], Common::C('code', '200'));
     }
 
@@ -220,6 +224,8 @@ class AddressController extends BaseController
         //del缓存
         $cache_key = 'address_details_'.$where['id'].'_'.$where['mobile'];
         SsdbHelper::Cache('del', $cache_key);
+        //记录用户活跃时间
+        $this->saveUserActiveTime(['mobile'=>$where['mobile']]);
         $this->returnJsonMsg('200', [], Common::C('code', '200'));
     }
 

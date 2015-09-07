@@ -102,6 +102,8 @@ class PostController extends BaseController
         if (!$rs) {
             $this->returnJsonMsg('400', [], Common::C('code', '400'));
         }
+        //记录用户活跃时间
+        $this->saveUserActiveTime(['mobile'=>$mobile]);
         $this->returnJsonMsg('200', [], Common::C('code', '200'));
     }
 
@@ -236,6 +238,8 @@ class PostController extends BaseController
         if (empty($rs)) {
             $this->returnJsonMsg('400', [], Common::C('code', '400'));
         }
+        //记录用户活跃时间
+        $this->saveUserActiveTime(['mobile'=>$mobile]);
         $this->returnJsonMsg('200', [], Common::C('code', '200'));
     }
 
@@ -284,6 +288,8 @@ class PostController extends BaseController
             $this->returnJsonMsg('400', [], Common::C('code', '400'));
         }
         $rs_data['thumbs'] = Common::formatNumber($post_rs['thumbs']+1);
+        //记录用户活跃时间
+        $this->saveUserActiveTime(['mobile'=>$mobile]);
         $this->returnJsonMsg('200', $rs_data, Common::C('code', '200'));
     }
 
@@ -332,6 +338,8 @@ class PostController extends BaseController
             $this->returnJsonMsg('400', [], Common::C('code', '400'));
         }
         $rs_data['thumbs'] = Common::formatNumber($post_rs['thumbs']-1);
+        //记录用户活跃时间
+        $this->saveUserActiveTime(['mobile'=>$mobile]);
         $this->returnJsonMsg('200', $rs_data, Common::C('code', '200'));
     }
 
@@ -380,6 +388,8 @@ class PostController extends BaseController
             $this->returnJsonMsg('400', [], Common::C('code', '400'));
         }
         $rs_data['thumbs'] = Common::formatNumber($post_comments_update['thumbs']);
+        //记录用户活跃时间
+        $this->saveUserActiveTime(['mobile'=>$mobile]);
         $this->returnJsonMsg('200', $rs_data, Common::C('code', '200'));
     }
 
@@ -428,6 +438,8 @@ class PostController extends BaseController
             $this->returnJsonMsg('400', [], Common::C('code', '400'));
         }
         $rs_data['thumbs'] = Common::formatNumber($post_comments_update['thumbs']);
+        //记录用户活跃时间
+        $this->saveUserActiveTime(['mobile'=>$mobile]);
         $this->returnJsonMsg('200', $rs_data, Common::C('code', '200'));
     }
 
