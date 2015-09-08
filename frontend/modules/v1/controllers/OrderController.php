@@ -122,7 +122,7 @@ class OrderController extends BaseController
                     }
                     $buy_num = ArrayHelper::getValue($cart_list, $v['product_id'].'.num', 0);
                     $goods_arr[$k]['buy_num'] = $buy_num;
-                    if ($v['product_number'] <= $buy_num) {
+                    if ($v['product_number'] < $buy_num) {
                         $this->returnJsonMsg(106, [], '商品库存不足');
                     }
                     $goods_arr[$k]['name'] =  ArrayHelper::getValue($p_list, $v['product_id'].'.name', '');
@@ -373,7 +373,7 @@ class OrderController extends BaseController
                     }
                     $buy_num = ArrayHelper::getValue($cart_list, $v['product_id'].'.num', 0);
                     $goods_arr[$k]['buy_num'] = $buy_num;
-                    if ($v['product_number'] <= $buy_num) {
+                    if ($v['product_number'] < $buy_num) {
                         $this->returnJsonMsg(106, [], '商品库存不足');
                     }
                     $goods_arr[$k]['name'] =  ArrayHelper::getValue($p_list, $v['product_id'].'.name', '');
