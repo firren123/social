@@ -150,6 +150,8 @@ class ProfileController extends BaseController
         if (!empty($community_name)) {
             $user_base_update_data['community_name'] = $community_name;
         }
+        //记录用户活跃时间
+        $this->saveUserActiveTime(['mobile'=>$mobile]);
         if (!empty($user_base_update_data)) {
             $user_base_model = new UserBasicInfo();
             $user_base_where['mobile'] = $mobile;
