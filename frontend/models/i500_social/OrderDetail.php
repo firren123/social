@@ -77,7 +77,6 @@ class OrderDetail extends SocialBase
     {
         if (!empty($order_sn) && !empty($mobile)) {
             $order_detail = $this->getList(['order_sn'=>$order_sn, 'mobile'=>$mobile]);
-            var_dump($order_detail);
             if (!empty($order_detail)) {
                 $model = new ShopProducts();
                 $activity_model = new ActivityGoods();
