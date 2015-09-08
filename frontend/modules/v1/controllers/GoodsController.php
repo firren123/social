@@ -41,7 +41,7 @@ use yii\helpers\ArrayHelper;
 class GoodsController extends BaseController
 {
     public $enableCsrfValidation = false;
-    public $pageSize = 6;
+    public $pageSize = 20;
 
     /**
      * 商品列表
@@ -92,6 +92,9 @@ class GoodsController extends BaseController
                 $models = new Product();
                 $goods = $models->getList(['id'=>$goods_id, 'status'=>1], 'id,name,image,bar_code,attr_value');
             }
+            //var_dump($goods);
+            $goods = ArrayHelper::index($goods, 'id');
+            //var_dump($goods);
             $img_path = Yii::$app->params['imgHost'];
             if (substr($img_path, -1) == '/') {
                 $img_path = substr($img_path, 0, -1);
@@ -101,11 +104,11 @@ class GoodsController extends BaseController
                 $goods_arr[$k]['product_id'] = $v['product_id'];
                 $goods_arr[$k]['product_number'] = $v['product_number'];
 
-                $goods_arr[$k]['price'] = ArrayHelper::getValue($activity_goods, $k.'.price', $v['price']);
-                $goods_arr[$k]['name'] = ArrayHelper::getValue($goods, $k.'.name', '');
-                $goods_arr[$k]['attr_value'] = ArrayHelper::getValue($goods, $k.'.attr_value', '');
-                $goods_arr[$k]['image'] = $img_path . ArrayHelper::getValue($goods, $k.'.image', '');
-                $goods_arr[$k]['purchase_num'] = ArrayHelper::getValue($activity_goods, $k.'.day_confine_num', 0);
+                $goods_arr[$k]['price'] = ArrayHelper::getValue($activity_goods, $v['product_id'].'.price', $v['price']);
+                $goods_arr[$k]['name'] = ArrayHelper::getValue($goods, $v['product_id'].'.name', '');
+                $goods_arr[$k]['attr_value'] = ArrayHelper::getValue($goods, $v['product_id'].'.attr_value', '');
+                $goods_arr[$k]['image'] = $img_path . ArrayHelper::getValue($goods, $v['product_id'].'.image', '');
+                $goods_arr[$k]['purchase_num'] = ArrayHelper::getValue($activity_goods, $v['product_id'].'.day_confine_num', 0);
 
                 $goods_arr[$k]['origin_num'] = 0;
 
@@ -114,6 +117,87 @@ class GoodsController extends BaseController
             $pageCount = ArrayHelper::getValue($data_list, 'pageCount', 0);
             $count = ArrayHelper::getValue($data_list, 'count', 0);
             $this->returnJsonMsg(200, ['item'=>$goods_arr, 'pageCount'=>$pageCount, 'count'=>$count], '获取成功');
+
+        } else {
+            $this->returnJsonMsg(101, [], '无商品!');
+        }
+
+    }
+
+    /**
+     * 商品列表
+     * @return json
+     */
+    public function actionIndexIos()
+    {
+        $cat_id = RequestHelper::get('cat_id', 0, 'intval');
+        $this->shop_id = RequestHelper::get('shop_id', 0, 'intval');
+        if (empty($cat_id)) {
+            $this->returnJsonMsg(102, [], '分类id必须!');
+        }
+        if (empty($this->shop_id)) {
+            $this->returnJsonMsg(103, [], '商家id无效!');
+        }
+        $shop_models = new ShopProducts();
+        $map = ['shop_id'=>$this->shop_id, 'cat_id'=>$cat_id, 'status'=>1];
+        $data_list = $shop_models->getList($map, 'product_id,price,product_number,status,activity_id,activity_json');
+        //var_dump($data_list);exit();
+        $goods_id = $goods_list = $goods = $shop_products = [];
+        $activity_product_ids = $activity_ids = $activity_goods = [];
+        $goods_arr = [];
+        if (!empty($data_list)) {
+            $now = date("Y-m-d H:i:s");
+            foreach ($data_list as $k => $v) {
+
+                if (!empty($v['activity_id']) && !empty($v['activity_json'])) {
+
+                    $data_arr = json_decode($v['activity_json'], true);
+                    if (!empty($data_arr)) {
+
+                        //此活动有效
+                        if ($data_arr['start_time'] < $now && $data_arr['end_time'] > $now ) {
+                            $activity_ids[] = $v['activity_id'];
+                            $activity_product_ids[] = $v['product_id'];
+                        }
+                    }
+
+                }
+                $goods_id[] = $v['product_id'];
+                //$shop_products[$v['product_id']] = $v;
+            }
+            if (!empty($activity_product_ids) && !empty($activity_ids)) {
+                $activity_model = new ActivityGoods();
+                $activity_goods = $activity_model->getActivityGoodsList($activity_ids, $activity_product_ids, $this->shop_id);
+            }
+            if (!empty($goods_id)) {
+                $models = new Product();
+                $goods = $models->getList(['id'=>$goods_id, 'status'=>1], 'id,name,image,bar_code,attr_value');
+            }
+            //var_dump($goods);
+            $goods = ArrayHelper::index($goods, 'id');
+            //var_dump($goods);
+            $img_path = Yii::$app->params['imgHost'];
+            if (substr($img_path, -1) == '/') {
+                $img_path = substr($img_path, 0, -1);
+            }
+
+            foreach ($data_list as $k => $v) {
+                $goods_arr[$k]['product_id'] = $v['product_id'];
+                $goods_arr[$k]['product_number'] = $v['product_number'];
+
+                $goods_arr[$k]['price'] = ArrayHelper::getValue($activity_goods, $v['product_id'].'.price', $v['price']);
+                $goods_arr[$k]['name'] = ArrayHelper::getValue($goods, $v['product_id'].'.name', '');
+                $goods_arr[$k]['attr_value'] = ArrayHelper::getValue($goods, $v['product_id'].'.attr_value', '');
+                $goods_arr[$k]['image'] = $img_path . ArrayHelper::getValue($goods, $v['product_id'].'.image', '');
+                $goods_arr[$k]['purchase_num'] = ArrayHelper::getValue($activity_goods, $v['product_id'].'.day_confine_num', 0);
+
+                $goods_arr[$k]['origin_num'] = 0;
+
+
+            }
+            //$pageCount = ArrayHelper::getValue($data_list, 'pageCount', 0);
+            //$count = ArrayHelper::getValue($data_list, 'count', 0);
+            $this->returnJsonMsg(200, ['item'=>$goods_arr], '获取成功');
 
         } else {
             $this->returnJsonMsg(101, [], '无商品!');
