@@ -192,6 +192,9 @@ class MyorderController extends BaseController
         $order_fields = 'order_sn,status,pay_status,total,dis_amount,unionpay_tn';
         $rs = $order_model->getInfo($order_where, true, $order_fields);
         $order_detail_model = new OrderDetail();
+        if (empty($rs)) {
+            $this->returnJsonMsg('816', [], Common::C('code', '816'));
+        }
         if ($rs['pay_status'] == '0') {
             /**未支付**/
             $order_update_data['status'] = '2';
