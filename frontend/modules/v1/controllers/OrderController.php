@@ -287,6 +287,7 @@ class OrderController extends BaseController
         $coupon_id = RequestHelper::post('coupon_id', '', 'intval');//优惠劵id
         //$pay_method_id = RequestHelper::post('pay_method_id', 0, 'intval');//支付方式id
         $dispatch_id = RequestHelper::post('dispatch_id', 0, 'intval');//配送方式id
+        $source_type = RequestHelper::post('source_type', 0, 'intval');//配送方式id
         //$mobile = RequestHelper::post('mobile', '', '');
         if (empty($this->shop_id)) {
             $this->returnJsonMsg(101, [], '无效的商家id');
@@ -344,7 +345,7 @@ class OrderController extends BaseController
             'coupon_id'=>0,
             'dis_amount'=>0,
             'tag'=>'',
-            'source_type'=>'',
+            'source_type'=>$source_type,
             'dispatch_id'=>$dispatch_id,
             'send_time'=>$send_time,
         ];
