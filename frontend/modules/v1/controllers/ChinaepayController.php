@@ -84,7 +84,7 @@ class ChinaepayController extends BaseController
         if (!$rs) {
             $this->returnJsonMsg('400', [], Common::C('code', '400'));
         }
-        $this->returnJsonMsg('200', [], Common::C('code', '200'));
+        $this->returnJsonMsg('200', ['order_sn'=>$data['order_sn']], Common::C('code', '200'));
     }
 
     /**
