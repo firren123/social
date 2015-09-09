@@ -55,7 +55,6 @@ class VasController extends BaseController
      *
      * Author zhengyu@iyangpin.com
      * post
-     *   userid 用户在本网站的id
      *   yhbh   用户编号
      *   ip     可选参数
      *
@@ -64,12 +63,6 @@ class VasController extends BaseController
     public function actionQueryznb()
     {
         $helper_hxt = new HxtHelper();
-
-        $userid = RequestHelper::post('userid', 0, 'int');
-        if ($userid == 0) {
-            echo json_encode(array('code' => 0, 'data' => array(), 'msg' => '缺少参数:userid'));
-            return;
-        }
 
         $arr = array();
         $arr['TerminalID'] = Yii::$app->params['hxt_TerminalID'];
@@ -93,12 +86,6 @@ class VasController extends BaseController
         $arr['MCode'] = $this->_createQueryMcode($arr);
 
         $arr_result = $helper_hxt->query($arr);
-        if (isset($arr_result['PaymentOrderID'])) {
-            unset($arr_result['PaymentOrderID']);
-        }
-        if (isset($arr_result['MCode'])) {
-            unset($arr_result['MCode']);
-        }
         //print_r($arr_result);
 
         echo json_encode($arr_result);
@@ -110,7 +97,6 @@ class VasController extends BaseController
      *
      * Author zhengyu@iyangpin.com
      * post
-     *   userid 用户在本网站的id
      *   yhbh   用户编号
      *   money  缴费金额,单位：分
      *   ip     可选参数
@@ -121,17 +107,12 @@ class VasController extends BaseController
     {
         $helper_hxt = new HxtHelper();
 
-        $userid = RequestHelper::post('userid', 0, 'int');
-        if ($userid == 0) {
-            echo json_encode(array('code' => 0, 'data' => array(), 'msg' => '缺少参数:userid'));
-            return;
-        }
         $yhbh = RequestHelper::post('yhbh', '', 'trim');
         if ($yhbh == '') {
             echo json_encode(array('code' => 0, 'data' => array(), 'msg' => '缺少参数:用户编号'));
             return;
         }
-        $money = RequestHelper::post('money', 0, 'int');
+        $money = RequestHelper::post('money', 0, 'intval');
         if ($yhbh == 0) {
             echo json_encode(array('code' => 0, 'data' => array(), 'msg' => '缺少参数:缴费金额'));
             return;
@@ -170,7 +151,6 @@ class VasController extends BaseController
 
 
         $arr_data = array(
-            'userid' => $userid,
             'yhbh' => $yhbh,
             'money' => $money,
             'orderid' => $order_id,
@@ -199,12 +179,6 @@ class VasController extends BaseController
 
         $arr_result = $helper_hxt->pay($arr);
         //echo "<pre>";print_r($arr_result);echo "</pre>";exit;
-        if (isset($arr_result['PaymentOrderID'])) {
-            unset($arr_result['PaymentOrderID']);
-        }
-        if (isset($arr_result['MCode'])) {
-            unset($arr_result['MCode']);
-        }
 
         if (isset($arr_result['code']) && $arr_result['code'] == 0) {
             if (isset($arr_result['data']) && isset($arr_result['data']['ResultCode'])) {
@@ -250,7 +224,6 @@ class VasController extends BaseController
      *
      * Author zhengyu@iyangpin.com
      * post
-     *   userid 用户在本网站的id
      *   yhbh   用户编号
      *   ip     可选参数
      *
@@ -260,11 +233,6 @@ class VasController extends BaseController
     {
         $helper_hxt = new HxtHelper();
 
-        $userid = RequestHelper::post('userid', 0, 'int');
-        if ($userid == 0) {
-            echo json_encode(array('code' => 0, 'data' => array(), 'msg' => '缺少参数:userid'));
-            return;
-        }
         $yhbh = RequestHelper::post('yhbh', '', 'trim');
         if ($yhbh == '') {
             echo json_encode(array('code' => 0, 'data' => array(), 'msg' => '缺少参数:用户编号'));
@@ -288,12 +256,6 @@ class VasController extends BaseController
         $arr['MCode'] = $this->_createQueryMcode($arr);
 
         $arr_result = $helper_hxt->query($arr);
-        if (isset($arr_result['PaymentOrderID'])) {
-            unset($arr_result['PaymentOrderID']);
-        }
-        if (isset($arr_result['MCode'])) {
-            unset($arr_result['MCode']);
-        }
         //print_r($arr_result);
 
         echo json_encode($arr_result);
@@ -316,17 +278,12 @@ class VasController extends BaseController
     {
         $helper_hxt = new HxtHelper();
 
-        $userid = RequestHelper::post('userid', 0, 'int');
-        if ($userid == 0) {
-            echo json_encode(array('code' => 0, 'data' => array(), 'msg' => '缺少参数:userid'));
-            return;
-        }
         $yhbh = RequestHelper::post('yhbh', '', 'trim');
         if ($yhbh == '') {
             echo json_encode(array('code' => 0, 'data' => array(), 'msg' => '缺少参数:用户编号'));
             return;
         }
-        $money = RequestHelper::post('money', 0, 'int');
+        $money = RequestHelper::post('money', 0, 'intval');
         if ($yhbh == 0) {
             echo json_encode(array('code' => 0, 'data' => array(), 'msg' => '缺少参数:缴费金额'));
             return;
@@ -365,7 +322,6 @@ class VasController extends BaseController
 
 
         $arr_data = array(
-            'userid' => $userid,
             'yhbh' => $yhbh,
             'money' => $money,
             'orderid' => $order_id,
@@ -393,12 +349,6 @@ class VasController extends BaseController
         $arr['MCode'] = $this->_createPayMcode($arr);
 
         $arr_result = $helper_hxt->pay($arr);
-        if (isset($arr_result['PaymentOrderID'])) {
-            unset($arr_result['PaymentOrderID']);
-        }
-        if (isset($arr_result['MCode'])) {
-            unset($arr_result['MCode']);
-        }
 
         if (isset($arr_result['code']) && $arr_result['code'] == 0) {
             echo json_encode(array('code' => 0, 'data' => $arr_data, 'msg' => '错误代码:21'));
@@ -460,12 +410,6 @@ class VasController extends BaseController
 
 
         $arr_result = $helper_hxt->query($arr);
-        if (isset($arr_result['PaymentOrderID'])) {
-            unset($arr_result['PaymentOrderID']);
-        }
-        if (isset($arr_result['MCode'])) {
-            unset($arr_result['MCode']);
-        }
         //print_r($arr_result);
 
         echo json_encode($arr_result);
@@ -505,12 +449,6 @@ class VasController extends BaseController
         $arr['MCode'] = $this->_createPayMcode($arr);
 
         $arr_result = $helper_hxt->pay($arr);
-        if (isset($arr_result['PaymentOrderID'])) {
-            unset($arr_result['PaymentOrderID']);
-        }
-        if (isset($arr_result['MCode'])) {
-            unset($arr_result['MCode']);
-        }
         //print_r($arr_result);
 
         echo json_encode($arr_result);
