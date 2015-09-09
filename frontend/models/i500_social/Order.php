@@ -96,8 +96,8 @@ class Order extends SocialBase
     {
         if (!empty($coupon_id)) {
             $coupons_model = new UserCoupons();
-            $coupons_where['coupon_id'] = $coupon_id;
-            $coupons_where['mobile']    = $mobile;
+            $coupons_where['id']     = $coupon_id;
+            $coupons_where['mobile'] = $mobile;
             $coupons_update_data['status']    = '0';
             $coupons_update_data['used_time'] = '0000-00-00 00:00:00';
             $rs = $coupons_model->updateInfo($coupons_update_data, $coupons_where);

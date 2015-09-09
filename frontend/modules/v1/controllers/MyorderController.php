@@ -167,7 +167,7 @@ class MyorderController extends BaseController
 
     /**
      * 取消订单
-     * @throws \Exception
+     * @return array
      */
     public function actionCancel()
     {
@@ -190,20 +190,20 @@ class MyorderController extends BaseController
         $order_where['mobile']   = $mobile;
         $order_where['order_sn'] = $order_sn;
         $order_fields = 'order_sn,status,pay_status,total,dis_amount,unionpay_tn,coupon_id';
-        $rs = $order_model->getInfo($order_where, true, $order_fields);
+        $order_info = $order_model->getInfo($order_where, true, $order_fields);
         $order_detail_model = new OrderDetail();
-        if (empty($rs)) {
+        if (empty($order_info)) {
             $this->returnJsonMsg('816', [], Common::C('code', '816'));
         }
-        if ($rs['pay_status'] == '0') {
+        if ($order_info['pay_status'] == '0') {
             /**未支付**/
             $order_update_data['status'] = '2';
             $rs = $order_model->updateInfo($order_update_data, $order_where);
             //@todo 更新库存
             $order_detail_rs   = $order_detail_model->cancleOrder($order_sn, $mobile);
             //@todo 更新优惠券
-            $restore_coupon_rs = $order_model->restoreCoupon($rs['coupon_id'], $mobile);
-        } elseif ($rs['pay_status'] == '1') {
+            $restore_coupon_rs = $order_model->restoreCoupon($order_info['coupon_id'], $mobile);
+        } elseif ($order_info['pay_status'] == '1') {
             /**已支付**/
             $connection = \Yii::$app->db_social;
             $transaction = $connection->beginTransaction();
@@ -213,9 +213,9 @@ class MyorderController extends BaseController
                 $refund_order_add_data['order_sn']    = $order_sn;
                 $refund_order_add_data['type']        = '1';
                 $refund_order_add_data['add_time']    = date('Y-m-d H:i:s', time());
-                $refund_order_add_data['money']       = $rs['total'];
-                $refund_order_add_data['code_money']  = $rs['dis_amount'];
-                $refund_order_add_data['unionpay_tn'] = $rs['unionpay_tn'];
+                $refund_order_add_data['money']       = $order_info['total'];
+                $refund_order_add_data['code_money']  = $order_info['dis_amount'];
+                $refund_order_add_data['unionpay_tn'] = $order_info['unionpay_tn'];
                 $refund_order_add_data['from_data']   = '1';
                 $rs = $refund_order_model->insertInfo($refund_order_add_data);
                 $order_update_data['status'] = '2';
@@ -224,17 +224,15 @@ class MyorderController extends BaseController
                 //@todo 更新库存
                 $order_detail_rs   = $order_detail_model->cancleOrder($order_sn, $mobile);
                 //@todo 更新优惠券
-                $restore_coupon_rs = $order_model->restoreCoupon($rs['coupon_id'], $mobile);
+                $restore_coupon_rs = $order_model->restoreCoupon($order_info['coupon_id'], $mobile);
             } catch (\Exception $e) {
                 $transaction->rollBack();
-                throw $e;
+                $this->returnJsonMsg('400', [], Common::C('code', '400'));
+                //throw $e;
             }
         } else {
             /**已退款**/
             $this->returnJsonMsg('807', [], Common::C('code', '807'));
-        }
-        if (!$rs) {
-            $this->returnJsonMsg('400', [], Common::C('code', '400'));
         }
         $this->returnJsonMsg('200', [], Common::C('code', '200'));
     }
