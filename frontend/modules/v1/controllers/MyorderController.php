@@ -189,7 +189,7 @@ class MyorderController extends BaseController
         $order_model = new Order();
         $order_where['mobile']   = $mobile;
         $order_where['order_sn'] = $order_sn;
-        $order_fields = 'order_sn,status,pay_status,total,dis_amount,unionpay_tn';
+        $order_fields = 'order_sn,status,pay_status,total,dis_amount,unionpay_tn,coupon_id';
         $rs = $order_model->getInfo($order_where, true, $order_fields);
         $order_detail_model = new OrderDetail();
         if (empty($rs)) {
@@ -200,7 +200,9 @@ class MyorderController extends BaseController
             $order_update_data['status'] = '2';
             $rs = $order_model->updateInfo($order_update_data, $order_where);
             //@todo 更新库存
-            $order_detail_rs = $order_detail_model->cancleOrder($order_sn, $mobile);
+            $order_detail_rs   = $order_detail_model->cancleOrder($order_sn, $mobile);
+            //@todo 更新优惠券
+            $restore_coupon_rs = $order_model->restoreCoupon($rs['coupon_id'], $mobile);
         } elseif ($rs['pay_status'] == '1') {
             /**已支付**/
             $connection = \Yii::$app->db_social;
@@ -220,7 +222,9 @@ class MyorderController extends BaseController
                 $rs = $order_model->updateInfo($order_update_data, $order_where);
                 $transaction->commit();
                 //@todo 更新库存
-                $order_detail_rs = $order_detail_model->cancleOrder($order_sn, $mobile);
+                $order_detail_rs   = $order_detail_model->cancleOrder($order_sn, $mobile);
+                //@todo 更新优惠券
+                $restore_coupon_rs = $order_model->restoreCoupon($rs['coupon_id'], $mobile);
             } catch (\Exception $e) {
                 $transaction->rollBack();
                 throw $e;
