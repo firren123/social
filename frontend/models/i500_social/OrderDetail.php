@@ -39,6 +39,7 @@ class OrderDetail extends SocialBase
 
     /**
      * 插入订单详情数据
+     * @author renyineng <renyineng@iyangpin.com>
      * @param array $order_detail 商品输数据
      * @return int
      */
@@ -69,6 +70,7 @@ class OrderDetail extends SocialBase
 
     /**
      * 根据订单号取消订单
+     * @author renyineng <renyineng@iyangpin.com>
      * @param string $order_sn 订单号号
      * @param string $mobile   手机号
      * @return bool;
