@@ -206,6 +206,7 @@ class MyorderController extends BaseController
             $connection = \Yii::$app->db_social;
             $transaction = $connection->beginTransaction();
             try {
+                //@todo 这块是CRM的退款表
                 $refund_order_model = new RefundOrder();
                 $refund_order_add_data['order_sn']    = $order_sn;
                 $refund_order_add_data['type']        = '1';
