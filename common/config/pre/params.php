@@ -10,8 +10,9 @@ return [
     'openLog'         => false, //true = 开始日志 false = 关闭日志
     'returnLogFile'   => '/tmp/return_log.txt', //返回值日志文件
     'paramsLogFile'   => '/tmp/params_log.txt', //客户端传递参数日志
-    'hongBaoShareImg'     => 'https://www.baidu.com/img/bd_logo1.png',  //红包分享图片
-    'hongBaoShareText'     => '大红包正在逼近，快来抢吧~',  //红包分享文字
+    'hongBaoShareImg'     => 'http://img.i500m.com/uploads/custom/20150909/hongbao.jpg',  //红包分享图片
+    'hongBaoShareTitle'   => 'i500m领券啦——积少成多，不做败家婆！',  //红包分享文字标题
+    'hongBaoShareText'    => '我在这里派发i500m抵用券啦。心若在钱就在，能省一块是一块！',  //红包分享文字内容
     'hongBaoHost'     => 'http://social.pre.i500m.com/hongbao?sign=',  //红包路径
     'imgHost'         => 'http://img.pre.i500m.com/', //图片服务器
     'channelHost'     => 'http://channel.pre.i500m.com/', //通道服务器

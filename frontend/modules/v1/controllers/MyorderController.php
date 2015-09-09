@@ -433,9 +433,10 @@ class MyorderController extends BaseController
         if (!$rs) {
             $this->returnJsonMsg('400', [], Common::C('code', '400'));
         }
-        $res['url']  = Common::C('hongBaoHost').$data['only_sign'];
-        $res['img']  = Common::C('hongBaoShareImg');
-        $res['text'] = Common::C('hongBaoShareText');
+        $res['url']   = Common::C('hongBaoHost').$data['only_sign'];
+        $res['img']   = Common::C('hongBaoShareImg');
+        $res['title'] = Common::C('hongBaoShareTitle');
+        $res['text']  = Common::C('hongBaoShareText');
         $this->returnJsonMsg('200', $res, Common::C('code', '200'));
     }
 
