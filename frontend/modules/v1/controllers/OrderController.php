@@ -572,30 +572,37 @@ class OrderController extends BaseController
         $model = new UserCoupons();
         $list = $model->getList(['mobile'=>$mobile, 'status'=>0], 'id,coupon_type_id,mobile,type_name,min_amount,par_value,expired_time,remark');
         $date = date("Y-m-d H:i:s");
-        $coupons = [];
+        $coupons = $un_coupons = [];
         if (!empty($list)) {
             foreach ($list as $k => $v) {
                 if ($v['expired_time'] > $date) {
                     if ($v['min_amount'] <= $goods_total) {
-                        $is_avail = 1;
+                        $coupons[] = [
+                            'id'=>$v['id'],
+                            'type_name'=>$v['type_name'],
+                            'min_amount'=>$v['min_amount'],
+                            'par_value'=>$v['par_value'],
+                            'expired_time'=>$v['expired_time'],
+                            'remark'=>$v['remark'],
+                            'is_avail'=>1,
+                        ];
                     } else {
-                        $is_avail = 0;
+                        $un_coupons[] = [
+                            'id'=>$v['id'],
+                            'type_name'=>$v['type_name'],
+                            'min_amount'=>$v['min_amount'],
+                            'par_value'=>$v['par_value'],
+                            'expired_time'=>$v['expired_time'],
+                            'remark'=>$v['remark'],
+                            'is_avail'=>0,
+                        ];
                     }
-                    $coupons[] = [
-                        'id'=>$v['id'],
-                        'type_name'=>$v['type_name'],
-                        'min_amount'=>$v['min_amount'],
-                        'par_value'=>$v['par_value'],
-                        'expired_time'=>$v['expired_time'],
-                        'remark'=>$v['remark'],
-                        'is_avail'=>$is_avail,
-                    ];
+
                 }
 
             }
         }
-        usort($coupons,"Common::cmp()");
-
+        $coupons = array_merge($coupons, $un_coupons);
         if ($coupons) {
             $this->returnJsonMsg(200, $coupons, '获取成功!');
         } else {
