@@ -149,7 +149,7 @@ class OrderController extends BaseController
                 //获取优惠劵
 
                 $coupons = new UserCoupons();
-                $coupons_max = $coupons->getMaxCoupon($mobile, $total);
+                $coupons_max = $coupons->getMaxCoupon($mobile, $goods_total);
                 //var_dump($coupons_max);
                 $coupon_value = 0;
                 if (!empty($coupons_max)) {
