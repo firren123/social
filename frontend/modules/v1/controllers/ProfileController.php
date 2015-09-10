@@ -231,7 +231,7 @@ class ProfileController extends BaseController
         par_value as amount,
         get_time as start_time,
         expired_time as end_time,
-        status';
+        status,remark';
         $info = $user_coupons_model->getList($user_coupons_where, $user_coupons_fields, 'id desc');
         foreach ($info as $k => $v) {
             if (strtotime($v['end_time']) < time()) {
