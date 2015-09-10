@@ -147,13 +147,14 @@ class OrderController extends BaseController
                 $data['item'] = $data_activity['goods_list'];
                 $data['gift_goods'] = $gift_goods;
                 //获取优惠劵
+
                 $coupons = new UserCoupons();
                 $coupons_max = $coupons->getMaxCoupon($mobile, $total);
+                //var_dump($coupons_max);
                 $coupon_value = 0;
                 if (!empty($coupons_max)) {
                     $coupon_value = $coupons_max['par_value'];
                 }
-
                 $data['coupon'] = $coupons_max;
                 //配送费
                 $data['freight'] = 0;
@@ -169,6 +170,9 @@ class OrderController extends BaseController
                 $data['goods_total'] = $goods_total;
                 //支付总价
                 $data['total'] = $goods_total + $data['freight'] - $coupon_value;
+                if ($data['total'] < 0) {
+                    $data['total'] = 0;
+                }
                 $this->returnJsonMsg(200, $data, 'SUCCESS');
             }
 
