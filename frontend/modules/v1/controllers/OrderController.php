@@ -478,9 +478,10 @@ class OrderController extends BaseController
                 //$order['goods_total'] = $goods_total;
                 //支付总价
                 $order['total'] = $goods_total + $order['freight'] - $dis_amount;
-
+                $pay_type = 'pay';
                 if ($order['total'] < 0) {
                     $order['total'] = 0;
+                    $pay_type = 'nopay';
                 }
                 //插入订单表
                 if (!empty($order)) {
@@ -533,7 +534,7 @@ class OrderController extends BaseController
                                 if ($order['total'] == 0) {
                                     //无需支付的 修改订单状态
                                 }
-                                $this->returnJsonMsg(200, ['order_sn'=>$order_sn], 'SUCCESS');
+                                $this->returnJsonMsg(200, ['order_sn'=>$order_sn, 'type'=>$pay_type], 'SUCCESS');
                             } else {
                                 $this->returnJsonMsg(108, [], '订单详情数据插入失败');
                             }
