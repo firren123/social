@@ -73,7 +73,7 @@ class OrderController extends BaseController
        // var_dump($dispatch_time);
         //配送地址
         $address_model = new UserAddress();
-        $address = $address_model->getList(['mobile'=>$mobile], 'id,consignee,consignee_mobile,search_address,details_address,is_default');
+        $address = $address_model->getList(['mobile'=>$mobile,'is_deleted'=>0], 'id,consignee,consignee_mobile,search_address,details_address,is_default');
         $default_address = [];
         if (!empty($address)) {
             foreach ($address as $k => $v) {
@@ -594,7 +594,7 @@ class OrderController extends BaseController
 
             }
         }
-        //usort($coupons,"Common::cmp()");
+        usort($coupons,"Common::cmp()");
 
         if ($coupons) {
             $this->returnJsonMsg(200, $coupons, '获取成功!');
