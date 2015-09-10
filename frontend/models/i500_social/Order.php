@@ -39,11 +39,13 @@ class Order extends SocialBase
 
     /**
      * 根据商家id，和商品金额 获取运费
-     * @param int   $shop_id 商家id
-     * @param float $total   商品金额
-     * @return string
+     * @author renyineng <renyineng@iyangpin.com>
+     * @param string $mobile     手机号
+     * @param int    $address_id 收货地址ID
+     * @param int    $shop_id    店铺ID
+     * @return bool
      */
-    public function checkAddress($mobile, $address_id, $shop_id)
+    public function checkAddress($mobile='', $address_id=0, $shop_id=0)
     {
         if (!empty($mobile) && !empty($address_id)) {
             $model = new UserAddress();
@@ -63,7 +65,15 @@ class Order extends SocialBase
 
 
     }
-    public function createSn($province_id, $mobile)
+
+    /**
+     * 创建订单号
+     * @author renyineng <renyineng@iyangpin.com>
+     * @param int    $province_id 省份id
+     * @param string $mobile      手机号
+     * @return bool
+     */
+    public function createSn($province_id=0, $mobile='')
     {
         $channelUrl = \Yii::$app->params['channelHost'];
         $url = $channelUrl.'order/create-order-sn?province_id='.$province_id.'&mobile='.$mobile;
@@ -73,5 +83,29 @@ class Order extends SocialBase
         } else {
             return false;
         }
+    }
+
+    /**
+     * 恢复优惠券
+     * @author linxinliang <linxinliang@iyangpin.com>
+     * @param int    $coupon_id 优惠券id
+     * @param string $mobile    手机号
+     * @return bool
+     */
+    public function restoreCoupon($coupon_id = 0, $mobile = '')
+    {
+        if (!empty($coupon_id)) {
+            $coupons_model = new UserCoupons();
+            $coupons_where['id']     = $coupon_id;
+            $coupons_where['mobile'] = $mobile;
+            $coupons_update_data['status']    = '0';
+            $coupons_update_data['used_time'] = '0000-00-00 00:00:00';
+            $rs = $coupons_model->updateInfo($coupons_update_data, $coupons_where);
+            if (!$rs) {
+                return false;
+            }
+            return true;
+        }
+        return true;
     }
 }

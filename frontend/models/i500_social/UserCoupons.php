@@ -37,6 +37,7 @@ class UserCoupons extends SocialBase
 
     /**
      * 获取最大的没有过期的优惠劵 并且符合使用条件
+     * @author renyineng <renyineng@iyangpin.com>
      * @param string $mobile 手机号
      * @param float  $total  总金额
      * @return array
@@ -64,7 +65,16 @@ class UserCoupons extends SocialBase
         return [];
             //->asArray()->all();
     }
-    public function checkCoupon($coupon_id, $total) {
+
+    /**
+     * 验证优惠券
+     * @author renyineng <renyineng@iyangpin.com>
+     * @param int $coupon_id 优惠券ID
+     * @param int $total     订单金额
+     * @return bool|mixed
+     */
+    public function checkCoupon($coupon_id = 0, $total = 0)
+    {
         if (empty($coupon_id)) {
             return false;
         }
