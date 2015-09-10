@@ -73,7 +73,7 @@ class OrderController extends BaseController
        // var_dump($dispatch_time);
         //配送地址
         $address_model = new UserAddress();
-        $address = $address_model->getList(['mobile'=>$mobile,'is_deleted'=>0], 'id,consignee,consignee_mobile,search_address,details_address,is_default');
+        $address = $address_model->getList(['mobile'=>$mobile,'is_deleted'=>2], 'id,consignee,consignee_mobile,search_address,details_address,is_default');
         $default_address = [];
         if (!empty($address)) {
             foreach ($address as $k => $v) {
@@ -478,6 +478,10 @@ class OrderController extends BaseController
                 //$order['goods_total'] = $goods_total;
                 //支付总价
                 $order['total'] = $goods_total + $order['freight'] - $dis_amount;
+
+                if ($order['total'] < 0) {
+                    $order['total'] = 0;
+                }
                 //插入订单表
                 if (!empty($order)) {
                     $re = $m_order->insertInfo($order);
@@ -525,6 +529,9 @@ class OrderController extends BaseController
                                         $this->returnJsonMsg(109, [], '优惠劵信息更新失败!');
                                     }
 
+                                }
+                                if ($order['total'] == 0) {
+                                    //无需支付的 修改订单状态
                                 }
                                 $this->returnJsonMsg(200, ['order_sn'=>$order_sn], 'SUCCESS');
                             } else {
