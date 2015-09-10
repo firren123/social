@@ -517,6 +517,15 @@ class OrderController extends BaseController
                                     }
 
                                 }
+                                //更新优惠劵信息
+                                if (!empty($coupon_id) && !empty($dis_amount)) {
+
+                                    $re = $coupons->updateInfo(['used_time'=>date("Y-m-d H:i:s"), 'status'=>1, 'shop_id'=>$this->shop_id], ['id'=>$coupon_id]);
+                                    if (empty($re)) {
+                                        $this->returnJsonMsg(109, [], '优惠劵信息更新失败!');
+                                    }
+
+                                }
                                 $this->returnJsonMsg(200, ['order_sn'=>$order_sn], 'SUCCESS');
                             } else {
                                 $this->returnJsonMsg(108, [], '订单详情数据插入失败');
