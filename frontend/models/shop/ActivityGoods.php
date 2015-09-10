@@ -36,17 +36,20 @@ class ActivityGoods extends ShopBase
     }
     /**
      * 减去库存
+     *
      * @param array  $map  查询条件
      * @param string $type 减or 加
+     * @param int    $num  数量
+     *
      * @return bool
      */
-    public function editNumber($map, $type = '-')
+    public function editNumber($map, $type = '-', $num = 1)
     {
         $model = $this->findOne($map);
         if ($type == '-') {
-            $model->day_confine_num = $model->day_confine_num - 1;
+            $model->day_confine_num = $model->day_confine_num - $num;
         } elseif ($type == '+') {
-            $model->day_confine_num = $model->day_confine_num + 1;
+            $model->day_confine_num = $model->day_confine_num + $num;
         }
         $re = $model->save();
         return $re;

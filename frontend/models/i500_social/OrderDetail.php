@@ -84,14 +84,14 @@ class OrderDetail extends SocialBase
                 $activity_model = new ActivityGoods();
                 foreach ($order_detail as $k => $v) {
 
-                    $model->editNumber(['product_id'=>$v['product_id'], 'shop_id'=>$v['shop_id']], '+');
+                    $model->editNumber(['product_id'=>$v['product_id'], 'shop_id'=>$v['shop_id']], '+', $v['num']);
                     if ($v['activity_id'] != 0) {
                         //活动的库存增加
-                        $activity_model->editNumber(['product_id'=>$v['product_id'], 'shop_id'=>$v['shop_id']], '+');
+                        $activity_model->editNumber(['product_id'=>$v['product_id'], 'shop_id'=>$v['shop_id']], '+', $v['num']);
                     }
                     if ($v['is_gift'] == 1) {
                         $activity_gift = new ActivityGoods();
-                        $activity_gift->editNumber(['product_id'=>$v['product_id'], 'shop_id'=>$v['shop_id']], '+');
+                        $activity_gift->editNumber(['product_id'=>$v['product_id'], 'shop_id'=>$v['shop_id']], '+', $v['num']);
                     }
 
                 }
