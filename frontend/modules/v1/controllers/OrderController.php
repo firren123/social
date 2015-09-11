@@ -73,7 +73,7 @@ class OrderController extends BaseController
        // var_dump($dispatch_time);
         //配送地址
         $address_model = new UserAddress();
-        $address = $address_model->getList(['mobile'=>$mobile,'is_deleted'=>2], 'id,consignee,consignee_mobile,search_address,details_address,is_default');
+        $address = $address_model->getList(['mobile'=>$mobile,'is_deleted'=>2], 'id,consignee,sex,consignee_mobile,search_address,details_address,is_default');
         $default_address = [];
         if (!empty($address)) {
             foreach ($address as $k => $v) {
