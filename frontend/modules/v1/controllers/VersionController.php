@@ -30,7 +30,9 @@ class VersionController extends BaseController
     public function actionIndex()
     {
         $model = new AppLog();
-        $info = $model->getInfo(['type'=>0], true , 'name,explain,url,upgrade', [], 'create_time desc');
+        $info = $model->getInfo(['type'=>0], true , 'name,major,explain,url,upgrade', [], 'create_time desc');
+        $info['version'] = $info['major'];
+        unset($info['major']);
         if (!empty($info)) {
             $this->returnJsonMsg(200, $info, '有新版本了');
         } else {
