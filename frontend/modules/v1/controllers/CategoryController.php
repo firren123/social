@@ -27,7 +27,8 @@ class CategoryController extends BaseController
     {
         $model = new ShopCategory();
         $this->shop_id = RequestHelper::get('shop_id', 0, 'intval');
-        $menu[] = ['name'=>'热门推荐', 'id'=>'hot','type'=>'hot'];
+        //$menu[] = ['name'=>'热门推荐', 'id'=>'hot','type'=>'hot'];
+        $menu = [];
         //读取活动
         $activity = new ShopActivity();
         $activity_name = $activity->getActivityName($this->shop_id);
