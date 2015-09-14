@@ -483,7 +483,7 @@ class MyorderController extends BaseController
         $shop_model = new Shop();
         $shop_where['id'] = $shop_id;
         $shop_fields = 'contact_name,mobile';
-        $rs = $shop_model->getInfo($shop_id, true, $shop_fields);
+        $rs = $shop_model->getInfo($shop_where, true, $shop_fields);
         return $rs;
     }
 
