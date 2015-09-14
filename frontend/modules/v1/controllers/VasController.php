@@ -197,8 +197,8 @@ class VasController extends BaseController
             }
         } elseif (isset($arr_result['code']) && $arr_result['code'] == 1) {
             if (isset($arr_result['data']) && isset($arr_result['data']['ResultCode'])) {
-                $arr_data = $arr_result['data'];
-                $str_code = $arr_result['data']['ResultCode'];
+                $arr_result_data = $arr_result['data'];
+                $str_code = $arr_result_data['ResultCode'];
                 if ($str_code === '00') {
                     echo json_encode(array('code' => 1, 'data' => $arr_data, 'msg' => ''));
                     return;
