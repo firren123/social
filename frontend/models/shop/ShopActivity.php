@@ -107,7 +107,13 @@ class ShopActivity extends ShopBase
      */
     public function getActivityName($shop_id)
     {
-        $type = $this->find()->select('type,name')->where(['shop_id'=>$shop_id])->groupBy('type')->asArray()->all();
+        $time = date("Y-m-d H:i:s", time());
+        $type = $this->find()
+            ->select('type,name')
+            ->where(['shop_id'=>$shop_id])
+            >andWhere(['<', 'start_time', $time])
+            ->andWhere(['>', 'end_time', $time])
+            ->groupBy('type')->asArray()->all();
         return $type;
     }
 }
