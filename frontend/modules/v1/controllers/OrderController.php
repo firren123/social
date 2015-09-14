@@ -339,6 +339,7 @@ class OrderController extends BaseController
             'order_sn'=>$order_sn,
             'mobile'=>$mobile,
             'shop_id'=>$this->shop_id,
+            'goods_total'=>0,
             'total'=>0,
             'remark'=>'',
             'status'=>0,
@@ -482,7 +483,7 @@ class OrderController extends BaseController
                 }
 
                 //商品总价
-                //$order['goods_total'] = $goods_total;
+                $order['goods_total'] = $goods_total;
                 //支付总价
                 $order['total'] = $goods_total + $order['freight'] - $dis_amount;
                 $pay_type = 'pay';
