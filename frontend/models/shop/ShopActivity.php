@@ -111,7 +111,7 @@ class ShopActivity extends ShopBase
         $type = $this->find()
             ->select('type,name')
             ->where(['shop_id'=>$shop_id])
-            >andWhere(['<', 'start_time', $time])
+            ->andWhere(['<', 'start_time', $time])
             ->andWhere(['>', 'end_time', $time])
             ->groupBy('type')->asArray()->all();
         return $type;
