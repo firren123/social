@@ -627,6 +627,7 @@ class OrderController extends BaseController
     public function actionTest()
     {
         $model = new OrderDetail();
+
         $model->cancleOrder('1441010766', '13617258652');
     }
 }
