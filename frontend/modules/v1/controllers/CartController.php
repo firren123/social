@@ -140,13 +140,14 @@ class CartController extends BaseController
         }
         $s_products = new ShopProducts();
         $info = $s_products->getInfo(['shop_id'=>$shop_id, 'product_id'=>$product_id], 'product_number,status');
+        //var_dump($info);
         //判断这个商品是否属于活动
         $activity_model = new ActivityGoods();
         $re = $activity_model->getActivitygoods($shop_id, $product_id);
         $data['num'] = $info['product_number'];
         $data['status'] = $info['status'];
         if (!empty($re)) {
-            $data['num'] = $re['num'];
+            //$data['num'] = $re['num'];
         }
 
         if (!empty($info)) {
