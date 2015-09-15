@@ -31,12 +31,12 @@ class CategoryController extends BaseController
         //$menu[] = ['name'=>'热门推荐', 'id'=>'hot','type'=>'hot'];
         $menu = [];
         //读取活动
-        $activity = new ShopActivity();
-        $activity_name = $activity->getActivityName($this->shop_id);
-        //var_dump($activity_name);exit();
-        foreach($activity_name as $k => $v) {
-            $menu[] = ['name'=>$v['name'], 'id'=>$v['type'], 'type'=>'activity'];
-        }
+//        $activity = new ShopActivity();
+//        $activity_name = $activity->getActivityName($this->shop_id);
+//        //var_dump($activity_name);exit();
+//        foreach($activity_name as $k => $v) {
+//            $menu[] = ['name'=>$v['name'], 'id'=>$v['type'], 'type'=>'activity'];
+//        }
 
 
         //获取分类
