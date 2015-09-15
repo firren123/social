@@ -20,6 +20,7 @@ use frontend\models\shop\ActivityProducts;
 use frontend\models\shop\ShopActivity;
 use frontend\models\shop\ActProducts;
 use frontend\models\shop\ShopCategory;
+use frontend\models\shop\ShopProducts;
 
 class CategoryController extends BaseController
 {
@@ -41,8 +42,13 @@ class CategoryController extends BaseController
         //获取分类
         $item = $model->getCategory(['shop_id'=>$this->shop_id]);
         //var_dump($item);
+        $product_model = new ShopProducts();
+
         foreach ($item as $k => $v) {
-            $menu[] = ['name'=>$v['name'], 'id'=>$v['id'], 'type'=>'category'];;
+            $info = $product_model->getInfo(['cat_id'=>$v['id']], 'id');
+            if (!empty($info)) {
+                $menu[] = ['name'=>$v['name'], 'id'=>$v['id'], 'type'=>'category'];
+            }
         }
         $this->returnJsonMsg(200, $menu, 'SUCCESS');
 
