@@ -45,7 +45,7 @@ class CategoryController extends BaseController
         $product_model = new ShopProducts();
 
         foreach ($item as $k => $v) {
-            $info = $product_model->getInfo(['cat_id'=>$v['id']], 'id');
+            $info = $product_model->getInfo(['cat_id'=>$v['id']], true, 'id');
             if (!empty($info)) {
                 $menu[] = ['name'=>$v['name'], 'id'=>$v['id'], 'type'=>'category'];
             }
