@@ -172,8 +172,13 @@ class OrderController extends BaseController
                 }
                 //商品总价
                 $data['goods_total'] = $goods_total;
-                //支付总价
-                $data['total'] = $goods_total + $data['freight'] - $coupon_value;
+//                echo "<br />";
+//                //支付总价
+               // echo $coupon_value;
+                //echo "<br />";
+                //echo $goods_total + $data['freight'];
+                //echo 10.01-10;
+                $data['total'] = number_format($goods_total + $data['freight'] - $coupon_value, 2);
                 if ($data['total'] < 0) {
                     $data['total'] = 0;
                 }
