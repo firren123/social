@@ -507,6 +507,16 @@ class ServiceController extends BaseController
         $user_card = RequestHelper::post('user_card', '', '');
         if (!empty($user_card)) {
             $update_data['user_card'] = $user_card;
+            //验证身份证
+            //@todo 通过身份证号未能获取到地址所在地
+            if (strlen($update_data['user_card']) != '18') {
+                $this->returnJsonMsg('1017', [], Common::C('code', '1017'));
+            }
+            if (!Common::isIdCard($update_data['user_card'])) {
+                $this->returnJsonMsg('1018', [], Common::C('code', '1018'));
+            }
+            $update_data['user_age'] = Common::getAgeByCard($update_data['user_card']);
+            $update_data['user_sex'] = Common::getSexByCard($update_data['user_card']);
         }
         //@todo 编辑个人信息后 是否又返回到待审核状态。
         $user_description = RequestHelper::post('user_description', '', '');
