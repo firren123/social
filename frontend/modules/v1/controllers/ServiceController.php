@@ -19,6 +19,7 @@ use common\helpers\Common;
 use common\helpers\RequestHelper;
 use frontend\models\i500_social\Service;
 use frontend\models\i500_social\ServiceCategory;
+use frontend\models\i500_social\ServiceSetting;
 use frontend\models\i500_social\UserBasicInfo;
 
 /**
@@ -177,6 +178,7 @@ class ServiceController extends BaseController
      */
     public function actionDetail()
     {
+        //@todo 未认证的在前台是不现实的。
         $where['id'] = RequestHelper::get('service_id', '0', 'intval');
         if (empty($where['id'])) {
             $this->returnJsonMsg('1010', [], Common::C('code', '1010'));
@@ -299,6 +301,7 @@ class ServiceController extends BaseController
      */
     public function actionGetIndexService()
     {
+        //@todo 未认证的在前台是不现实的。
         $page      = RequestHelper::get('page', '1', 'intval');
         $page_size = RequestHelper::get('page_size', '6', 'intval');
         if ($page_size > Common::C('maxPageSize')) {
@@ -332,6 +335,7 @@ class ServiceController extends BaseController
      */
     public function actionGetServiceSquare()
     {
+        //@todo 未认证的在前台是不现实的。
         $type = RequestHelper::get('type', '0', 'intval');
         if (empty($type)) {
             $this->returnJsonMsg('1008', [], Common::C('code', '1008'));
@@ -411,6 +415,33 @@ class ServiceController extends BaseController
             unset($list[$k]['mobile']);
         }
         $this->returnJsonMsg('200', $list, Common::C('code', '200'));
+    }
+
+    /**
+     * 获取设置信息
+     * @return array
+     */
+    public function actionGetSetting()
+    {
+        $where['uid'] = RequestHelper::get('uid', '', '');
+        if (empty($where['uid'])) {
+            $this->returnJsonMsg('621', [], Common::C('code', '621'));
+        }
+        $where['mobile'] = RequestHelper::get('mobile', '', '');
+        if (empty($where['mobile'])) {
+            $this->returnJsonMsg('604', [], Common::C('code', '604'));
+        }
+        if (!Common::validateMobile($where['mobile'])) {
+            $this->returnJsonMsg('605', [], Common::C('code', '605'));
+        }
+        $fields = 'name,description,province_id,search_address,details_address,lng,lat,user_name,user_card,user_description,audit_status';
+        $service_setting_model = new ServiceSetting();
+        $info = $service_setting_model->getInfo($where, true, $fields);
+        if (empty($info)) {
+            $this->returnJsonMsg('1015', [], Common::C('code', '1015'));
+        }
+        //@todo 身份证号码需要处理，考虑是否需要返回
+        $this->returnJsonMsg('200', $info, Common::C('code', '200'));
     }
 
     /**
