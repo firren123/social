@@ -345,7 +345,8 @@ class ServiceController extends BaseController
             /**附近**/
         } elseif ($type == '2') {
             /**分类**/
-            $where['category_id'] = RequestHelper::get('category_id', '0', 'intval');
+            $where['category_id']     = RequestHelper::get('category_id', '0', 'intval');
+            $where['son_category_id'] = RequestHelper::get('son_category_id', '0', 'intval');
             if (empty($where['category_id'])) {
                 $this->returnJsonMsg('1000', [], Common::C('code', '1000'));
             }
