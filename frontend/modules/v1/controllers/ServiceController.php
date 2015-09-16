@@ -311,7 +311,7 @@ class ServiceController extends BaseController
         $where['audit_status'] = '2';
         $where['status']       = '1';
         $where['is_deleted']   = '2';
-        $fields = 'id,mobile,category_id,son_category_id,image,title,price,unit,service_way,description';
+        $fields = 'id,mobile,category_id,son_category_id,image,title,price,unit,service_way,description as service_description';
         $list = $service_model->getPageList($where, $fields, 'id desc', $page, $page_size);
         if (empty($list)) {
             $this->returnJsonMsg('1009', [], Common::C('code', '1009'));
