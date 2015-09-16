@@ -445,6 +445,86 @@ class ServiceController extends BaseController
     }
 
     /**
+     * 设置服务信息
+     * @return array
+     */
+    public function actionSet()
+    {
+        $where['uid'] = RequestHelper::post('uid', '', '');
+        if (empty($where['uid'])) {
+            $this->returnJsonMsg('621', [], Common::C('code', '621'));
+        }
+        $where['mobile'] = RequestHelper::post('mobile', '', '');
+        if (empty($where['mobile'])) {
+            $this->returnJsonMsg('604', [], Common::C('code', '604'));
+        }
+        if (!Common::validateMobile($where['mobile'])) {
+            $this->returnJsonMsg('605', [], Common::C('code', '605'));
+        }
+        $name = RequestHelper::post('name', '', '');
+        $update_data = [];
+        if (!empty($name)) {
+            $update_data['name'] = $name;
+        }
+        $description = RequestHelper::post('description', '', '');
+        if (!empty($description)) {
+            $update_data['description'] = $description;
+        }
+        $province_id = RequestHelper::post('province_id', '', '');
+        if (!empty($province_id)) {
+            $update_data['province_id'] = $province_id;
+        }
+        $search_address = RequestHelper::post('search_address', '', '');
+        if (!empty($search_address)) {
+            $update_data['search_address'] = $search_address;
+        }
+        $details_address = RequestHelper::post('details_address', '', '');
+        if (!empty($details_address)) {
+            $update_data['details_address'] = $details_address;
+        }
+        $lng = RequestHelper::post('lng', '', '');
+        if (!empty($lng)) {
+            $update_data['lng'] = $lng;
+        }
+        $lat = RequestHelper::post('lat', '', '');
+        if (!empty($lat)) {
+            $update_data['lat'] = $lat;
+        }
+        $user_name = RequestHelper::post('user_name', '', '');
+        if (!empty($user_name)) {
+            $update_data['user_name'] = $user_name;
+        }
+        $user_card = RequestHelper::post('user_card', '', '');
+        if (!empty($user_card)) {
+            $update_data['user_card'] = $user_card;
+        }
+        //@todo 编辑个人信息后 是否又返回到待审核状态。
+        $user_description = RequestHelper::post('user_description', '', '');
+        if (!empty($user_description)) {
+            $update_data['user_description'] = $user_description;
+        }
+        if (empty($update_data)) {
+            $this->returnJsonMsg('1016', [], Common::C('code', '1016'));
+        }
+        $service_setting_model = new ServiceSetting();
+        $info = $service_setting_model->getInfo($where, true, 'id');
+        if (empty($info)) {
+            /**执行添加**/
+            $update_data['uid']    = $where['uid'];
+            $update_data['mobile'] = $where['mobile'];
+            $rs = $service_setting_model->insertInfo($update_data);
+        } else {
+            $update_data['update_time'] = date('Y-m-d H:i:s', time());
+            /**执行更新**/
+            $rs = $service_setting_model->updateInfo($update_data, $where);
+        }
+        if (!$rs) {
+            $this->returnJsonMsg('400', [], Common::C('code', '400'));
+        }
+        $this->returnJsonMsg('200', [], Common::C('code', '200'));
+    }
+
+    /**
      * 获取服务分类
      * @return array
      */
