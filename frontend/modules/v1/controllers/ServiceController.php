@@ -350,6 +350,9 @@ class ServiceController extends BaseController
             if (empty($where['category_id'])) {
                 $this->returnJsonMsg('1000', [], Common::C('code', '1000'));
             }
+            if (empty($where['son_category_id'])) {
+                unset($where['son_category_id']);
+            }
             $page      = RequestHelper::get('page', '1', 'intval');
             $page_size = RequestHelper::get('page_size', '6', 'intval');
             if ($page_size > Common::C('maxPageSize')) {
