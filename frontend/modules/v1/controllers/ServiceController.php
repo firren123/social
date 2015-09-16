@@ -365,7 +365,7 @@ class ServiceController extends BaseController
             $where['audit_status'] = '2';
             $where['status']       = '1';
             $where['is_deleted']   = '2';
-            $fields = 'id,mobile,category_id,son_category_id,image,title,price,unit,service_way,description';
+            $fields = 'id,mobile,image,title,price,unit,service_way';
             $list = $service_model->getPageList($where, $fields, 'id desc', $page, $page_size);
             if (empty($list)) {
                 $this->returnJsonMsg('1009', [], Common::C('code', '1009'));
@@ -376,7 +376,10 @@ class ServiceController extends BaseController
                 }
                 if (!empty($v['mobile'])) {
                     $user_info = $this->_getUserInfo($v['mobile']);
-                    $list[$k]['user_avatar'] = $user_info['avatar'];
+                    $list[$k]['user_avatar']    = $user_info['avatar'];
+                    $list[$k]['search_address'] = $this->_getSettingInfo($v['mobile']);
+                    //@todo 距离需求请求仪能的接口
+                    $list[$k]['distance']       = '1.5公里';
                 }
                 unset($list[$k]['mobile']);
             }
