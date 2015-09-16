@@ -311,7 +311,7 @@ class ServiceController extends BaseController
         $where['audit_status'] = '2';
         $where['status']       = '1';
         $where['is_deleted']   = '2';
-        $fields = 'id,mobile,category_id,son_category_id,image,title,price,unit,service_way,description as service_description';
+        $fields = 'id,mobile,image,title,price,unit,service_way';
         $list = $service_model->getPageList($where, $fields, 'id desc', $page, $page_size);
         if (empty($list)) {
             $this->returnJsonMsg('1009', [], Common::C('code', '1009'));
@@ -322,7 +322,10 @@ class ServiceController extends BaseController
             }
             if (!empty($v['mobile'])) {
                 $user_info = $this->_getUserInfo($v['mobile']);
-                $list[$k]['user_avatar'] = $user_info['avatar'];
+                $list[$k]['user_avatar']    = $user_info['avatar'];
+                $list[$k]['search_address'] = $this->_getSettingInfo($v['mobile']);
+                //@todo 距离需求请求仪能的接口
+                $list[$k]['distance']       = '1.5公里';
             }
             unset($list[$k]['mobile']);
         }
@@ -558,6 +561,24 @@ class ServiceController extends BaseController
         $this->returnJsonMsg('200', $info, Common::C('code', '200'));
     }
 
+    /**
+     * 获取设置信息
+     * @param string $mobile 手机号
+     * @return string
+     */
+    private function _getSettingInfo($mobile = '')
+    {
+        if (!empty($mobile)) {
+            $service_setting_model = new ServiceSetting();
+            $where['mobile'] = $mobile;
+            $fields = 'search_address';
+            $info = $service_setting_model->getInfo($where, true, $fields);
+            if (!empty($info) && !empty($info['search_address'])) {
+                return $info['search_address'];
+            }
+        }
+        return '';
+    }
     /**
      * 格式化图片
      * @param string $image 图片地址
