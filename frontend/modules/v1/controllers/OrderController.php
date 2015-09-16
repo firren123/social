@@ -178,7 +178,9 @@ class OrderController extends BaseController
                 //echo "<br />";
                 //echo $goods_total + $data['freight'];
                 //echo 10.01-10;
-                $data['total'] = number_format($goods_total + $data['freight'] - $coupon_value, 2, '', '');
+                $data['total'] = $goods_total + $data['freight'] - $coupon_value;
+
+                $data['total'] = round($data['total'], 2);
                 if ($data['total'] < 0) {
                     $data['total'] = 0;
                 }
