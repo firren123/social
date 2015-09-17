@@ -569,6 +569,9 @@ class ServiceController extends BaseController
                 if ($type == '2') {
                     $info[$k]['son'] = $this->_getSonCategory($v['id']);
                 }
+                if ($type == '3') {
+                    $info[$k]['son'] = $this->_getSonCategory($v['id'], '1');
+                }
             }
         }
         $this->returnJsonMsg('200', $info, Common::C('code', '200'));
@@ -609,11 +612,18 @@ class ServiceController extends BaseController
 
     /**
      * 获取子类的信息
-     * @param int $pid 父类ID
+     * @param int $pid  父类ID
+     * @param int $type 类型ID 当type!=0的时候返回子类中返回"全部"
      * @return array
      */
-    private function _getSonCategory($pid = 0)
+    private function _getSonCategory($pid = 0, $type = 0)
     {
+        $rs = [];
+        if (!empty($type)) {
+            $rs['id']    = '0';
+            $rs['name']  = '全部';
+            $rs['image'] = '';
+        }
         if (!empty($pid)) {
             $service_category_model = new ServiceCategory();
             $fields = 'id,name,image';
@@ -622,6 +632,9 @@ class ServiceController extends BaseController
             $where['is_deleted'] = '2';
             $order  = 'sort desc';
             $info = $service_category_model->getList($where, $fields, $order);
+            if (!empty($type)) {
+                array_unshift($info, $rs);//向数组插入元素
+            }
             if (!empty($info)) {
                 foreach ($info as $k => $v) {
                     if ($v['image']) {
@@ -631,7 +644,7 @@ class ServiceController extends BaseController
             }
             return $info;
         }
-        return [];
+        return $rs;
     }
 
     /**
