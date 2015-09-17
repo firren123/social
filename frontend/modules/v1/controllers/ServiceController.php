@@ -96,6 +96,9 @@ class ServiceController extends BaseController
         }
         /**查看该用户是否已经认证**/
         $audit_status = $this->_getSettingInfo($data['mobile'], 'audit_status');
+        if ($audit_status == "") {
+            $this->returnJsonMsg('1019', [], Common::C('code', '1019'));
+        }
         if ($audit_status == '2') {
             /**user_auth_status=1表示认证成功**/
             $data['user_auth_status'] = '1';
@@ -181,6 +184,9 @@ class ServiceController extends BaseController
         $data['audit_status'] = '0';
         /**查看该用户是否已经认证**/
         $audit_status = $this->_getSettingInfo($data['mobile'], 'audit_status');
+        if ($audit_status == "") {
+            $this->returnJsonMsg('1019', [], Common::C('code', '1019'));
+        }
         if ($audit_status == '2') {
             /**user_auth_status=1表示认证成功**/
             $data['user_auth_status'] = '1';
