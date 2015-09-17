@@ -86,6 +86,7 @@ class AddressController extends BaseController
         if (empty($uid)) {
             $this->returnJsonMsg('621', [], Common::C('code', '621'));
         }
+        $data['uid']    = $uid;
         $data['mobile'] = RequestHelper::post('mobile', '', '');
         if (empty($data['mobile'])) {
             $this->returnJsonMsg('604', [], Common::C('code', '604'));
