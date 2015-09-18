@@ -47,7 +47,7 @@ class OrderController extends BaseController
 
     /**
      * 确认订单页面 [{"product_id":"9000","num":10},{"product_id":"10","num":10}]
-     *
+     * @return json
      */
     public function actionConfirm()
     {
@@ -163,7 +163,7 @@ class OrderController extends BaseController
                 //配送费
                 $data['freight'] = 0;
                 $shop_model  = new Shop();
-                $info = $shop_model->getInfo(['id'=>$this->shop_id], true, 'sent_fee,free_money,freight');
+                $info = $shop_model->getInfo(['id'=>$this->shop_id], true, 'sent_fee,free_money,freight,shop_name,contact_name,mobile,address');
                 if ($info['sent_fee'] > $goods_total) {
                     $this->returnJsonMsg(109, [], '不够起送费');
                 }
@@ -184,6 +184,11 @@ class OrderController extends BaseController
                 if ($data['total'] < 0) {
                     $data['total'] = 0;
                 }
+                $data['shop_address'] = [
+                    'consignee'=>$info['shop_name'],
+                    'consignee_mobile'=>$info['mobile'],
+                    'address'=>$info['address'],
+                ];
                 $this->returnJsonMsg(200, $data, 'SUCCESS');
             }
 
