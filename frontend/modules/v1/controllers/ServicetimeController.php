@@ -95,15 +95,16 @@ class ServicetimeController extends BaseController
         $service_time_and_where = ['>=' , 'day', date("Y-m-d", time())];
         $list = $service_time_model->getPageList($where, $service_time_fields, 'day asc', '1', '7', $service_time_and_where);
         $count = 0;
+        $last_day = date('Y-m-d', time());
         if (!empty($list)) {
             foreach ($list as $k => $v) {
                 $list[$k]['day']      = date('Y-m-d', strtotime($v['day']));
                 $list[$k]['show_day'] = date('m.d', strtotime($v['day']));
             }
             $count = count($list);
+            $last_day = $list[$count-1]['day'];
         }
         if ($count < 7) {
-            $last_day = $list[$count-1]['day'];
             for ($i=0; $i<=(6-$count); $i++) {
                 $list[$count+$i]['day']      = date("Y-m-d", strtotime("+".($i+1)." day", strtotime($last_day)));
                 $list[$count+$i]['week']     = Common::getWeek($list[$count+$i]['day']);
