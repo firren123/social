@@ -46,6 +46,61 @@ class ServiceController extends BaseController
     }
 
     /**
+     * 服务主页
+     * @return array
+     */
+    public function actionIndex()
+    {
+        $uid = RequestHelper::get('uid', '', '');
+        if (empty($uid)) {
+            $this->returnJsonMsg('621', [], Common::C('code', '621'));
+        }
+        /**获取服务设置信息**/
+        $service_setting_where['uid']          = $uid;
+        $service_setting_where['audit_status'] = '2';
+        $service_setting_where['status']       = '2';
+        $service_setting_where['is_deleted']   = '2';
+        $service_setting_fields = 'mobile,name,search_address';
+        $service_setting_model = new ServiceSetting();
+        $service_setting_info = $service_setting_model->getInfo($service_setting_where, true, $service_setting_fields);
+        if (empty($service_setting_info)) {
+            $this->returnJsonMsg('1015', [], Common::C('code', '1015'));
+        }
+        if (!empty($service_setting_info['mobile'])) {
+            $user_info = $this->_getUserInfo($service_setting_info['mobile']);
+            $service_setting_info['user_avatar'] = $user_info['avatar'];
+        }
+        unset($service_setting_info['mobile']);
+        $service_setting_info['star']     = '5';
+        //@todo 距离需求请求仪能的接口
+        $service_setting_info['distance'] = '1.0公里';
+        $rs['service_setting'] = $service_setting_info;
+        $rs['service_list']    = [];
+        $page      = RequestHelper::get('page', '1', 'intval');
+        $page_size = RequestHelper::get('page_size', '6', 'intval');
+        if ($page_size > Common::C('maxPageSize')) {
+            $this->returnJsonMsg('705', [], Common::C('code', '705'));
+        }
+        $service_model = new Service();
+        $service_where['uid']              = $uid;
+        $service_where['audit_status']     = '2';
+        $service_where['user_auth_status'] = '1';
+        $service_where['status']           = '1';
+        $service_where['is_deleted']       = '2';
+        $service_fields = 'id,mobile,image,title,price,unit,service_way';
+        $list = $service_model->getPageList($service_where, $service_fields, 'id desc', $page, $page_size);
+        if (!empty($list)) {
+            foreach ($list as $k => $v) {
+                if ($v['image']) {
+                    $list[$k]['image'] = $this->_formatImg($v['image']);
+                }
+                unset($list[$k]['mobile']);
+            }
+        }
+        $rs['service_list'] = $list;
+        $this->returnJsonMsg('200', $rs, Common::C('code', '200'));
+    }
+    /**
      * 发布服务
      * @return array
      */
@@ -340,7 +395,7 @@ class ServiceController extends BaseController
         $where['user_auth_status'] = '1';
         $where['status']           = '1';
         $where['is_deleted']       = '2';
-        $fields = 'id,mobile,image,title,price,unit,service_way';
+        $fields = 'id,uid,mobile,image,title,price,unit,service_way';
         $list = $service_model->getPageList($where, $fields, 'id desc', $page, $page_size);
         if (empty($list)) {
             $this->returnJsonMsg('1009', [], Common::C('code', '1009'));
@@ -394,7 +449,7 @@ class ServiceController extends BaseController
             $where['user_auth_status'] = '1';
             $where['status']           = '1';
             $where['is_deleted']       = '2';
-            $fields = 'id,mobile,image,title,price,unit,service_way';
+            $fields = 'id,uid,mobile,image,title,price,unit,service_way';
             $list = $service_model->getPageList($where, $fields, 'id desc', $page, $page_size);
             if (empty($list)) {
                 $this->returnJsonMsg('1009', [], Common::C('code', '1009'));
