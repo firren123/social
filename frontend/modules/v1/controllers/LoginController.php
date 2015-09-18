@@ -163,6 +163,7 @@ class LoginController extends BaseController
         $user_m->updateInfo($user_update_data, $user_update_where);
 
         $login_log_model = new LoginLog();
+        $login_log_data['uid']      = $user_info['id'];
         $login_log_data['mobile']   = $mobile;
         $login_log_data['login_ip'] = Common::getIp();
         $login_log_data['channel']  = $channel;

@@ -75,6 +75,7 @@ class ProfileController extends BaseController
         $user_base_fields = 'id,mobile,nickname,avatar,personal_sign,realname,sex,birthday,province_id,city_id,district_id,community_name';
         $user_base_info = $user_base_model->getInfo($user_base_where, true, $user_base_fields);
         if (empty($user_base_info)) {
+            $user_base_data['uid']    = $uid;
             $user_base_data['mobile'] = $mobile;
             $rs = $user_base_model->insertInfo($user_base_data);
             if (!$rs) {

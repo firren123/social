@@ -192,12 +192,82 @@ class Common
     }
 
     /**
+     * 是否是身份证格式
+     * @param string $number 身份证数字
+     * @return bool
+     */
+    public static function isIdCard($number = '')
+    {
+        // 转化为大写，如出现x
+        $number = strtoupper($number);
+        //加权因子
+        $wi = array(7, 9, 10, 5, 8, 4, 2, 1, 6, 3, 7, 9, 10, 5, 8, 4, 2);
+        //校验码串
+        $ai = array('1', '0', 'X', '9', '8', '7', '6', '5', '4', '3', '2');
+        //按顺序循环处理前17位
+        $sigma = 0;
+        for ($i = 0;$i < 17;$i++) {
+            //提取前17位的其中一位，并将变量类型转为实数
+            $b = (int) $number{$i};
+            //提取相应的加权因子
+            $w = $wi[$i];
+            //把从身份证号码中提取的一位数字和加权因子相乘，并累加
+            $sigma += $b * $w;
+        }
+        //计算序号
+        $snumber = $sigma % 11;
+        //按照序号从校验码串中提取相应的字符。
+        $check_number = $ai[$snumber];
+        if ($number{17} == $check_number) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * 通过身份证获取生日
+     * @param string $card 身份证
+     * @return string
+     */
+    public static function getBirthdayByCard($card = '')
+    {
+        return strlen($card)==15 ? ('19' . substr($card, 6, 6)) : substr($card, 6, 8);
+    }
+
+    /**
+     * 通过身份证获取性别
+     * @param string $card 身份证
+     * @return string
+     */
+    public static function getSexByCard($card = '')
+    {
+        //1=男 2=女
+        return substr($card, (strlen($card)==15 ? -2 : -1), 1) % 2 ? '1' : '2';
+    }
+
+    /**
+     * 通过身份证获取年龄
+     * @param string $card 身份证
+     * @return string
+     */
+    public static function getAgeByCard($card = '')
+    {
+        $date = strtotime(substr($card, 6, 8)); //获得出生年月日的时间戳
+        $today = strtotime('today'); //获得今日的时间戳
+        $diff = floor(($today-$date)/86400/365); //得到两个日期相差的大体年数
+        //strtotime 加上这个年数后得到那日的时间戳后与今日的时间戳相比
+        $age = strtotime(substr($card, 6, 8).' +'.$diff.'years') > $today ? ($diff+1) : $diff ;
+        return $age;
+    }
+
+    /**
      * 距离当前时间展示方法
      * @param string $datetime 活跃时间
      * @param int    $nowtime  当前时间
      * @return bool|string
      */
-    function timeAgo($datetime='', $nowtime = 0)
+    public static function timeAgo($datetime='', $nowtime = 0)
     {
         $datetime = strtotime($datetime);
         if (empty($nowtime)) {

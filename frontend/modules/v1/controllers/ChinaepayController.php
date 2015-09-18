@@ -62,8 +62,8 @@ class ChinaepayController extends BaseController
         }
         $order_model = new Order();
         $data['mobile']   = $mobile;
-        //@todo 确定创建订单号为什么用省份？
-        $data['order_sn'] = $order_model->createSn('1', $mobile);
+        //@todo 确定创建订单号为什么用省份？35=全国
+        $data['order_sn'] = $order_model->createSn('35', $mobile);
         $data['business_code'] = RequestHelper::post('business_code', '0', '');
         if (empty($data['business_code'])) {
             $this->returnJsonMsg('900', [], Common::C('code', '900'));

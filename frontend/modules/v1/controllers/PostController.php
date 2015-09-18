@@ -85,6 +85,7 @@ class PostController extends BaseController
         if (!empty($post_info)) {
             $this->returnJsonMsg('704', [], Common::C('code', '704'));
         }
+        $post_add_data['uid']      = $uid;
         $post_add_data['mobile']   = $mobile;
         $post_add_data['forum_id'] = $forum_id;
         $post_add_data['title']    = $title;
@@ -231,6 +232,7 @@ class PostController extends BaseController
             $this->returnJsonMsg('715', [], Common::C('code', '715'));
         }
         $post_comment_model = new PostComments();
+        $post_comment_add_data['uid']     = $uid;
         $post_comment_add_data['mobile']  = $mobile;
         $post_comment_add_data['post_id'] = $post_id;
         $post_comment_add_data['content'] = $content;
@@ -281,6 +283,7 @@ class PostController extends BaseController
             $this->returnJsonMsg('718', [], Common::C('code', '718'));
         }
         $rs = $this->_setPostNumber($post_id, $post_rs['thumbs']+1, '1');
+        $post_thumbs_add_data['uid']     = $uid;
         $post_thumbs_add_data['mobile']  = $mobile;
         $post_thumbs_add_data['post_id'] = $post_id;
         $add_rs = $post_thumbs->insertInfo($post_thumbs_add_data);
@@ -381,6 +384,7 @@ class PostController extends BaseController
         }
         $post_comments_update['thumbs'] = $post_comments_info['thumbs'] + 1;
         $rs = $post_comments_model->updateInfo($post_comments_update, $post_comments_where);
+        $post_comments_thumbs_add_data['uid']        = $uid;
         $post_comments_thumbs_add_data['mobile']     = $mobile;
         $post_comments_thumbs_add_data['comment_id'] = $comment_id;
         $add_rs = $post_comments_thumbs_model->insertInfo($post_comments_thumbs_add_data);
