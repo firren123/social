@@ -51,12 +51,12 @@ class ServiceController extends BaseController
      */
     public function actionIndex()
     {
-        $uid = RequestHelper::get('uid', '', '');
-        if (empty($uid)) {
-            $this->returnJsonMsg('621', [], Common::C('code', '621'));
+        $uuid = RequestHelper::get('uuid', '', '');
+        if (empty($uuid)) {
+            $this->returnJsonMsg('641', [], Common::C('code', '641'));
         }
         /**获取服务设置信息**/
-        $service_setting_where['uid']          = $uid;
+        $service_setting_where['uid']          = $uuid;
         $service_setting_where['audit_status'] = '2';
         $service_setting_where['status']       = '2';
         $service_setting_where['is_deleted']   = '2';
@@ -82,7 +82,7 @@ class ServiceController extends BaseController
             $this->returnJsonMsg('705', [], Common::C('code', '705'));
         }
         $service_model = new Service();
-        $service_where['uid']              = $uid;
+        $service_where['uid']              = $uuid;
         $service_where['audit_status']     = '2';
         $service_where['user_auth_status'] = '1';
         $service_where['status']           = '1';
