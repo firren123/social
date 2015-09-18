@@ -1,0 +1,187 @@
+<?php
+/**
+ * 服务时间设置
+ *
+ * PHP Version 5
+ *
+ * @category  Social
+ * @package   Service
+ * @author    linxinliang <linxinliang@iyangpin.com>
+ * @time      2015/9/18
+ * @copyright 2015 灵韬致胜（北京）科技发展有限公司
+ * @license   http://www.i500m.com license
+ * @link      linxinliang@iyangpin.com
+ */
+namespace frontend\modules\v1\controllers;
+
+use Yii;
+use common\helpers\Common;
+use common\helpers\RequestHelper;
+use frontend\models\i500_social\ServiceTime;
+
+/**
+ * Service time
+ *
+ * @category Social
+ * @package  Servicetime
+ * @author   linxinliang <linxinliang@iyangpin.com>
+ * @license  http://www.i500m.com/ license
+ * @link     linxinliang@iyangpin.com
+ */
+class ServicetimeController extends BaseController
+{
+    /**
+     * Before
+     * @param \yii\base\Action $action Action
+     * @return bool
+     * @throws \yii\web\BadRequestHttpException
+     */
+    public function beforeAction($action)
+    {
+        $this->enableCsrfValidation = false;
+        return parent::beforeAction($action);
+    }
+
+    /**
+     * 获取时间
+     * @return array
+     */
+    public function actionGetTime()
+    {
+        $where['uid'] = RequestHelper::get('uid', '', '');
+        if (empty($where['uid'])) {
+            $this->returnJsonMsg('621', [], Common::C('code', '621'));
+        }
+        $where['mobile'] = RequestHelper::get('mobile', '', '');
+        if (empty($where['mobile'])) {
+            $this->returnJsonMsg('604', [], Common::C('code', '604'));
+        }
+        if (!Common::validateMobile($where['mobile'])) {
+            $this->returnJsonMsg('605', [], Common::C('code', '605'));
+        }
+        $where['day'] = RequestHelper::get('day', '', '');
+        if (empty($where['day'])) {
+            $this->returnJsonMsg('1023', [], Common::C('code', '1023'));
+        }
+        $service_time_model = new ServiceTime();
+        $service_time_fields = 'hours';
+        $info = $service_time_model->getInfo($where, true, $service_time_fields);
+        if (empty($info)) {
+            $this->returnJsonMsg('1024', $info, Common::C('code', '1024'));
+        }
+        $rs_info = json_decode(htmlspecialchars_decode($info['hours']), true);
+        $this->returnJsonMsg('200', $rs_info, Common::C('code', '200'));
+    }
+
+    /**
+     * 设置时间
+     * @return array
+     */
+    public function actionSetTime()
+    {
+        $data['uid'] = RequestHelper::post('uid', '', '');
+        if (empty($data['uid'])) {
+            $this->returnJsonMsg('621', [], Common::C('code', '621'));
+        }
+        $data['mobile'] = RequestHelper::post('mobile', '', '');
+        if (empty($data['mobile'])) {
+            $this->returnJsonMsg('604', [], Common::C('code', '604'));
+        }
+        if (!Common::validateMobile($data['mobile'])) {
+            $this->returnJsonMsg('605', [], Common::C('code', '605'));
+        }
+        $data['day'] = RequestHelper::post('day', '', '');
+        if (empty($data['day'])) {
+            $this->returnJsonMsg('1023', [], Common::C('code', '1023'));
+        }
+        $data['week'] = Common::getWeek($data['day']);
+        $data['hours'] = RequestHelper::post('json_str', '', '');
+        $service_time_model = new ServiceTime();
+        /**判断是否存在 存在执行更新 不存在执行添加**/
+        $service_time_where['uid']    = $data['uid'];
+        $service_time_where['mobile'] = $data['mobile'];
+        $service_time_where['day']    = $data['day'];
+        $update_data['hours']         = $data['hours'];
+        $info = $service_time_model->getInfo($service_time_where, true, 'id');
+        if (empty($info)) {
+            $rs = $service_time_model->insertInfo($data);
+        } else {
+            $rs = $service_time_model->updateInfo($update_data, $service_time_where);
+        }
+        if (!$rs) {
+            $this->returnJsonMsg('400', [], Common::C('code', '400'));
+        }
+        $this->returnJsonMsg('200', [], Common::C('code', '200'));
+    }
+
+    /**
+     * 检验时间
+     * @return array
+     */
+    public function actionCheckTime()
+    {
+        $where['uid'] = RequestHelper::post('uid', '', '');
+        if (empty($where['uid'])) {
+            $this->returnJsonMsg('621', [], Common::C('code', '621'));
+        }
+        $where['mobile'] = RequestHelper::post('mobile', '', '');
+        if (empty($where['mobile'])) {
+            $this->returnJsonMsg('604', [], Common::C('code', '604'));
+        }
+        if (!Common::validateMobile($where['mobile'])) {
+            $this->returnJsonMsg('605', [], Common::C('code', '605'));
+        }
+        $where['day'] = RequestHelper::post('day', '', '');
+        if (empty($where['day'])) {
+            $this->returnJsonMsg('1023', [], Common::C('code', '1023'));
+        }
+        $hour = RequestHelper::post('hour', '', '');
+        if (empty($hour)) {
+            $this->returnJsonMsg('1025', [], Common::C('code', '1025'));
+        }
+        $status = RequestHelper::post('status', '', '');  //1=启用 2=禁用
+        if (empty($status)) {
+            $this->returnJsonMsg('1026', [], Common::C('code', '1026'));
+        }
+        $service_time_model = new ServiceTime();
+        $info = $service_time_model->getInfo($where, true, 'hours');
+        if (empty($info)) {
+            $this->returnJsonMsg('1024', [], Common::C('code', '1024'));
+        }
+        $hours = json_decode(htmlspecialchars_decode($info['hours']), true);
+        if (!empty($hours)) {
+            foreach ($hours as $k => $v) {
+                $hours[$k]['hour'] = $v['hour'];
+                if ($v['hour'] == $hour) {
+                    if ($status == '1') {
+                        /**启用**/
+                        if ($v['is_available'] == '1') {
+                            $this->returnJsonMsg('1027', [], Common::C('code', '1027'));
+                        } else {
+                            $hours[$k]['is_available'] = '1';
+                            $v['is_available'] = '1';
+                        }
+                    } else {
+                        /**禁用**/
+                        if ($v['is_available'] == '2') {
+                            $this->returnJsonMsg('1028', [], Common::C('code', '1028'));
+                        } else {
+                            $hours[$k]['is_available'] = '2';
+                        }
+                    }
+                    break;
+                } else {
+                    $this->returnJsonMsg('1029', [], Common::C('code', '1029'));
+                    break;
+                }
+            }
+        }
+        $service_time_model = new ServiceTime();
+        $update_data['hours'] = json_encode($hours);
+        $rs = $service_time_model->updateInfo($update_data, $where);
+        if (!$rs) {
+            $this->returnJsonMsg('400', [], Common::C('code', '400'));
+        }
+        $this->returnJsonMsg('200', [], Common::C('code', '200'));
+    }
+}

@@ -262,6 +262,20 @@ class Common
     }
 
     /**
+     * 通过日期获取星期
+     * @param string $day 日期
+     * @return string
+     */
+    public static function getWeek($day = '')
+    {
+        if (!empty($day)) {
+            $week_array =array("日","一","二","三","四","五","六");
+            return $week_array[@date("w", $day)];
+        }
+        return "";
+    }
+
+    /**
      * 距离当前时间展示方法
      * @param string $datetime 活跃时间
      * @param int    $nowtime  当前时间
