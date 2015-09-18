@@ -270,7 +270,7 @@ class Common
     {
         if (!empty($day)) {
             $week_array =array("日","一","二","三","四","五","六");
-            return $week_array[@date("w", $day)];
+            return $week_array[@date("w", strtotime($day))];
         }
         return "";
     }

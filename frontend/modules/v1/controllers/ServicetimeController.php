@@ -113,7 +113,7 @@ class ServicetimeController extends BaseController
         $this->returnJsonMsg('200', $list, Common::C('code', '200'));
     }
     /**
-     * 设置时间
+     *【单天】设置时间
      * @return array
      */
     public function actionSetTime()
@@ -135,6 +135,10 @@ class ServicetimeController extends BaseController
         }
         $data['week'] = Common::getWeek($data['day']);
         $data['hours'] = RequestHelper::post('json_str', '', '');
+        $check_json = json_decode(htmlspecialchars_decode($data['hours']), true);
+        if (empty($check_json)) {
+            $this->returnJsonMsg('1030', [], Common::C('code', '1030'));
+        }
         $service_time_model = new ServiceTime();
         /**判断是否存在 存在执行更新 不存在执行添加**/
         $service_time_where['uid']    = $data['uid'];
@@ -147,6 +151,56 @@ class ServicetimeController extends BaseController
         } else {
             $update_data['update_time'] = date('Y-m-d H:i:s', time());
             $rs = $service_time_model->updateInfo($update_data, $service_time_where);
+        }
+        if (!$rs) {
+            $this->returnJsonMsg('400', [], Common::C('code', '400'));
+        }
+        $this->returnJsonMsg('200', [], Common::C('code', '200'));
+    }
+
+    /**
+     * 批量设置服务时间
+     * @return array
+     */
+    public function actionBatchSetTime()
+    {
+        $data['uid'] = RequestHelper::post('uid', '', '');
+        if (empty($data['uid'])) {
+            $this->returnJsonMsg('621', [], Common::C('code', '621'));
+        }
+        $data['mobile'] = RequestHelper::post('mobile', '', '');
+        if (empty($data['mobile'])) {
+            $this->returnJsonMsg('604', [], Common::C('code', '604'));
+        }
+        if (!Common::validateMobile($data['mobile'])) {
+            $this->returnJsonMsg('605', [], Common::C('code', '605'));
+        }
+        $service_time_model = new ServiceTime();
+        $hours = RequestHelper::post('json_str', '', '');
+        $hours = json_decode(htmlspecialchars_decode($hours), true);
+        if (empty($hours)) {
+            $this->returnJsonMsg('1030', [], Common::C('code', '1030'));
+        }
+        $rs = false;
+        foreach ($hours as $k => $v) {
+            $data_add[$k]['uid'] = $data['uid'];
+            $data_add[$k]['mobile'] = $data['mobile'];
+            $data_add[$k]['day']    = $v['day'];
+            $data_add[$k]['week']   = Common::getWeek($data_add[$k]['day']);
+            $data_add[$k]['hours']  = json_encode($v['hours']);
+
+            $service_time_where[$k]['uid']    = $data['uid'];
+            $service_time_where[$k]['mobile'] = $data['mobile'];
+            $service_time_where[$k]['day']    = $v['day'];
+            $update_data[$k]['hours']         = json_encode($v['hours']);
+
+            $info = $service_time_model->getInfo($service_time_where[$k], true, 'id');
+            if (empty($info)) {
+                $rs = $service_time_model->insertInfo($data_add[$k]);
+            } else {
+                $update_data[$k]['update_time'] = date('Y-m-d H:i:s', time());
+                $rs = $service_time_model->updateInfo($update_data[$k], $service_time_where[$k]);
+            }
         }
         if (!$rs) {
             $this->returnJsonMsg('400', [], Common::C('code', '400'));
