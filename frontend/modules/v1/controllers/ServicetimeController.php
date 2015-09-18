@@ -95,7 +95,7 @@ class ServicetimeController extends BaseController
         $service_time_and_where = ['>=' , 'day', date("Y-m-d", time())];
         $list = $service_time_model->getPageList($where, $service_time_fields, 'day asc', '1', '7', $service_time_and_where);
         $count = 0;
-        $last_day = date('Y-m-d', time());
+        $last_day = date('Y-m-d', strtotime("-1 day", time()));
         if (!empty($list)) {
             foreach ($list as $k => $v) {
                 $list[$k]['day']      = date('Y-m-d', strtotime($v['day']));
