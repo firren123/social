@@ -277,7 +277,7 @@ class ServiceController extends BaseController
             $where['user_auth_status'] = '1';
             $where['audit_status']     = '2';
             $where['is_deleted']       = '2';
-            $fields = 'id,category_id,son_category_id,image,title,price,unit,service_way,description';
+            $fields = 'id,uid,category_id,son_category_id,image,title,price,unit,service_way,description';
         } elseif ($type =='2') {
             /**在我的服务中查看服务详情**/
             $where['uid'] = RequestHelper::get('uid', '', '');
@@ -303,6 +303,29 @@ class ServiceController extends BaseController
         }
         if ($info['image']) {
             $info['image'] = $this->_formatImg($info['image']);
+        }
+        if ($type == '1') {
+            /**获取服务设置信息**/
+            $service_setting_where['uid']          = $info['uid'];
+            $service_setting_where['audit_status'] = '2';
+            $service_setting_where['status']       = '2';
+            $service_setting_where['is_deleted']   = '2';
+            $service_setting_fields = 'uid,mobile,name,search_address';
+            $service_setting_model = new ServiceSetting();
+            $service_setting_info = $service_setting_model->getInfo($service_setting_where, true, $service_setting_fields);
+            if (empty($service_setting_info)) {
+                $this->returnJsonMsg('1015', [], Common::C('code', '1015'));
+            }
+            if (!empty($service_setting_info['mobile'])) {
+                $user_info = $this->_getUserInfo($service_setting_info['mobile']);
+                $service_setting_info['user_avatar'] = $user_info['avatar'];
+            }
+            unset($service_setting_info['mobile']);
+            $service_setting_info['star']     = '5';
+            //@todo 距离需求请求仪能的接口
+            $service_setting_info['distance'] = '1.0公里';
+            $info['service_setting'] = $service_setting_info;
+            unset($info['uid']);
         }
         $this->returnJsonMsg('200', $info, Common::C('code', '200'));
     }
