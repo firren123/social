@@ -74,6 +74,45 @@ class ServicetimeController extends BaseController
     }
 
     /**
+     * 获取日期
+     * @return array
+     */
+    public function actionGetDays()
+    {
+        $where['uid'] = RequestHelper::get('uid', '', '');
+        if (empty($where['uid'])) {
+            $this->returnJsonMsg('621', [], Common::C('code', '621'));
+        }
+        $where['mobile'] = RequestHelper::get('mobile', '', '');
+        if (empty($where['mobile'])) {
+            $this->returnJsonMsg('604', [], Common::C('code', '604'));
+        }
+        if (!Common::validateMobile($where['mobile'])) {
+            $this->returnJsonMsg('605', [], Common::C('code', '605'));
+        }
+        $service_time_model = new ServiceTime();
+        $service_time_fields = 'day,week';
+        $service_time_and_where = ['>=' , 'day', date("Y-m-d", time())];
+        $list = $service_time_model->getPageList($where, $service_time_fields, 'day asc', '1', '7', $service_time_and_where);
+        if (empty($list)) {
+            $this->returnJsonMsg('1024', $list, Common::C('code', '1024'));
+        }
+        foreach ($list as $k => $v) {
+            $list[$k]['day']      = date('Y-m-d', strtotime($v['day']));
+            $list[$k]['show_day'] = date('m.d', strtotime($v['day']));
+        }
+        $count = count($list);
+        if ($count < 7) {
+            $last_day = $list[$count-1]['day'];
+            for ($i=0; $i<=(6-$count); $i++) {
+                $list[$count+$i]['day']      = date("Y-m-d", strtotime("+".($i+1)." day", strtotime($last_day)));
+                $list[$count+$i]['week']     = Common::getWeek($list[$count+$i]['day']);
+                $list[$count+$i]['show_day'] = date('m.d', strtotime($list[$count+$i]['day']));
+            }
+        }
+        $this->returnJsonMsg('200', $list, Common::C('code', '200'));
+    }
+    /**
      * 设置时间
      * @return array
      */
@@ -106,6 +145,7 @@ class ServicetimeController extends BaseController
         if (empty($info)) {
             $rs = $service_time_model->insertInfo($data);
         } else {
+            $update_data['update_time'] = date('Y-m-d H:i:s', time());
             $rs = $service_time_model->updateInfo($update_data, $service_time_where);
         }
         if (!$rs) {
