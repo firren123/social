@@ -149,6 +149,7 @@ return [
     '1031' => '缺少参数 appointment_service_time',
     '1032' => '缺少参数 appointment_service_address',
     '1033' => '缺少参数 source_type',
+    '1034' => '暂无订单',
 
 
 

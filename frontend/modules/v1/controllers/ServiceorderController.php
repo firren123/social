@@ -21,6 +21,7 @@ use frontend\models\i500_social\Service;
 use frontend\models\i500_social\ServiceTime;
 use frontend\models\i500_social\ServiceOrder;
 use frontend\models\i500_social\Order;
+use frontend\models\i500_social\UserBasicInfo;
 
 /**
  * Service time
@@ -125,15 +126,15 @@ class ServiceorderController extends BaseController
      */
     public function actionList()
     {
-        $where['uid'] = RequestHelper::post('uid', '', '');
-        if (empty($where['uid'])) {
+        $where['service_uid'] = RequestHelper::get('uid', '', '');
+        if (empty($where['service_uid'])) {
             $this->returnJsonMsg('621', [], Common::C('code', '621'));
         }
-        $where['mobile'] = RequestHelper::post('mobile', '', '');
-        if (empty($where['mobile'])) {
+        $where['service_mobile'] = RequestHelper::get('mobile', '', '');
+        if (empty($where['service_mobile'])) {
             $this->returnJsonMsg('604', [], Common::C('code', '604'));
         }
-        if (!Common::validateMobile($where['mobile'])) {
+        if (!Common::validateMobile($where['service_mobile'])) {
             $this->returnJsonMsg('605', [], Common::C('code', '605'));
         }
         $page      = RequestHelper::get('page', '1', 'intval');
@@ -142,6 +143,38 @@ class ServiceorderController extends BaseController
             $this->returnJsonMsg('705', [], Common::C('code', '705'));
         }
         $service_order_model = new ServiceOrder();
-        $service_fields = '';
+        $fields = 'service_info_title,mobile,appointment_service_time,appointment_service_address,status,pay_status';
+        $list = $service_order_model->getPageList($where, $fields, 'id desc', $page, $page_size);
+        if (empty($list)) {
+            $this->returnJsonMsg('1034', [], Common::C('code', '1034'));
+        }
+        $rs_info = [];
+        foreach ($list as $k => $v) {
+            $rs_info[$k]['day']        = date('Y-m-d', strtotime($v['appointment_service_time']));
+            $rs_info[$k]['week']       = Common::getWeek($rs_info[$k]['day']);
+            $rs_info[$k]['hour']       = date('H', strtotime($v['appointment_service_time']));
+            $rs_info[$k]['title']      = $v['service_info_title'];
+            $rs_info[$k]['mobile']     = $v['mobile'];
+            $rs_info[$k]['name']       = $this->_getUserInfo($v['mobile']);
+            $rs_info[$k]['address']    = $v['appointment_service_address'];
+            $rs_info[$k]['status']     = $v['status'];
+            $rs_info[$k]['pay_status'] = $v['pay_status'];
+        }
+        $this->returnJsonMsg('200', $rs_info, Common::C('code', '200'));
+    }
+
+    /**
+     * 获取用户信息
+     * @param string $mobile 电话
+     * @return array
+     */
+    private function _getUserInfo($mobile = '')
+    {
+        $user_base_info_model = new UserBasicInfo();
+        $user_base_info_where['mobile'] = $mobile;
+        $user_base_info_fields = 'nickname';
+        $rs['nickname'] = '';
+        $rs = $user_base_info_model->getInfo($user_base_info_where, true, $user_base_info_fields);
+        return $rs['nickname'];
     }
 }
