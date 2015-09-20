@@ -17,6 +17,7 @@ namespace frontend\modules\v1\controllers;
 use Yii;
 use common\helpers\Common;
 use common\helpers\RequestHelper;
+use frontend\models\i500_social\Service;
 use frontend\models\i500_social\ServiceTime;
 
 /**
@@ -48,16 +49,40 @@ class ServicetimeController extends BaseController
      */
     public function actionGetTime()
     {
-        $where['uid'] = RequestHelper::get('uid', '', '');
-        if (empty($where['uid'])) {
-            $this->returnJsonMsg('621', [], Common::C('code', '621'));
-        }
-        $where['mobile'] = RequestHelper::get('mobile', '', '');
-        if (empty($where['mobile'])) {
-            $this->returnJsonMsg('604', [], Common::C('code', '604'));
-        }
-        if (!Common::validateMobile($where['mobile'])) {
-            $this->returnJsonMsg('605', [], Common::C('code', '605'));
+        $type = RequestHelper::get('type', '', '');
+        if ($type == '1') {
+            /**服务详情中获取服务时间**/
+            $service_id = RequestHelper::get('service_id', '', '');
+            if (empty($service_id)) {
+                $this->returnJsonMsg('1010', [], Common::C('code', '1010'));
+            }
+            $service_model = new Service();
+            $service_where['id']               = $service_id;
+            $service_where['audit_status']     = '2';
+            $service_where['status']           = '1';
+            $service_where['user_auth_status'] = '1';
+            $service_where['is_deleted']       = '2';
+            $service_info = $service_model->getInfo($service_where, true, 'uid,mobile');
+            if (empty($service_info)) {
+                $this->returnJsonMsg('1011', [], Common::C('code', '1011'));
+            }
+            $where['uid']    = $service_info['uid'];
+            $where['mobile'] = $service_info['mobile'];
+        } elseif ($type == '2') {
+            /**商家自己设置服务时间**/
+            $where['uid'] = RequestHelper::get('uid', '', '');
+            if (empty($where['uid'])) {
+                $this->returnJsonMsg('621', [], Common::C('code', '621'));
+            }
+            $where['mobile'] = RequestHelper::get('mobile', '', '');
+            if (empty($where['mobile'])) {
+                $this->returnJsonMsg('604', [], Common::C('code', '604'));
+            }
+            if (!Common::validateMobile($where['mobile'])) {
+                $this->returnJsonMsg('605', [], Common::C('code', '605'));
+            }
+        } else {
+            $this->returnJsonMsg('1014', [], Common::C('code', '1014'));
         }
         $where['day'] = RequestHelper::get('day', '', '');
         if (empty($where['day'])) {
