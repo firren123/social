@@ -20,7 +20,9 @@ use common\helpers\RequestHelper;
 use frontend\models\i500_social\Service;
 use frontend\models\i500_social\ServiceCategory;
 use frontend\models\i500_social\ServiceSetting;
+use frontend\models\i500_social\ServiceOrder;
 use frontend\models\i500_social\UserBasicInfo;
+use frontend\models\i500_social\Order;
 
 /**
  * Service
@@ -687,6 +689,72 @@ class ServiceController extends BaseController
             }
         }
         $this->returnJsonMsg('200', $info, Common::C('code', '200'));
+    }
+
+    /**
+     * 预约
+     * @return array
+     */
+    public function actionAppointment()
+    {
+        $data['uid'] = RequestHelper::post('uid', '', '');
+        if (empty($data['uid'])) {
+            $this->returnJsonMsg('621', [], Common::C('code', '621'));
+        }
+        $data['mobile'] = RequestHelper::post('mobile', '', '');
+        if (empty($data['mobile'])) {
+            $this->returnJsonMsg('604', [], Common::C('code', '604'));
+        }
+        if (!Common::validateMobile($data['mobile'])) {
+            $this->returnJsonMsg('605', [], Common::C('code', '605'));
+        }
+        $data['service_id'] = RequestHelper::post('service_id', '', '');
+        if (empty($data['service_id'])) {
+            $this->returnJsonMsg('1010', [], Common::C('code', '1010'));
+        }
+        $data['appointment_service_time'] = RequestHelper::post('appointment_service_time', '', '');
+        if (empty($data['appointment_service_time'])) {
+            $this->returnJsonMsg('1031', [], Common::C('code', '1031'));
+        }
+        $data['appointment_service_address'] = RequestHelper::post('appointment_service_address', '', '');
+        if (empty($data['appointment_service_address'])) {
+            $this->returnJsonMsg('1032', [], Common::C('code', '1032'));
+        }
+        $data['source_type'] = RequestHelper::post('source_type', '', '');
+        if (empty($data['source_type'])) {
+            $this->returnJsonMsg('1033', [], Common::C('code', '1033'));
+        }
+        $data['remark'] = RequestHelper::post('remark', '', '');
+        /**获取服务信息**/
+        $service_model = new Service();
+        $service_where['id']               = $data['service_id'];
+        $service_where['audit_status']     = '2';
+        $service_where['status']           = '1';
+        $service_where['user_auth_status'] = '1';
+        $service_where['is_deleted']       = '2';
+        $service_fields = 'uid,mobile,image,title,price,unit,service_way,description';
+        $service_info = $service_model->getInfo($service_where, true, $service_fields);
+        if (empty($service_info)) {
+            $this->returnJsonMsg('1011', [], Common::C('code', '1011'));
+        }
+        $order_model = new Order();
+        //@todo 确定创建订单号为什么用省份？35=全国
+        $data['order_sn']                 = $order_model->createSn('35', $data['mobile']);
+        $data['service_uid']              = $service_info['uid'];
+        $data['service_mobile']           = $service_info['mobile'];
+        $data['service_way']              = $service_info['service_way'];
+        $data['service_info_title']       = $service_info['title'];
+        $data['service_info_image']       = $service_info['image'];
+        $data['service_info_price']       = $service_info['price'];
+        $data['service_info_unit']        = $service_info['unit'];
+        //$data['service_info_description'] = $service_info['description'];
+        $data['total']                    = $service_info['price'];
+        $service_order_model = new ServiceOrder();
+        $rs = $service_order_model->insertInfo($data);
+        if (!$rs) {
+            $this->returnJsonMsg('400', [], Common::C('code', '400'));
+        }
+        $this->returnJsonMsg('200', [], Common::C('code', '200'));
     }
 
     /**

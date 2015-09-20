@@ -146,6 +146,10 @@ return [
     '1028' => '该时间段已经禁用中',
     '1029' => '该时间段未在服务时间内，请进行设置',
     '1030' => '无效的JSON数据',
+    '1031' => '缺少参数 appointment_service_time',
+    '1032' => '缺少参数 appointment_service_address',
+    '1033' => '缺少参数 source_type',
+
 
 
     //SSDB KEY 备注
