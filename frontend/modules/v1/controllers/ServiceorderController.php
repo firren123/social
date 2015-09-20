@@ -151,7 +151,7 @@ class ServiceorderController extends BaseController
         $rs_info = [];
         foreach ($list as $k => $v) {
             $rs_info[$k]['day']        = date('Y-m-d', strtotime($v['appointment_service_time']));
-            $rs_info[$k]['week']       = Common::getWeek($rs_info[$k]['day']);
+            $rs_info[$k]['week']       = "周".Common::getWeek($rs_info[$k]['day']);
             $rs_info[$k]['hour']       = date('H', strtotime($v['appointment_service_time']));
             $rs_info[$k]['title']      = $v['service_info_title'];
             $rs_info[$k]['mobile']     = $v['mobile'];
