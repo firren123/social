@@ -53,7 +53,7 @@ class ServiceController extends BaseController
     {
         $uuid = RequestHelper::get('uuid', '', '');
         if (empty($uuid)) {
-            $this->returnJsonMsg('641', [], Common::C('code', '641'));
+            $this->returnJsonMsg('1035', [], Common::C('code', '1035'));
         }
         /**获取服务设置信息**/
         $service_setting_where['uid']          = $uuid;
