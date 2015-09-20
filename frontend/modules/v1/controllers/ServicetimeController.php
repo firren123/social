@@ -270,9 +270,11 @@ class ServicetimeController extends BaseController
         }
         $hours = json_decode(htmlspecialchars_decode($info['hours']), true);
         if (!empty($hours)) {
+            $have = 0;
             foreach ($hours as $k => $v) {
                 $hours[$k]['hour'] = $v['hour'];
                 if ($v['hour'] == $hour) {
+                    $have += 1;
                     if ($status == '1') {
                         /**启用**/
                         if ($v['is_available'] == '1') {
@@ -290,10 +292,10 @@ class ServicetimeController extends BaseController
                         }
                     }
                     break;
-                } else {
-                    $this->returnJsonMsg('1029', [], Common::C('code', '1029'));
-                    break;
                 }
+            }
+            if ($have == 0) {
+                $this->returnJsonMsg('1029', [], Common::C('code', '1029'));
             }
         }
         $service_time_model = new ServiceTime();
