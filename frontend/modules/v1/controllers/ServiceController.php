@@ -20,6 +20,7 @@ use common\helpers\RequestHelper;
 use frontend\models\i500_social\Service;
 use frontend\models\i500_social\ServiceCategory;
 use frontend\models\i500_social\ServiceSetting;
+use frontend\models\i500_social\ServiceTime;
 use frontend\models\i500_social\ServiceOrder;
 use frontend\models\i500_social\UserBasicInfo;
 use frontend\models\i500_social\Order;
@@ -754,6 +755,14 @@ class ServiceController extends BaseController
         if (!$rs) {
             $this->returnJsonMsg('400', [], Common::C('code', '400'));
         }
+        //@todo 预约成功后，更新商家当前时间段为不可预约状态
+        $service_time_model = new ServiceTime();
+        $day  = date('Y-m-d', strtotime($data['appointment_service_time']));
+        $hour = date('H', strtotime($data['appointment_service_time']));
+        if (!empty($day) && !empty($hour)) {
+            $time_status = $service_time_model->updateTimeStatus($service_info['uid'], $day, $hour);
+        }
+        //@todo 应该用事务 判断这两个逻辑。
         $this->returnJsonMsg('200', [], Common::C('code', '200'));
     }
 
