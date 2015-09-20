@@ -36,6 +36,41 @@ class ServiceTime extends SocialBase
     }
 
     /**
+     * 检验时间状态
+     * @param int    $uid  用户ID
+     * @param string $day  日期
+     * @param string $hour 时间段
+     * @return bool
+     */
+    public function checkTimeStatus($uid = 0, $day = '', $hour = '')
+    {
+        if (empty($uid) || empty($day) || empty($hour)) {
+            return false;
+        }
+        $service_time_model = new ServiceTime();
+        $service_time_where['uid'] = $uid;
+        $service_time_where['day'] = $day;
+        $info = $service_time_model->getInfo($service_time_where, true, 'hours');
+        if (empty($info)) {
+            return false;
+        } else {
+            $hours = json_decode(htmlspecialchars_decode($info['hours']), true);
+            if (empty($hours)) {
+                return false;
+            }
+            foreach ($hours as $k => $v) {
+                if ($v['hour'] == $hour) {
+                    if ($v['is_available'] == '2') {
+                        return false;
+                        break;
+                    }
+                }
+            }
+            return true;
+        }
+    }
+
+    /**
      * 更新时间段为不可预约状态
      * @param int    $uid  用户ID
      * @param string $day  日期

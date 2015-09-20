@@ -104,15 +104,18 @@ class ServiceorderController extends BaseController
         $data['service_info_unit']        = $service_info['unit'];
         //$data['service_info_description'] = $service_info['description'];
         $data['total']                    = $service_info['price'];
+        $day  = date('Y-m-d', strtotime($data['appointment_service_time']));
+        $hour = date('H', strtotime($data['appointment_service_time']));
+        $service_time_model = new ServiceTime();
+        if (!$service_time_model->checkTimeStatus($service_info['uid'], $day, $hour)) {
+            $this->returnJsonMsg('1036', [], Common::C('code', '1036'));
+        }
         $service_order_model = new ServiceOrder();
         $rs = $service_order_model->insertInfo($data);
         if (!$rs) {
             $this->returnJsonMsg('400', [], Common::C('code', '400'));
         }
         //@todo 预约成功后，更新商家当前时间段为不可预约状态
-        $service_time_model = new ServiceTime();
-        $day  = date('Y-m-d', strtotime($data['appointment_service_time']));
-        $hour = date('H', strtotime($data['appointment_service_time']));
         if (!empty($day) && !empty($hour)) {
             $time_status = $service_time_model->updateTimeStatus($service_info['uid'], $day, $hour);
         }
