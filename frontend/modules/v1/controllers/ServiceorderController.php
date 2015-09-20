@@ -143,7 +143,7 @@ class ServiceorderController extends BaseController
             $this->returnJsonMsg('705', [], Common::C('code', '705'));
         }
         $service_order_model = new ServiceOrder();
-        $fields = 'service_info_title,mobile,appointment_service_time,appointment_service_address,status,pay_status';
+        $fields = 'service_info_title,mobile,appointment_service_time,appointment_service_address,status,pay_status,order_sn';
         $list = $service_order_model->getPageList($where, $fields, 'id desc', $page, $page_size);
         if (empty($list)) {
             $this->returnJsonMsg('1034', [], Common::C('code', '1034'));
@@ -159,8 +159,18 @@ class ServiceorderController extends BaseController
             $rs_info[$k]['address']    = $v['appointment_service_address'];
             $rs_info[$k]['status']     = $v['status'];
             $rs_info[$k]['pay_status'] = $v['pay_status'];
+            $rs_info[$k]['order_sn']   = $v['order_sn'];
         }
         $this->returnJsonMsg('200', $rs_info, Common::C('code', '200'));
+    }
+
+    /**
+     * 订单详情
+     * @return array
+     */
+    public function actionDetail()
+    {
+
     }
 
     /**
