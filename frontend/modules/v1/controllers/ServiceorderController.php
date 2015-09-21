@@ -129,16 +129,39 @@ class ServiceorderController extends BaseController
      */
     public function actionList()
     {
-        $where['service_uid'] = RequestHelper::get('uid', '', '');
-        if (empty($where['service_uid'])) {
-            $this->returnJsonMsg('621', [], Common::C('code', '621'));
+        $where = [];
+        $type = RequestHelper::get('type', '', '');
+        if (empty($type)) {
+            $this->returnJsonMsg('1037', [], Common::C('code', '1037'));
         }
-        $where['service_mobile'] = RequestHelper::get('mobile', '', '');
-        if (empty($where['service_mobile'])) {
-            $this->returnJsonMsg('604', [], Common::C('code', '604'));
-        }
-        if (!Common::validateMobile($where['service_mobile'])) {
-            $this->returnJsonMsg('605', [], Common::C('code', '605'));
+        if ($type == '1') {
+            /**我预约的服务**/
+            $where['uid'] = RequestHelper::get('uid', '', '');
+            if (empty($where['uid'])) {
+                $this->returnJsonMsg('621', [], Common::C('code', '621'));
+            }
+            $where['mobile'] = RequestHelper::get('mobile', '', '');
+            if (empty($where['mobile'])) {
+                $this->returnJsonMsg('604', [], Common::C('code', '604'));
+            }
+            if (!Common::validateMobile($where['mobile'])) {
+                $this->returnJsonMsg('605', [], Common::C('code', '605'));
+            }
+        } elseif ($type == '2') {
+            /**别人预约我的服务**/
+            $where['service_uid'] = RequestHelper::get('uid', '', '');
+            if (empty($where['service_uid'])) {
+                $this->returnJsonMsg('621', [], Common::C('code', '621'));
+            }
+            $where['service_mobile'] = RequestHelper::get('mobile', '', '');
+            if (empty($where['service_mobile'])) {
+                $this->returnJsonMsg('604', [], Common::C('code', '604'));
+            }
+            if (!Common::validateMobile($where['service_mobile'])) {
+                $this->returnJsonMsg('605', [], Common::C('code', '605'));
+            }
+        } else {
+            $this->returnJsonMsg('1014', [], Common::C('code', '1014'));
         }
         $page      = RequestHelper::get('page', '1', 'intval');
         $page_size = RequestHelper::get('page_size', '6', 'intval');
@@ -146,7 +169,11 @@ class ServiceorderController extends BaseController
             $this->returnJsonMsg('705', [], Common::C('code', '705'));
         }
         $service_order_model = new ServiceOrder();
-        $fields = 'service_info_title,mobile,appointment_service_time,appointment_service_address,status,pay_status,order_sn';
+        if ($type == '1') {
+            $fields = 'service_info_title,service_mobile as mobile,appointment_service_time,appointment_service_address,status,pay_status,order_sn';
+        } else {
+            $fields = 'service_info_title,mobile,appointment_service_time,appointment_service_address,status,pay_status,order_sn';
+        }
         $list = $service_order_model->getPageList($where, $fields, 'id desc', $page, $page_size);
         if (empty($list)) {
             $this->returnJsonMsg('1034', [], Common::C('code', '1034'));
