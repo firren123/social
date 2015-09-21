@@ -73,6 +73,12 @@ class BankcardController extends BaseController
         if (empty($code)) {
             $this->returnJsonMsg('608', [], Common::C('code', '608'));
         }
+        $bank_card_model = new UserBankCard();
+        $where['bank_card'] = $data['bank_card'];
+        $info = $bank_card_model->getInfo($where, true, 'id');
+        if (!empty($info)) {
+            $this->returnJsonMsg('1102', [], Common::C('code', '1102'));
+        }
         $user_verify_code_model = new UserVerifyCode();
         $user_verify_code_where['mobile'] = $data['mobile'];
         $user_verify_code_where['code']   = $code;
@@ -86,7 +92,6 @@ class BankcardController extends BaseController
         } else {
             $this->returnJsonMsg('610', [], Common::C('code', '610'));
         }
-        $bank_card_model = new UserBankCard();
         $rs = $bank_card_model->insertInfo($data);
         if (!$rs) {
             $this->returnJsonMsg('400', [], Common::C('code', '400'));
