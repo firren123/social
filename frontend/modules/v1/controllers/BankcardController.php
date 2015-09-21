@@ -122,7 +122,23 @@ class BankcardController extends BaseController
         $arr['card_validity'] = '2019-10-09';
         $arr['card_id'] = '998787666567654456';
         $arr['card_cvv2'] = '989';
-        $arr['card_mobile'] = '18898988889';
+        $arr['card_mobile'] = $data['mobile'];
         $this->returnJsonMsg('200', $arr, Common::C('code', '200'));
+    }
+
+    /**
+     * 列表
+     * @return array
+     */
+    public function actionList()
+    {
+        $data['uid'] = RequestHelper::get('uid', '', '');
+        if (empty($data['uid'])) {
+            $this->returnJsonMsg('621', [], Common::C('code', '621'));
+        }
+        $data['mobile'] = RequestHelper::get('mobile', '', '');
+        if (empty($data['mobile'])) {
+            $this->returnJsonMsg('604', [], Common::C('code', '604'));
+        }
     }
 }
