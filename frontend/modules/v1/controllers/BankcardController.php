@@ -95,6 +95,34 @@ class BankcardController extends BaseController
     }
 
     /**
+     * 描述判断是否添加过
+     * @return array
+     */
+    public function actionCheckAdd()
+    {
+        $uid = RequestHelper::post('uid', '', '');
+        if (empty($uid)) {
+            $this->returnJsonMsg('621', [], Common::C('code', '621'));
+        }
+        $mobile = RequestHelper::post('mobile', '', '');
+        if (empty($mobile)) {
+            $this->returnJsonMsg('604', [], Common::C('code', '604'));
+        }
+        if (!Common::validateMobile($mobile)) {
+            $this->returnJsonMsg('605', [], Common::C('code', '605'));
+        }
+        $where['bank_card'] = RequestHelper::post('bank_card', '', '');
+        if (empty($where['bank_card'])) {
+            $this->returnJsonMsg('1101', [], Common::C('code', '1101'));
+        }
+        $bank_card_model = new UserBankCard();
+        $info = $bank_card_model->getInfo($where, true, 'id');
+        if (!empty($info)) {
+            $this->returnJsonMsg('1102', [], Common::C('code', '1102'));
+        }
+        $this->returnJsonMsg('200', [], Common::C('code', '200'));
+    }
+    /**
      * 卡信息
      * @return array
      */
