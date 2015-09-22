@@ -165,13 +165,33 @@ class BankcardController extends BaseController
      */
     public function actionList()
     {
-        $data['uid'] = RequestHelper::get('uid', '', '');
-        if (empty($data['uid'])) {
+        $where['uid'] = RequestHelper::get('uid', '', '');
+        if (empty($where['uid'])) {
             $this->returnJsonMsg('621', [], Common::C('code', '621'));
         }
-        $data['mobile'] = RequestHelper::get('mobile', '', '');
-        if (empty($data['mobile'])) {
+        $where['mobile'] = RequestHelper::get('mobile', '', '');
+        if (empty($where['mobile'])) {
             $this->returnJsonMsg('604', [], Common::C('code', '604'));
         }
+        if (!Common::validateMobile($where['mobile'])) {
+            $this->returnJsonMsg('605', [], Common::C('code', '605'));
+        }
+        $bank_card_model = new UserBankCard();
+        $bank_card_fields = 'real_name,bank_card,status';
+        $list = $bank_card_model->getList($where, $bank_card_fields, 'id desc');
+        if (empty($list)) {
+            $this->returnJsonMsg('1103', [], Common::C('code', '1103'));
+        }
+        $rs_list = [];
+        foreach ($list as $k => $v) {
+            $rs_list[$k]['real_name'] = $v['real_name'];
+            $rs_list[$k]['bank_card'] = $v['bank_card'];
+            $rs_list[$k]['tail_number'] = substr($v['bank_card'], -4);
+            $rs_list[$k]['status'] = $v['status'];
+            $rs_list[$k]['card_type'] = '借记卡';
+            $rs_list[$k]['bank_name'] = '招商银行';
+            $rs_list[$k]['bank_ico'] = 'http://www.cmbchina.com/images/main_logo.gif';
+        }
+        $this->returnJsonMsg('200', $rs_list, Common::C('code', '200'));
     }
 }
