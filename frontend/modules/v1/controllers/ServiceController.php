@@ -99,6 +99,31 @@ class ServiceController extends BaseController
         $rs['service_list'] = $list;
         $this->returnJsonMsg('200', $rs, Common::C('code', '200'));
     }
+
+    /**
+     * 检测用户是否验证过
+     * @return array
+     */
+    public function actionCheckUserAuth()
+    {
+        $where['uid'] = RequestHelper::post('uid', '', '');
+        if (empty($where['uid'])) {
+            $this->returnJsonMsg('621', [], Common::C('code', '621'));
+        }
+        $where['mobile'] = RequestHelper::post('mobile', '', '');
+        if (empty($where['mobile'])) {
+            $this->returnJsonMsg('604', [], Common::C('code', '604'));
+        }
+        if (!Common::validateMobile($where['mobile'])) {
+            $this->returnJsonMsg('605', [], Common::C('code', '605'));
+        }
+        $service_setting_model = new ServiceSetting();
+        $info = $service_setting_model->getInfo($where, true, 'audit_status');
+        if (empty($info) || $info['audit_status'] != '2') {
+            $this->returnJsonMsg('1038', [], Common::C('code', '1038'));
+        }
+        $this->returnJsonMsg('200', [], Common::C('code', '200'));
+    }
     /**
      * 发布服务
      * @return array
@@ -157,6 +182,8 @@ class ServiceController extends BaseController
             /**user_auth_status=1表示认证成功**/
             $data['user_auth_status'] = '1';
         } else {
+            //@todo 未认证成功 抛出提示
+            $this->returnJsonMsg('1038', [], Common::C('code', '1038'));
             /**user_auth_status=2表示认证失败**/
             $data['user_auth_status'] = '2';
         }
