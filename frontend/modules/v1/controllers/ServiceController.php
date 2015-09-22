@@ -554,7 +554,7 @@ class ServiceController extends BaseController
         }
         $service_model = new Service();
         $where['is_deleted']   = '2';
-        $fields = 'id,mobile,image,title,price,unit,service_way,audit_status,status';
+        $fields = 'id,mobile,image,title,description,price,unit,service_way,audit_status,status';
         $list = $service_model->getPageList($where, $fields, 'id desc', $page, $page_size);
         if (empty($list)) {
             $this->returnJsonMsg('1009', [], Common::C('code', '1009'));
