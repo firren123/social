@@ -86,7 +86,7 @@ class ServiceController extends BaseController
         $service_where['user_auth_status'] = '1';
         $service_where['status']           = '1';
         $service_where['is_deleted']       = '2';
-        $service_fields = 'id,mobile,image,title,description,price,unit,service_way';
+        $service_fields = 'id,mobile,image,title,description as service_description,price,unit,service_way';
         $list = $service_model->getPageList($service_where, $service_fields, 'id desc', $page, $page_size);
         if (!empty($list)) {
             foreach ($list as $k => $v) {
@@ -554,7 +554,7 @@ class ServiceController extends BaseController
         }
         $service_model = new Service();
         $where['is_deleted']   = '2';
-        $fields = 'id,mobile,image,title,description,price,unit,service_way,audit_status,status';
+        $fields = 'id,mobile,image,title,description as service_description,price,unit,service_way,audit_status,status';
         $list = $service_model->getPageList($where, $fields, 'id desc', $page, $page_size);
         if (empty($list)) {
             $this->returnJsonMsg('1009', [], Common::C('code', '1009'));
