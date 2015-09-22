@@ -194,4 +194,72 @@ class BankcardController extends BaseController
         }
         $this->returnJsonMsg('200', $rs_list, Common::C('code', '200'));
     }
+
+    /**
+     * 解除绑定
+     * @return array
+     */
+    public function actionRemoveBind()
+    {
+        $where['uid'] = RequestHelper::post('uid', '', '');
+        if (empty($where['uid'])) {
+            $this->returnJsonMsg('621', [], Common::C('code', '621'));
+        }
+        $where['mobile'] = RequestHelper::post('mobile', '', '');
+        if (empty($where['mobile'])) {
+            $this->returnJsonMsg('604', [], Common::C('code', '604'));
+        }
+        if (!Common::validateMobile($where['mobile'])) {
+            $this->returnJsonMsg('605', [], Common::C('code', '605'));
+        }
+        $where['bank_card'] = RequestHelper::post('bank_card', '', '');
+        if (empty($where['bank_card'])) {
+            $this->returnJsonMsg('1101', [], Common::C('code', '1101'));
+        }
+        $bank_card_model = new UserBankCard();
+        $info = $bank_card_model->getInfo($where, true, 'id');
+        if (empty($info)) {
+            $this->returnJsonMsg('1104', [], Common::C('code', '1104'));
+        }
+        $update_data['status'] = '2';
+        $update_data['update_time'] = date('Y-m-d H:i:s', time());
+        $rs = $bank_card_model->updateInfo($update_data, $where);
+        if (!$rs) {
+            $this->returnJsonMsg('400', [], Common::C('code', '400'));
+        }
+        $this->returnJsonMsg('200', [], Common::C('code', '200'));
+    }
+
+    /**
+     * 删除
+     * @return array
+     */
+    public function actionDel()
+    {
+        $where['uid'] = RequestHelper::post('uid', '', '');
+        if (empty($where['uid'])) {
+            $this->returnJsonMsg('621', [], Common::C('code', '621'));
+        }
+        $where['mobile'] = RequestHelper::post('mobile', '', '');
+        if (empty($where['mobile'])) {
+            $this->returnJsonMsg('604', [], Common::C('code', '604'));
+        }
+        if (!Common::validateMobile($where['mobile'])) {
+            $this->returnJsonMsg('605', [], Common::C('code', '605'));
+        }
+        $where['bank_card'] = RequestHelper::post('bank_card', '', '');
+        if (empty($where['bank_card'])) {
+            $this->returnJsonMsg('1101', [], Common::C('code', '1101'));
+        }
+        $bank_card_model = new UserBankCard();
+        $info = $bank_card_model->getInfo($where, true, 'id');
+        if (empty($info)) {
+            $this->returnJsonMsg('1104', [], Common::C('code', '1104'));
+        }
+        $rs = $bank_card_model->delOneRecord($where);
+        if (!$rs) {
+            $this->returnJsonMsg('400', [], Common::C('code', '400'));
+        }
+        $this->returnJsonMsg('200', [], Common::C('code', '200'));
+    }
 }
