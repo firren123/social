@@ -706,18 +706,19 @@ class ServiceController extends BaseController
                     $info[$k]['image'] = $this->_formatImg($v['image']);
                 }
                 //判断子类中是否存在 不存在子类则不展示该分类
-                //$son = $this->_getSonCategory($v['id']);
+                $son = $this->_getSonCategory($v['id']);
                 if ($type == '2') {
-                    $info[$k]['son'] = $this->_getSonCategory($v['id']);
+                    $info[$k]['son'] = $son;
                 }
                 if ($type == '3') {
                     $info[$k]['son'] = $this->_getSonCategory($v['id'], '1');
                 }
-//                $count = count($son);
-//                if ($count == 0) {
-//                    unset($info[$k]);
-//                }
+                $count = count($son);
+                if ($count == 0) {
+                    unset($info[$k]);
+                }
             }
+            $info = array_values($info);
         }
         $this->returnJsonMsg('200', $info, Common::C('code', '200'));
     }
