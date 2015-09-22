@@ -93,7 +93,9 @@ class ServiceController extends BaseController
                 if ($v['image']) {
                     $list[$k]['image'] = $this->_formatImg($v['image']);
                 }
+                $list[$k]['price'] = $v['price'].$this->_getServiceUnit($v['unit']);
                 unset($list[$k]['mobile']);
+                unset($list[$k]['unit']);
             }
         }
         $rs['service_list'] = $list;
@@ -330,6 +332,8 @@ class ServiceController extends BaseController
         if ($info['image']) {
             $info['image'] = $this->_formatImg($info['image']);
         }
+        $info['price'] = $info['price'].$this->_getServiceUnit($info['unit']);
+        unset($info['unit']);
         if ($type == '1') {
             /**获取服务设置信息**/
             $service_setting_where['uid']          = $info['uid'];
@@ -460,7 +464,9 @@ class ServiceController extends BaseController
                 //@todo 距离需求请求仪能的接口
                 $list[$k]['distance']       = '1.5公里';
             }
+            $list[$k]['price'] = $v['price'].$this->_getServiceUnit($v['unit']);
             unset($list[$k]['mobile']);
+            unset($list[$k]['unit']);
         }
         $this->returnJsonMsg('200', $list, Common::C('code', '200'));
     }
@@ -514,7 +520,9 @@ class ServiceController extends BaseController
                     //@todo 距离需求请求仪能的接口
                     $list[$k]['distance']       = '1.5公里';
                 }
+                $list[$k]['price'] = $v['price'].$this->_getServiceUnit($v['unit']);
                 unset($list[$k]['mobile']);
+                unset($list[$k]['unit']);
             }
         } else {
             $this->returnJsonMsg('1014', [], Common::C('code', '1014'));
@@ -555,7 +563,9 @@ class ServiceController extends BaseController
             if ($v['image']) {
                 $list[$k]['image'] = $this->_formatImg($v['image']);
             }
+            $list[$k]['price'] = $v['price'].$this->_getServiceUnit($v['unit']);
             unset($list[$k]['mobile']);
+            unset($list[$k]['unit']);
         }
         $this->returnJsonMsg('200', $list, Common::C('code', '200'));
     }
@@ -830,5 +840,16 @@ class ServiceController extends BaseController
         $arr[1]['unit'] = '元/次';
         $arr[2]['id'] = '3';
         $arr[2]['unit'] = '元/小时';
+        $unit_info = $arr;
+        $unit = '';
+        if (!empty($unit_info)) {
+            foreach ($arr as $k => $v) {
+                if ($arr[$k]['id'] == $unit_id) {
+                    $unit = $arr[$k]['unit'];
+                    break;
+                }
+            }
+        }
+        return $unit;
     }
 }
