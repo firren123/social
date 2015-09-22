@@ -706,17 +706,17 @@ class ServiceController extends BaseController
                     $info[$k]['image'] = $this->_formatImg($v['image']);
                 }
                 //判断子类中是否存在 不存在子类则不展示该分类
-                $son = $this->_getSonCategory($v['id']);
+                //$son = $this->_getSonCategory($v['id']);
                 if ($type == '2') {
-                    $info[$k]['son'] = $son;
+                    $info[$k]['son'] = $this->_getSonCategory($v['id']);
                 }
                 if ($type == '3') {
                     $info[$k]['son'] = $this->_getSonCategory($v['id'], '1');
                 }
-                $count = count($son);
-                if ($count == 0) {
-                    unset($info[$k]);
-                }
+//                $count = count($son);
+//                if ($count == 0) {
+//                    unset($info[$k]);
+//                }
             }
         }
         $this->returnJsonMsg('200', $info, Common::C('code', '200'));
@@ -814,5 +814,20 @@ class ServiceController extends BaseController
             }
         }
         return $rs;
+    }
+
+    /**
+     * 获取服务单位
+     * @param int $unit_id 单位ID
+     * @return string
+     */
+    private function _getServiceUnit($unit_id = 0)
+    {
+        $arr[0]['id'] = '1';
+        $arr[0]['unit'] = '元';
+        $arr[1]['id'] = '2';
+        $arr[1]['unit'] = '元/次';
+        $arr[2]['id'] = '3';
+        $arr[2]['unit'] = '元/小时';
     }
 }
