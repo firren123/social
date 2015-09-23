@@ -120,11 +120,12 @@ class ServiceController extends BaseController
             $this->returnJsonMsg('605', [], Common::C('code', '605'));
         }
         $service_setting_model = new ServiceSetting();
-        $info = $service_setting_model->getInfo($where, true, 'audit_status');
+        $info = $service_setting_model->getInfo($where, true, 'user_name,audit_status');
         if (empty($info) || $info['audit_status'] != '2') {
             $this->returnJsonMsg('1038', [], Common::C('code', '1038'));
         }
-        $this->returnJsonMsg('200', [], Common::C('code', '200'));
+        $rs_info['user_name'] = $info['user_name'];
+        $this->returnJsonMsg('200', $rs_info, Common::C('code', '200'));
     }
     /**
      * 发布服务
