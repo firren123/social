@@ -19,6 +19,7 @@ use common\helpers\Common;
 use common\helpers\RequestHelper;
 use frontend\models\i500_social\Service;
 use frontend\models\i500_social\ServiceCategory;
+use frontend\models\i500_social\ServiceUnit;
 use frontend\models\i500_social\ServiceSetting;
 use frontend\models\i500_social\UserBasicInfo;
 
@@ -735,6 +736,31 @@ class ServiceController extends BaseController
     }
 
     /**
+     * 获取服务单位
+     * @return array
+     */
+    public function actionGetUnit()
+    {
+        $data['uid'] = RequestHelper::get('uid', '', '');
+        if (empty($data['uid'])) {
+            $this->returnJsonMsg('621', [], Common::C('code', '621'));
+        }
+        $data['mobile'] = RequestHelper::get('mobile', '', '');
+        if (empty($data['mobile'])) {
+            $this->returnJsonMsg('604', [], Common::C('code', '604'));
+        }
+        if (!Common::validateMobile($data['mobile'])) {
+            $this->returnJsonMsg('605', [], Common::C('code', '605'));
+        }
+        $unit_model = new ServiceUnit();
+        $unit_where['status'] = '2';
+        $unit_list = $unit_model->getList($unit_where, 'id,unit', 'id asc');
+        if (empty($unit_list)) {
+            $this->returnJsonMsg('1039', [], Common::C('code', '1039'));
+        }
+        $this->returnJsonMsg('200', $unit_list, Common::C('code', '200'));
+    }
+    /**
      * 获取设置信息
      * @param string $mobile 手机号
      * @param string $params 参数名
@@ -835,19 +861,17 @@ class ServiceController extends BaseController
      */
     private function _getServiceUnit($unit_id = 0)
     {
-        $arr[0]['id'] = '1';
-        $arr[0]['unit'] = '元';
-        $arr[1]['id'] = '2';
-        $arr[1]['unit'] = '元/次';
-        $arr[2]['id'] = '3';
-        $arr[2]['unit'] = '元/小时';
-        $unit_info = $arr;
         $unit = '';
-        if (!empty($unit_info)) {
-            foreach ($arr as $k => $v) {
-                if ($arr[$k]['id'] == $unit_id) {
-                    $unit = $arr[$k]['unit'];
-                    break;
+        if (!empty($unit_id)) {
+            $unit_model = new ServiceUnit();
+            $unit_where['status'] = '2';
+            $unit_list = $unit_model->getList($unit_where, 'id,unit', 'id asc');
+            if (!empty($unit_list)) {
+                foreach ($unit_list as $k => $v) {
+                    if ($unit_list[$k]['id'] == $unit_id) {
+                        $unit = $unit_list[$k]['unit'];
+                        break;
+                    }
                 }
             }
         }
