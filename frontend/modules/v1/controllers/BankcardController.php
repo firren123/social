@@ -120,6 +120,7 @@ class BankcardController extends BaseController
         if (empty($where['bank_card'])) {
             $this->returnJsonMsg('1101', [], Common::C('code', '1101'));
         }
+        //@todo 验证是否是合法的银行卡号
         $bank_card_model = new UserBankCard();
         $info = $bank_card_model->getInfo($where, true, 'id');
         if (!empty($info)) {
