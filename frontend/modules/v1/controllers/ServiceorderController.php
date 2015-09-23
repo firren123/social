@@ -102,7 +102,7 @@ class ServiceorderController extends BaseController
         $data['service_info_image']       = $service_info['image'];
         $data['service_info_price']       = $service_info['price'];
         $data['service_info_unit']        = $service_info['unit'];
-        //$data['service_info_description'] = $service_info['description'];
+        $data['service_info_description'] = $service_info['description'];
         $data['total']                    = $service_info['price'];
         $day  = date('Y-m-d', strtotime($data['appointment_service_time']));
         $hour = date('H', strtotime($data['appointment_service_time']));
