@@ -186,7 +186,7 @@ class TestController extends Controller
         $cname = RequestHelper::post('cname', 'ztestchdefault', 'trim');
         $content = RequestHelper::post('content', 'ztestcontentdefault', 'trim');
 
-        $url_pub = $this->_icomet_url_admin . "pub?cname=" . $cname . "&content=" . $content;
+        $url_pub = $this->_icomet_url_admin . "pub?cname=" . $cname . "&content=" . rawurlencode($content);
 
         if ($str_pub_result = $zhelper->zcurl('get', $url_pub)) {
             if ($zhelper->zcheckJson($str_pub_result) === false) {
