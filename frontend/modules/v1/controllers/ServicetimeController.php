@@ -145,17 +145,23 @@ class ServicetimeController extends BaseController
             $this->returnJsonMsg('1023', [], Common::C('code', '1023'));
         }
         $data['week'] = Common::getWeek($data['day']);
-        $data['hours'] = RequestHelper::post('json_str', '', '');
-        $check_json = json_decode(htmlspecialchars_decode($data['hours']), true);
+        $hours = RequestHelper::post('json_str', '', '');
+        $check_json = json_decode(htmlspecialchars_decode($hours), true);
         if (empty($check_json)) {
             $this->returnJsonMsg('1030', [], Common::C('code', '1030'));
         }
+        $data['hours'] = $hours;
         $service_time_model = new ServiceTime();
         /**判断是否存在 存在执行更新 不存在执行添加**/
         $service_time_where['uid']    = $data['uid'];
         $service_time_where['mobile'] = $data['mobile'];
         $service_time_where['day']    = $data['day'];
-        $update_data['hours']         = $data['hours'];
+        $update_data['hours']         = json_encode($data['hours']);
+
+        $check_repeat = $this->_checkRepeatTime($data['hours']);
+        if (!$check_repeat) {
+            $this->returnJsonMsg('1040', [], Common::C('code', '1040'));
+        }
         $info = $service_time_model->getInfo($service_time_where, true, 'id');
         if (empty($info)) {
             $rs = $service_time_model->insertInfo($data);
@@ -205,6 +211,11 @@ class ServicetimeController extends BaseController
             $service_time_where[$k]['day']    = $v['day'];
             $update_data[$k]['hours']         = json_encode($v['hours']);
 
+            $check_repeat = $this->_checkRepeatTime($v['hours']);
+            if (!$check_repeat) {
+                $this->returnJsonMsg('1040', [], Common::C('code', '1040'));
+                break;
+            }
             $info = $service_time_model->getInfo($service_time_where[$k], true, 'id');
             if (empty($info)) {
                 $rs = $service_time_model->insertInfo($data_add[$k]);
@@ -290,5 +301,25 @@ class ServicetimeController extends BaseController
             $this->returnJsonMsg('400', [], Common::C('code', '400'));
         }
         $this->returnJsonMsg('200', [], Common::C('code', '200'));
+    }
+
+    /**
+     * 检验时间是否重复
+     * @param array $time_array 时间数组
+     * @return bool
+     */
+    private function _checkRepeatTime($time_array = [])
+    {
+        $rs = true;
+        if (!empty($time_array)) {
+            $hours = [];
+            foreach ($time_array as $k => $v) {
+                $hours[] = $v['hour'];
+            }
+            if (count($hours) != count(array_unique($hours))) {
+                return false;
+            }
+        }
+        return $rs;
     }
 }
