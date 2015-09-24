@@ -47,7 +47,7 @@
     </tr>
 
     <tr>
-        <td colspan="2"><input type="button" class="zjs_btn_sign" value="向通道发布内容,返回数据组合url" style="margin:10px;" /></td>
+        <td colspan="2"><input type="button" class="zjs_btn_sign" value="获取通道信息,返回数据组合url" style="margin:10px;" /></td>
     </tr>
 
     <tr>
