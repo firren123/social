@@ -15,6 +15,7 @@
 
 namespace frontend\models\i500_social;
 
+use common\helpers\Common;
 /**
  * 服务时间设置表
  *
@@ -64,6 +65,10 @@ class ServiceTime extends SocialBase
                         return false;
                         break;
                     }
+                    if ($v['appointment_num'] >= Common::C('maxAppointmentNumber')) {
+                        return false;
+                        break;
+                    }
                 }
             }
             return true;
@@ -99,7 +104,8 @@ class ServiceTime extends SocialBase
                         return false;
                         break;
                     }
-                    $hours[$k]['is_available'] = '2';
+                    $hours[$k]['is_available'] = '3';
+                    $hours[$k]['appointment_num'] = $v['appointment_num'] + 1;
                     break;
                 } else {
                     return false;

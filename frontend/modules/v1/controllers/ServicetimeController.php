@@ -200,7 +200,7 @@ class ServicetimeController extends BaseController
         }
         $rs = false;
         foreach ($hours as $k => $v) {
-            $data_add[$k]['uid'] = $data['uid'];
+            $data_add[$k]['uid']    = $data['uid'];
             $data_add[$k]['mobile'] = $data['mobile'];
             $data_add[$k]['day']    = $v['day'];
             $data_add[$k]['week']   = Common::getWeek($data_add[$k]['day']);
@@ -281,7 +281,9 @@ class ServicetimeController extends BaseController
                         }
                     } else {
                         /**禁用**/
-                        if ($v['is_available'] == '2') {
+                        if ($v['is_available'] == '3') {
+                            $this->returnJsonMsg('1041', [], Common::C('code', '1041'));
+                        } elseif ($v['is_available'] == '2') {
                             $this->returnJsonMsg('1028', [], Common::C('code', '1028'));
                         } else {
                             $hours[$k]['is_available'] = '2';

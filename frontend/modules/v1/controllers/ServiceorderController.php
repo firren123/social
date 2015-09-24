@@ -115,7 +115,7 @@ class ServiceorderController extends BaseController
         if (!$rs) {
             $this->returnJsonMsg('400', [], Common::C('code', '400'));
         }
-        //@todo 预约成功后，更新商家当前时间段为不可预约状态
+        //@todo 预约成功后，当前预约数量+1
         if (!empty($day) && !empty($hour)) {
             $time_status = $service_time_model->updateTimeStatus($service_info['uid'], $day, $hour);
         }
