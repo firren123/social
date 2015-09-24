@@ -173,6 +173,9 @@ class WalletController extends BaseController
         if (empty($list)) {
             $this->returnJsonMsg('1108', [], Common::C('code', '1108'));
         }
+        foreach ($list as $k => $v) {
+            $list[$k]['status'] = '2';  //1="+" 2="-"
+        }
         $this->returnJsonMsg('200', $list, Common::C('code', '200'));
     }
 
