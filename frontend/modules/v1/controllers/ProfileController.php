@@ -70,9 +70,14 @@ class ProfileController extends BaseController
             }
             $mobile = $user_mobile;
         }
+        $type = RequestHelper::post('type', '0', '');
         $user_base_model = new UserBasicInfo();
         $user_base_where['mobile'] = $mobile;
         $user_base_fields = 'id,mobile,nickname,avatar,personal_sign,realname,sex,birthday,province_id,city_id,district_id,community_name';
+        if ($type == '1') {
+            //仅获取昵称 + 头像
+            $user_base_fields = 'nickname,avatar';
+        }
         $user_base_info = $user_base_model->getInfo($user_base_where, true, $user_base_fields);
         if (empty($user_base_info)) {
             $user_base_data['uid']    = $uid;
@@ -88,6 +93,14 @@ class ProfileController extends BaseController
                 if (!strstr($user_base_info['avatar'], 'http')) {
                     $user_base_info['avatar'] = Common::C('imgHost').$user_base_info['avatar'];
                 }
+            } else {
+                $user_base_info['avatar'] = Common::C('defaultAvatar');
+            }
+        }
+        if ($type == '1') {
+            //仅获取昵称 + 头像
+            if (empty($user_base_info['nickname'])) {
+                $user_base_info['nickname'] = Common::C('defaultNickName');
             }
         }
         $this->returnJsonMsg('200', $user_base_info, Common::C('code', '200'));

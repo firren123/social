@@ -35,6 +35,8 @@ return [
     'hxUsersAPI'      => 'https://a1.easemob.com/iyangpin2015/i500social/users/', //环信注册API
     'regAddFriendCustomerService' => true,  //true = 注册添加客服为好友 false = 不添加
     'customerServiceUserName'  => 'customservice',   //客服账号
+    'defaultNickName'          => '小伙伴', //默认昵称
+    'defaultAvatar'            => 'http://img.i500m.com/uploads/custom/20150924/tx.png',  //默认头像
 
     'sign_debug'      => false,                        //false = 开启验证 true 关闭验证
 
