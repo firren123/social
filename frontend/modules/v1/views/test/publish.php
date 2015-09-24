@@ -123,9 +123,12 @@ $(function()
                 $(".zjs_sub_ch").val(obj.data.cname);
                 $(".zjs_sub_seq").val(obj.data.seq);
                 $(".zjs_sub_token").val(obj.data.token);
+                $(".zjs_pub_ch").val(obj.data.cname);
 
                 var url="http://channel.test.i500m.com/icomet/sub?cname="+obj.data.cname+"&seq="+obj.data.seq+"&token="+obj.data.token;
                 var html='<a class="zjs_sub_url" href="'+url+'" target="_blank">新页面打开此url</a>';
+                html+='<br />';
+                html+='<span>'+url+'</span>';
                 $(".zjs_sub_url").html(html);
             }
         );
