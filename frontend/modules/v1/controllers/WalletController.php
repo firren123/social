@@ -146,6 +146,70 @@ class WalletController extends BaseController
     }
 
     /**
+     * 提现列表
+     * @return array
+     */
+    public function actionWithdrawalList()
+    {
+        $where['uid'] = RequestHelper::get('uid', '', '');
+        if (empty($where['uid'])) {
+            $this->returnJsonMsg('621', [], Common::C('code', '621'));
+        }
+        $where['mobile'] = RequestHelper::get('mobile', '', '');
+        if (empty($where['mobile'])) {
+            $this->returnJsonMsg('604', [], Common::C('code', '604'));
+        }
+        if (!Common::validateMobile($where['mobile'])) {
+            $this->returnJsonMsg('605', [], Common::C('code', '605'));
+        }
+        $page      = RequestHelper::get('page', '1', 'intval');
+        $page_size = RequestHelper::get('page_size', '6', 'intval');
+        if ($page_size > Common::C('maxPageSize')) {
+            $this->returnJsonMsg('705', [], Common::C('code', '705'));
+        }
+        $fields = 'id,money,create_time';
+        $withdrawal_model = new UserWithdrawal();
+        $list = $withdrawal_model->getPageList($where, $fields, 'id desc', $page, $page_size);
+        if (empty($list)) {
+            $this->returnJsonMsg('1108', [], Common::C('code', '1108'));
+        }
+        $this->returnJsonMsg('200', $list, Common::C('code', '200'));
+    }
+
+    /**
+     * 提现详情
+     * @return array
+     */
+    public function actionWithdrawalDetail()
+    {
+        $where['uid'] = RequestHelper::get('uid', '', '');
+        if (empty($where['uid'])) {
+            $this->returnJsonMsg('621', [], Common::C('code', '621'));
+        }
+        $where['mobile'] = RequestHelper::get('mobile', '', '');
+        if (empty($where['mobile'])) {
+            $this->returnJsonMsg('604', [], Common::C('code', '604'));
+        }
+        if (!Common::validateMobile($where['mobile'])) {
+            $this->returnJsonMsg('605', [], Common::C('code', '605'));
+        }
+        $where['id'] = RequestHelper::get('withdrawal_id', '', '');
+        if (empty($where['id'])) {
+            $this->returnJsonMsg('1106', [], Common::C('code', '1106'));
+        }
+        //@todo 验证是否是合法的银行卡号
+        $withdrawal_model = new UserWithdrawal();
+        $fields = 'bank_card,money,status,create_time,expect_arrival_time,arrival_time';
+        $info = $withdrawal_model->getInfo($where, true, $fields);
+        if (empty($info)) {
+            $this->returnJsonMsg('1107', [], Common::C('code', '1107'));
+        }
+        $info['tail_number'] = substr($info['bank_card'], -4);
+        $info['bank_name']   = '中国银行';
+        $this->returnJsonMsg('200', $info, Common::C('code', '200'));
+    }
+
+    /**
      * 获取用户认证名称
      * @param string $mobile 手机号
      * @return string
