@@ -25,6 +25,7 @@ return [
     'maxPageSize'     => 10,         //最大分页数
     'shopScope'       => 2,         //附近商家范围 单位(公里)
     'money_arrival_time' => 2*24*60*60,     //提现预计到账时间 2天
+    'maxAppointmentNumber' => 100,          //一小时内 最大预约数量
     /**环信相关配置**/
     'openHuanXin'     => true, //true = 开启环信 false = 关闭环信
     'passwordCode'    => '3e4r5t6y7f8d', //环信那边用户密码
