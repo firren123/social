@@ -22,6 +22,7 @@ use frontend\models\i500_social\ServiceTime;
 use frontend\models\i500_social\ServiceOrder;
 use frontend\models\i500_social\Order;
 use frontend\models\i500_social\UserBasicInfo;
+use frontend\models\i500_social\ServiceUnit;
 
 /**
  * Service time
@@ -200,7 +201,30 @@ class ServiceorderController extends BaseController
      */
     public function actionDetail()
     {
-
+        $where['uid'] = RequestHelper::get('uid', '', '');
+        if (empty($where['uid'])) {
+            $this->returnJsonMsg('621', [], Common::C('code', '621'));
+        }
+        $where['mobile'] = RequestHelper::get('mobile', '', '');
+        if (empty($where['mobile'])) {
+            $this->returnJsonMsg('604', [], Common::C('code', '604'));
+        }
+        if (!Common::validateMobile($where['mobile'])) {
+            $this->returnJsonMsg('605', [], Common::C('code', '605'));
+        }
+        $where['order_sn'] = RequestHelper::get('order_sn', '', '');
+        if (empty($where['order_sn'])) {
+            $this->returnJsonMsg('1042', [], Common::C('code', '1042'));
+        }
+        $service_order_model = new ServiceOrder();
+        $fields = 'service_id,service_way,total,service_info_title,service_info_description,service_info_image,service_info_price,service_info_unit,appointment_service_time,appointment_service_address,remark,status,pay_status';
+        $info = $service_order_model->getInfo($where, true, $fields);
+        if (empty($info)) {
+            $this->returnJsonMsg('1043', [], Common::C('code', '1043'));
+        }
+        $info['service_info_price'] = $info['service_info_price'].$this->_getServiceUnit($info['service_info_unit']);
+        unset($info['service_info_unit']);
+        $this->returnJsonMsg('200', $info, Common::C('code', '200'));
     }
 
     /**
@@ -216,5 +240,29 @@ class ServiceorderController extends BaseController
         $rs['nickname'] = '';
         $rs = $user_base_info_model->getInfo($user_base_info_where, true, $user_base_info_fields);
         return $rs['nickname'];
+    }
+
+    /**
+     * 获取服务单位
+     * @param int $unit_id 单位ID
+     * @return string
+     */
+    private function _getServiceUnit($unit_id = 0)
+    {
+        $unit = '';
+        if (!empty($unit_id)) {
+            $unit_model = new ServiceUnit();
+            $unit_where['status'] = '2';
+            $unit_list = $unit_model->getList($unit_where, 'id,unit', 'id asc');
+            if (!empty($unit_list)) {
+                foreach ($unit_list as $k => $v) {
+                    if ($unit_list[$k]['id'] == $unit_id) {
+                        $unit = $unit_list[$k]['unit'];
+                        break;
+                    }
+                }
+            }
+        }
+        return $unit;
     }
 }
