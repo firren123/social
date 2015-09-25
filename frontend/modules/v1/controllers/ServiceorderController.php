@@ -93,6 +93,9 @@ class ServiceorderController extends BaseController
         if (empty($service_info)) {
             $this->returnJsonMsg('1011', [], Common::C('code', '1011'));
         }
+        if ($data['uid'] == $service_info['uid']) {
+            $this->returnJsonMsg('1045', [], Common::C('code', '1045'));
+        }
         $order_model = new Order();
         //@todo 确定创建订单号为什么用省份？35=全国
         $data['order_sn']                 = $order_model->createSn('35', $data['mobile']);
