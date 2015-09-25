@@ -82,11 +82,12 @@ class ServiceController extends BaseController
             $this->returnJsonMsg('705', [], Common::C('code', '705'));
         }
         $service_model = new Service();
-        $service_where['uid']              = $uuid;
-        $service_where['audit_status']     = '2';
-        $service_where['user_auth_status'] = '1';
-        $service_where['status']           = '1';
-        $service_where['is_deleted']       = '2';
+        $service_where['uid']                  = $uuid;
+        $service_where['audit_status']         = '2';
+        $service_where['user_auth_status']     = '1';
+        $service_where['servicer_info_status'] = '1';
+        $service_where['status']               = '1';
+        $service_where['is_deleted']           = '2';
         $service_fields = 'id,mobile,image,title,description as service_description,price,unit,service_way';
         $list = $service_model->getPageList($service_where, $service_fields, 'id desc', $page, $page_size);
         if (!empty($list)) {
@@ -121,9 +122,12 @@ class ServiceController extends BaseController
             $this->returnJsonMsg('605', [], Common::C('code', '605'));
         }
         $service_setting_model = new ServiceSetting();
-        $info = $service_setting_model->getInfo($where, true, 'user_name,audit_status');
+        $info = $service_setting_model->getInfo($where, true, 'user_name,audit_status,status');
         if (empty($info) || $info['audit_status'] != '2') {
             $this->returnJsonMsg('1038', [], Common::C('code', '1038'));
+        }
+        if ($info['status'] != '2') {
+            $this->returnJsonMsg('1044', [], Common::C('code', '1044'));
         }
         $rs_info['user_name'] = $info['user_name'];
         $this->returnJsonMsg('200', $rs_info, Common::C('code', '200'));
@@ -178,9 +182,20 @@ class ServiceController extends BaseController
             $this->returnJsonMsg('1007', [], Common::C('code', '1007'));
         }
         /**查看该用户是否已经认证**/
-        $audit_status = $this->_getSettingInfo($data['mobile'], 'audit_status');
+        $service_setting_info = $this->_getSettingInfo($data['mobile'], 'audit_status,status', 2);
+        $audit_status = $service_setting_info['audit_status'];
+        $status       = $service_setting_info['status'];
         if ($audit_status == "") {
             $this->returnJsonMsg('1019', [], Common::C('code', '1019'));
+        }
+        if ($status == '2') {
+            /**servicer_info_status=1表示服务人(店铺)信息审核成功**/
+            $data['servicer_info_status'] = '1';
+        } else {
+            //@todo 未审核成功 抛出提示
+            $this->returnJsonMsg('1044', [], Common::C('code', '1044'));
+            /**servicer_info_status=2表示服务人(店铺)信息审核成功**/
+            $data['servicer_info_status'] = '2';
         }
         if ($audit_status == '2') {
             /**user_auth_status=1表示认证成功**/
@@ -268,9 +283,20 @@ class ServiceController extends BaseController
         }
         $data['audit_status'] = '0';
         /**查看该用户是否已经认证**/
-        $audit_status = $this->_getSettingInfo($data['mobile'], 'audit_status');
+        $service_setting_info = $this->_getSettingInfo($data['mobile'], 'audit_status,status', 2);
+        $audit_status = $service_setting_info['audit_status'];
+        $status       = $service_setting_info['status'];
         if ($audit_status == "") {
             $this->returnJsonMsg('1019', [], Common::C('code', '1019'));
+        }
+        if ($status == '2') {
+            /**servicer_info_status=1表示服务人(店铺)信息审核成功**/
+            $data['servicer_info_status'] = '1';
+        } else {
+            //@todo 未审核成功 抛出提示
+            $this->returnJsonMsg('1044', [], Common::C('code', '1044'));
+            /**servicer_info_status=2表示服务人(店铺)信息审核成功**/
+            $data['servicer_info_status'] = '2';
         }
         if ($audit_status == '2') {
             /**user_auth_status=1表示认证成功**/
@@ -303,10 +329,11 @@ class ServiceController extends BaseController
         $fields = '*';
         if ($type == '1') {
             /**在首页或服务广场页查看服务详情**/
-            $where['status']           = '1';
-            $where['user_auth_status'] = '1';
-            $where['audit_status']     = '2';
-            $where['is_deleted']       = '2';
+            $where['status']               = '1';
+            $where['user_auth_status']     = '1';
+            $where['servicer_info_status'] = '1';
+            $where['audit_status']         = '2';
+            $where['is_deleted']           = '2';
             $fields = 'id,uid,category_id,son_category_id,image,title,price,unit,service_way,description';
         } elseif ($type =='2') {
             /**在我的服务中查看服务详情**/
@@ -446,10 +473,11 @@ class ServiceController extends BaseController
             $this->returnJsonMsg('705', [], Common::C('code', '705'));
         }
         $service_model = new Service();
-        $where['audit_status']     = '2';
-        $where['user_auth_status'] = '1';
-        $where['status']           = '1';
-        $where['is_deleted']       = '2';
+        $where['audit_status']         = '2';
+        $where['user_auth_status']     = '1';
+        $where['servicer_info_status'] = '1';
+        $where['status']               = '1';
+        $where['is_deleted']           = '2';
         $fields = 'id,uid,mobile,image,title,price,unit,service_way';
         $list = $service_model->getPageList($where, $fields, 'id desc', $page, $page_size);
         if (empty($list)) {
@@ -462,7 +490,7 @@ class ServiceController extends BaseController
             if (!empty($v['mobile'])) {
                 $user_info = $this->_getUserInfo($v['mobile']);
                 $list[$k]['user_avatar']    = $user_info['avatar'];
-                $list[$k]['search_address'] = $this->_getSettingInfo($v['mobile'], 'search_address');
+                $list[$k]['search_address'] = $this->_getSettingInfo($v['mobile'], 'search_address', 1);
                 //@todo 距离需求请求仪能的接口
                 $list[$k]['distance']       = '1.5公里';
             }
@@ -502,10 +530,11 @@ class ServiceController extends BaseController
                 $this->returnJsonMsg('705', [], Common::C('code', '705'));
             }
             $service_model = new Service();
-            $where['audit_status']     = '2';
-            $where['user_auth_status'] = '1';
-            $where['status']           = '1';
-            $where['is_deleted']       = '2';
+            $where['audit_status']         = '2';
+            $where['user_auth_status']     = '1';
+            $where['servicer_info_status'] = '1';
+            $where['status']               = '1';
+            $where['is_deleted']           = '2';
             $fields = 'id,uid,mobile,image,title,price,unit,service_way';
             $list = $service_model->getPageList($where, $fields, 'id desc', $page, $page_size);
             if (empty($list)) {
@@ -518,7 +547,7 @@ class ServiceController extends BaseController
                 if (!empty($v['mobile'])) {
                     $user_info = $this->_getUserInfo($v['mobile']);
                     $list[$k]['user_avatar']    = $user_info['avatar'];
-                    $list[$k]['search_address'] = $this->_getSettingInfo($v['mobile'], 'search_address');
+                    $list[$k]['search_address'] = $this->_getSettingInfo($v['mobile'], 'search_address', 1);
                     //@todo 距离需求请求仪能的接口
                     $list[$k]['distance']       = '1.5公里';
                 }
@@ -685,6 +714,7 @@ class ServiceController extends BaseController
                 }
                 $update_data['audit_status'] = '0';
             }
+            $update_data['status']      = '1'; //禁用  编辑后信息需要审核
             $update_data['update_time'] = date('Y-m-d H:i:s', time());
             /**执行更新**/
             $rs = $service_setting_model->updateInfo($update_data, $where);
@@ -764,20 +794,25 @@ class ServiceController extends BaseController
      * 获取设置信息
      * @param string $mobile 手机号
      * @param string $params 参数名
+     * @param int    $type   表示 1=一个参数 返回一个字段值 2=多个参数 返回数组
      * @return string
      */
-    private function _getSettingInfo($mobile = '',$params = '')
+    private function _getSettingInfo($mobile = '',$params = '',$type = 1)
     {
         if (!empty($mobile) && !empty($params)) {
             $service_setting_model = new ServiceSetting();
             $where['mobile'] = $mobile;
-            $fields = 'search_address,audit_status';
+            $fields = $params;
             $info = $service_setting_model->getInfo($where, true, $fields);
             if (!empty($info)) {
-                return $info[$params];
+                if ($type == 1) {
+                    return $info[$params];
+                } else {
+                    return $info;
+                }
             }
         }
-        return '';
+        return ($type == 1) ? '' : [] ;
     }
     /**
      * 格式化图片
