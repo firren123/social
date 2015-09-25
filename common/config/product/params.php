@@ -16,7 +16,7 @@ return [
     'hongBaoHost'     => 'http://social.i500m.com/hongbao?sign=',  //红包路径
     'imgHost'         => 'http://img.i500m.com/', //图片服务器
     'channelHost'     => 'http://channel.i500m.com/', //通道服务器
-    'saveSms'         => false, //true = 保存短信内容入库 false = 不保存短信入库
+    'saveSms'         => true, //true = 保存短信内容入库 false = 不保存短信入库
     'openSmsChannel'  => true, //true = 开启短信通道 false = 关闭短信通道
     'openUserActiveTime' => true, //true = 开启记录用户活跃时间 false = 关闭
     'mobilePreg'      => '/^1[34587][0-9]{9}$/',       //Mobile 验证规则
