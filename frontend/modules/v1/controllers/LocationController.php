@@ -14,14 +14,10 @@
  */
 namespace frontend\modules\v1\controllers;
 
+use common\helpers\CurlHelper;
 use Yii;
 use common\helpers\Common;
 use common\helpers\RequestHelper;
-use frontend\models\i500_social\Service;
-use frontend\models\i500_social\ServiceCategory;
-use frontend\models\i500_social\ServiceUnit;
-use frontend\models\i500_social\ServiceSetting;
-use frontend\models\i500_social\UserBasicInfo;
 
 /**
  * 定位
@@ -34,16 +30,18 @@ use frontend\models\i500_social\UserBasicInfo;
  */
 class LocationController extends BaseController
 {
-    /**
-     * Before
-     * @param \yii\base\Action $action Action
-     * @return bool
-     * @throws \yii\web\BadRequestHttpException
-     */
-    public function beforeAction($action)
+    public function actionNearCommunity()
     {
-        $this->enableCsrfValidation = false;
-        return parent::beforeAction($action);
-    }
+        $lng = RequestHelper::get('lng', 0);
+        $lat = RequestHelper::get('lat', 0);
+        $url = Common::C('channelHost').'lbs/near-community?lng='.$lng.'&lat='.$lat;
+        $res = CurlHelper::get($url);
+        if ($res['code'] == 200) {
+            $this->returnJsonMsg($res['code'], $res['data'], $res['message']);
+        } else {
+            $this->returnJsonMsg(101, [], '获取失败');
+        }
 
+
+    }
 }
