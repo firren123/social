@@ -34,7 +34,8 @@ class LocationController extends BaseController
     {
         $lng = RequestHelper::get('lng', 0);
         $lat = RequestHelper::get('lat', 0);
-        $url = Common::C('channelHost').'lbs/near-community?lng='.$lng.'&lat='.$lat;
+        $dis = RequestHelper::get('dis', 3);
+        $url = Common::C('channelHost').'lbs/near-community?lng='.$lng.'&lat='.$lat.'&dis='.$dis;
         $res = CurlHelper::get($url);
         if ($res['code'] == 200) {
             $this->returnJsonMsg($res['code'], $res['data'], $res['message']);
