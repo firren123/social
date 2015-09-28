@@ -167,6 +167,10 @@ class ProfileController extends BaseController
         if (!empty($community_name)) {
             $user_base_update_data['community_name'] = $community_name;
         }
+        $push_status = RequestHelper::post('push_status', '', 'intval');
+        if (!empty($push_status)) {
+            $user_base_update_data['push_status'] = $push_status;
+        }
         //记录用户活跃时间
         $this->saveUserActiveTime(['mobile'=>$mobile]);
         if (!empty($user_base_update_data)) {
