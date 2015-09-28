@@ -311,6 +311,10 @@ class OrderController extends BaseController
         //$pay_method_id = RequestHelper::post('pay_method_id', 0, 'intval');//支付方式id
         $dispatch_id = RequestHelper::post('dispatch_id', 0, 'intval');//配送方式id
         $source_type = RequestHelper::post('source_type', 0, 'intval');//配送方式id
+
+        $community_id = RequestHelper::post('community_id', 0, 'intval');//小区id
+
+
         //$mobile = RequestHelper::post('mobile', '', '');
         if (empty($this->shop_id)) {
             $this->returnJsonMsg(101, [], '无效的商家id');
@@ -326,6 +330,12 @@ class OrderController extends BaseController
         }
         if (empty($address_id)) {
             $this->returnJsonMsg(103, [], '请选择有效的收货地址');
+        }
+        if (empty($address_id)) {
+            $this->returnJsonMsg(103, [], '请选择有效的收货地址');
+        }
+        if (empty($community_id)) {
+            $this->returnJsonMsg(103, [], '无效的小区参数');
         }
         $cart_goods = htmlspecialchars_decode($cart_goods);
         $cart_goods = json_decode($cart_goods, true);
@@ -372,6 +382,7 @@ class OrderController extends BaseController
             'source_type'=>$source_type,
             'dispatch_id'=>$dispatch_id,
             'send_time'=>$send_time,
+            'community_id'=>$community_id,
         ];
         $order_detail = '';
         $goods_total = 0;
