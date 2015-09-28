@@ -264,6 +264,19 @@ class BaseController extends Controller
     }
 
     /**
+     * 推送消息(请求百度推送)
+     * @return bool
+     */
+    public function pushToApp()
+    {
+        if (Common::C('OpenPushToApp')) {
+
+        } else {
+            return true;
+        }
+    }
+
+    /**
      * 开启日志
      * @param string $path 路径
      * @param string $data 数据
