@@ -370,12 +370,6 @@ class ProfileController extends BaseController
         if (!Common::validateMobile($mobile)) {
             $this->returnJsonMsg('605', [], Common::C('code', '605'));
         }
-        //get缓存
-        $cache_key = 'coupons_'.$mobile;
-        $cache_rs = SsdbHelper::Cache('get', $cache_key);
-        if ($cache_rs) {
-            $this->returnJsonMsg('200', $cache_rs, Common::C('code', '200'));
-        }
         $user_coupons_model = new UserCoupons();
         $user_coupons_where['mobile'] = $mobile;
         $user_coupons_fields = '
@@ -391,8 +385,6 @@ class ProfileController extends BaseController
                 $info[$k]['status'] = '2';
             }
         }
-        //set 缓存
-        SsdbHelper::Cache('set', $cache_key, $info, Common::C('SSDBCacheTime'));
         $this->returnJsonMsg('200', $info, Common::C('code', '200'));
     }
 
