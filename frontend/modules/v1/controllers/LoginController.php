@@ -253,7 +253,7 @@ class LoginController extends BaseController
             $this->returnJsonMsg('400', [], Common::C('code', '400'));
         }
         /**环信注册**/
-        $hx_rs = HuanXinHelper::hxRegister($mobile, Common::C('passwordCode'), $mobile);
+        $hx_rs = HuanXinHelper::hxRegister($mobile, Common::C('passwordCode'), Common::C('defaultNickName'));
         if (empty($hx_rs)) {
             $this->returnJsonMsg('626', [], Common::C('code', '626'));
         }
@@ -299,6 +299,10 @@ class LoginController extends BaseController
             case '4' :
                 /**绑定用户获取验证码**/
                 $this->_bindUserSendCode($mobile);
+                break;
+            case '5' :
+                /**绑定银行卡页面获取验证码**/
+                $this->_bindUserBankCardSendCode($mobile);
                 break;
         }
     }
@@ -544,7 +548,7 @@ class LoginController extends BaseController
                 $this->returnJsonMsg('400', [], Common::C('code', '400'));
             }
             /**环信注册**/
-            $hx_rs = HuanXinHelper::hxRegister($mobile, Common::C('passwordCode'), $mobile);
+            $hx_rs = HuanXinHelper::hxRegister($mobile, Common::C('passwordCode'), Common::C('defaultNickName'));
             if (empty($hx_rs)) {
                 $this->returnJsonMsg('626', ['first_login'=>'1'], Common::C('code', '626'));
             }
@@ -677,6 +681,38 @@ class LoginController extends BaseController
             $this->returnJsonMsg('400', [], Common::C('code', '400'));
         }
         $sms_content = Common::getSmsTemplate(6, $user_verify_code_data['code']);
+        /**保存短信数据**/
+        $user_sms_data['mobile']  = $mobile;
+        $user_sms_data['content'] = $sms_content;
+        if (!$this->saveUserSms($user_sms_data)) {
+            $this->returnJsonMsg('611', [], Common::C('code', '611'));
+        }
+        /**发送短信通道**/
+        $rs = $this->sendSmsChannel($mobile, $sms_content);
+        if (!$rs) {
+            $this->returnJsonMsg('611', [], Common::C('code', '611'));
+        }
+        $this->returnJsonMsg('200', ['first_login'=>'1'], Common::C('code', '200'));
+    }
+
+    /**
+     * 绑定用户银行卡发送验证码
+     * @param string $mobile 手机号
+     * @return array
+     */
+    private function _bindUserBankCardSendCode($mobile = '')
+    {
+        /**发送验证码**/
+        $user_verify_code_model = new UserVerifyCode();
+        $user_verify_code_data['mobile']     = $mobile;
+        $user_verify_code_data['code']       = Common::getRandomNumber();
+        $user_verify_code_data['type']       = '5';  //绑定用户银行卡发送验证码
+        $user_verify_code_data['expires_in'] = date('Y-m-d H:i:s', (time()+ Common::C('verify_code_timeout')));
+        $rs = $user_verify_code_model->insertInfo($user_verify_code_data);
+        if (!$rs) {
+            $this->returnJsonMsg('400', [], Common::C('code', '400'));
+        }
+        $sms_content = Common::getSmsTemplate(7, $user_verify_code_data['code']);
         /**保存短信数据**/
         $user_sms_data['mobile']  = $mobile;
         $user_sms_data['content'] = $sms_content;

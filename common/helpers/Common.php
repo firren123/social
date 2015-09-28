@@ -185,6 +185,10 @@ class Common
                 /**绑定用户发送验证码**/
                 $temp = '校验码 '.$code.'，您正在使用第三方登录绑定到您的爱500米账号。如非本人操作请忽略本条信息';
                 break;
+            case 7 :
+                /**绑定用户银行卡发送验证码短信**/
+                $temp = '校验码 '.$code.'，您正在绑定银行卡账号。如非本人操作请忽略本条信息';
+                break;
             default :
                 $temp = '';
         }
@@ -259,6 +263,20 @@ class Common
         //strtotime 加上这个年数后得到那日的时间戳后与今日的时间戳相比
         $age = strtotime(substr($card, 6, 8).' +'.$diff.'years') > $today ? ($diff+1) : $diff ;
         return $age;
+    }
+
+    /**
+     * 通过日期获取星期
+     * @param string $day 日期
+     * @return string
+     */
+    public static function getWeek($day = '')
+    {
+        if (!empty($day)) {
+            $week_array =array("日","一","二","三","四","五","六");
+            return $week_array[@date("w", strtotime($day))];
+        }
+        return "";
     }
 
     /**
