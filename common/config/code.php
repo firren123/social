@@ -78,6 +78,7 @@ return [
     '642' => '缺少参数 community_id',
     '643' => '缺少参数 push_channel',
     '644' => '缺少参数 push_id',
+    '645' => '缺少参数 community_city_id',
 
     '701' => '版块ID不能为空',
     '702' => '帖子标题不能为空',

@@ -76,7 +76,7 @@ class ProfileController extends BaseController
         $type = RequestHelper::post('type', '0', '');
         $user_base_model = new UserBasicInfo();
         $user_base_where['mobile'] = $mobile;
-        $user_base_fields = 'id,mobile,nickname,avatar,personal_sign,realname,sex,birthday,province_id,city_id,district_id,community_name';
+        $user_base_fields = 'id,mobile,nickname,avatar,personal_sign,realname,sex,birthday,province_id,city_id,district_id,community_name,push_status';
         if ($type == '1') {
             //仅获取昵称 + 头像
             $user_base_fields = 'nickname,avatar';
@@ -207,9 +207,13 @@ class ProfileController extends BaseController
         if (!Common::validateMobile($mobile)) {
             $this->returnJsonMsg('605', [], Common::C('code', '605'));
         }
-        $community_id = RequestHelper::post('community_id', '', 'intval');
+        $community_id = RequestHelper::post('community_id', '0', 'intval');
         if (empty($community_id)) {
             $this->returnJsonMsg('642', [], Common::C('code', '642'));
+        }
+        $community_city_id = RequestHelper::post('community_city_id', '0', 'intval');
+        if (empty($community_city_id)) {
+            $this->returnJsonMsg('645', [], Common::C('code', '645'));
         }
         $user_base_model = new UserBasicInfo();
         $user_base_where['mobile'] = $mobile;
@@ -217,23 +221,25 @@ class ProfileController extends BaseController
         $user_base_info = $user_base_model->getInfo($user_base_where, true, $user_base_fields);
         if (empty($user_base_info)) {
             /**添加**/
-            $user_base_data['uid']               = $uid;
-            $user_base_data['mobile']            = $mobile;
-            $user_base_data['last_community_id'] = $community_id;
+            $user_base_data['uid']                    = $uid;
+            $user_base_data['mobile']                 = $mobile;
+            $user_base_data['last_community_city_id'] = $community_city_id;
+            $user_base_data['last_community_id']      = $community_id;
             $rs = $user_base_model->insertInfo($user_base_data);
             if (!$rs) {
                 $this->returnJsonMsg('400', [], Common::C('code', '400'));
             }
-            $this->_checkUserCommunity($uid, $mobile, $community_id);
+            $this->_checkUserCommunity($uid, $mobile, $community_city_id, $community_id);
             $this->returnJsonMsg('200', [], Common::C('code', '200'));
         }
         /**编辑**/
-        $user_base_update['last_community_id'] = $community_id;
+        $user_base_update['last_community_city_id'] = $community_city_id;
+        $user_base_update['last_community_id']      = $community_id;
         $update_rs = $user_base_model->updateInfo($user_base_update, $user_base_where);
         if (!$update_rs) {
             $this->returnJsonMsg('400', [], Common::C('code', '400'));
         }
-        $this->_checkUserCommunity($uid, $mobile, $community_id);
+        $this->_checkUserCommunity($uid, $mobile, $community_city_id, $community_id);
         $this->returnJsonMsg('200', [], Common::C('code', '200'));
     }
 
@@ -308,7 +314,7 @@ class ProfileController extends BaseController
         $rs['last_community_id'] = '0';
         $user_base_model = new UserBasicInfo();
         $user_base_where['mobile'] = $mobile;
-        $user_base_fields = 'last_community_id';
+        $user_base_fields = 'last_community_id,last_community_city_id';
         $user_base_info = $user_base_model->getInfo($user_base_where, true, $user_base_fields);
         if (empty($user_base_info)) {
             $this->returnJsonMsg('200', $rs, Common::C('code', '200'));
@@ -412,19 +418,21 @@ class ProfileController extends BaseController
 
     /**
      * 验证并更新用户小区
-     * @param int    $uid          用户ID
-     * @param string $mobile       手机号
-     * @param int    $community_id 小区ID
+     * @param int    $uid               用户ID
+     * @param string $mobile            手机号
+     * @param int    $community_city_id 小区城市ID
+     * @param int    $community_id      小区ID
      * @return bool
      */
-    private function _checkUserCommunity($uid = 0, $mobile = '', $community_id = 0)
+    private function _checkUserCommunity($uid = 0, $mobile = '', $community_city_id = 0, $community_id = 0)
     {
-        if (!empty($community_id) && !empty($mobile) && !empty($uid)) {
+        if (!empty($community_city_id) && !empty($community_id) && !empty($mobile) && !empty($uid)) {
             $user_community_model = new UserCommunity();
             $user_community_fields = 'id';
-            $user_community_where['uid']          = $uid;
-            $user_community_where['mobile']       = $mobile;
-            $user_community_where['community_id'] = $community_id;
+            $user_community_where['uid']               = $uid;
+            $user_community_where['mobile']            = $mobile;
+            $user_community_where['community_id']      = $community_id;
+            $user_community_where['community_city_id'] = $community_city_id;
             $info = $user_community_model->getInfo($user_community_where, true, $user_community_fields);
             if (empty($info)) {
                 /**执行添加**/

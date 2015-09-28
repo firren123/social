@@ -181,6 +181,14 @@ class ServiceController extends BaseController
         if (empty($data['description'])) {
             $this->returnJsonMsg('1007', [], Common::C('code', '1007'));
         }
+        $data['community_id'] = RequestHelper::post('community_id', '0', 'intval');
+        if (empty($data['community_id'])) {
+            $this->returnJsonMsg('642', [], Common::C('code', '642'));
+        }
+        $data['community_city_id'] = RequestHelper::post('community_city_id', '0', 'intval');
+        if (empty($data['community_city_id'])) {
+            $this->returnJsonMsg('645', [], Common::C('code', '645'));
+        }
         /**查看该用户是否已经认证**/
         $service_setting_info = $this->_getSettingInfo($data['mobile'], 'audit_status,status', 2);
         $audit_status = $service_setting_info['audit_status'];
@@ -321,6 +329,14 @@ class ServiceController extends BaseController
         $where['id'] = RequestHelper::get('service_id', '0', 'intval');
         if (empty($where['id'])) {
             $this->returnJsonMsg('1010', [], Common::C('code', '1010'));
+        }
+        $where['community_id'] = RequestHelper::get('community_id', '0', 'intval');
+        if (empty($where['community_id'])) {
+            $this->returnJsonMsg('642', [], Common::C('code', '642'));
+        }
+        $where['community_city_id'] = RequestHelper::get('community_city_id', '0', 'intval');
+        if (empty($where['community_city_id'])) {
+            $this->returnJsonMsg('645', [], Common::C('code', '645'));
         }
         $type = RequestHelper::get('type', '0', 'intval');
         if (empty($type)) {
@@ -467,12 +483,22 @@ class ServiceController extends BaseController
      */
     public function actionGetIndexService()
     {
+        $community_id = RequestHelper::get('community_id', '0', 'intval');
+        if (empty($community_id)) {
+            $this->returnJsonMsg('642', [], Common::C('code', '642'));
+        }
+        $community_city_id = RequestHelper::get('community_city_id', '0', 'intval');
+        if (empty($community_city_id)) {
+            $this->returnJsonMsg('645', [], Common::C('code', '645'));
+        }
         $page      = RequestHelper::get('page', '1', 'intval');
         $page_size = RequestHelper::get('page_size', '6', 'intval');
         if ($page_size > Common::C('maxPageSize')) {
             $this->returnJsonMsg('705', [], Common::C('code', '705'));
         }
         $service_model = new Service();
+        $where['community_id']         = $community_id;
+        $where['community_city_id']    = $community_city_id;
         $where['audit_status']         = '2';
         $where['user_auth_status']     = '1';
         $where['servicer_info_status'] = '1';
@@ -524,12 +550,22 @@ class ServiceController extends BaseController
             if (empty($where['son_category_id'])) {
                 unset($where['son_category_id']);
             }
+            $community_id = RequestHelper::get('community_id', '0', 'intval');
+            if (empty($community_id)) {
+                $this->returnJsonMsg('642', [], Common::C('code', '642'));
+            }
+            $community_city_id = RequestHelper::get('community_city_id', '0', 'intval');
+            if (empty($community_city_id)) {
+                $this->returnJsonMsg('645', [], Common::C('code', '645'));
+            }
             $page      = RequestHelper::get('page', '1', 'intval');
             $page_size = RequestHelper::get('page_size', '6', 'intval');
             if ($page_size > Common::C('maxPageSize')) {
                 $this->returnJsonMsg('705', [], Common::C('code', '705'));
             }
             $service_model = new Service();
+            $where['community_id']         = $community_id;
+            $where['community_city_id']    = $community_city_id;
             $where['audit_status']         = '2';
             $where['user_auth_status']     = '1';
             $where['servicer_info_status'] = '1';

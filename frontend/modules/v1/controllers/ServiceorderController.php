@@ -81,6 +81,14 @@ class ServiceorderController extends BaseController
             $this->returnJsonMsg('1033', [], Common::C('code', '1033'));
         }
         $data['remark'] = RequestHelper::post('remark', '', '');
+        $data['community_id'] = RequestHelper::post('community_id', '0', 'intval');
+        if (empty($data['community_id'])) {
+            $this->returnJsonMsg('642', [], Common::C('code', '642'));
+        }
+        $data['community_city_id'] = RequestHelper::post('community_city_id', '0', 'intval');
+        if (empty($data['community_city_id'])) {
+            $this->returnJsonMsg('645', [], Common::C('code', '645'));
+        }
         /**获取服务信息**/
         $service_model = new Service();
         $service_where['id']               = $data['service_id'];
