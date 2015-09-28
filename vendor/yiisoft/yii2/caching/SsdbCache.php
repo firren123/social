@@ -131,7 +131,7 @@ class SsdbCache extends Cache
     public function deleteValue($key)
     {
         $key = $this->_keyPre.$key;
-        $this->getSsdbCache()->hdel($this->_keyPre, $key);
+        $this->getSsdbCache()->hdel($key);
         return $this->getSsdbCache()->del($key);
     }
 
