@@ -86,6 +86,7 @@ class AddressController extends BaseController
         if (empty($uid)) {
             $this->returnJsonMsg('621', [], Common::C('code', '621'));
         }
+        $data['uid']    = $uid;
         $data['mobile'] = RequestHelper::post('mobile', '', '');
         if (empty($data['mobile'])) {
             $this->returnJsonMsg('604', [], Common::C('code', '604'));
@@ -126,6 +127,9 @@ class AddressController extends BaseController
         if (empty($rs)) {
             $this->returnJsonMsg('400', [], Common::C('code', '400'));
         }
+        //del列表缓存
+        $cache_key = 'address_list_'.$data['mobile'];
+        SsdbHelper::Cache('del', $cache_key);
         //记录用户活跃时间
         $this->saveUserActiveTime(['mobile'=>$data['mobile']]);
         $this->returnJsonMsg('200', [], Common::C('code', '200'));
@@ -186,9 +190,12 @@ class AddressController extends BaseController
         if (empty($rs)) {
             $this->returnJsonMsg('400', [], Common::C('code', '400'));
         }
-        //del缓存
-        $cache_key = 'address_details_'.$where['id'].'_'.$data['mobile'];
+        //del列表缓存
+        $cache_key = 'address_list_'.$data['mobile'];
         SsdbHelper::Cache('del', $cache_key);
+        //del详情缓存
+        $cache_detail_key = 'address_details_'.$where['id'].'_'.$data['mobile'];
+        SsdbHelper::Cache('del', $cache_detail_key);
         //记录用户活跃时间
         $this->saveUserActiveTime(['mobile'=>$data['mobile']]);
         $this->returnJsonMsg('200', [], Common::C('code', '200'));
@@ -221,9 +228,12 @@ class AddressController extends BaseController
         if (empty($rs)) {
             $this->returnJsonMsg('400', [], Common::C('code', '400'));
         }
-        //del缓存
-        $cache_key = 'address_details_'.$where['id'].'_'.$where['mobile'];
-        SsdbHelper::Cache('del', $cache_key);
+        //del列表缓存
+        $cache_list_key = 'address_list_'.$where['mobile'];
+        SsdbHelper::Cache('del', $cache_list_key);
+        //del详情缓存
+        $cache_detail_key = 'address_details_'.$where['id'].'_'.$where['mobile'];
+        SsdbHelper::Cache('del', $cache_detail_key);
         //记录用户活跃时间
         $this->saveUserActiveTime(['mobile'=>$where['mobile']]);
         $this->returnJsonMsg('200', [], Common::C('code', '200'));

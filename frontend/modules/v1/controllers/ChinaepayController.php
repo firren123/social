@@ -62,8 +62,8 @@ class ChinaepayController extends BaseController
         }
         $order_model = new Order();
         $data['mobile']   = $mobile;
-        //@todo 确定创建订单号为什么用省份？
-        $data['order_sn'] = $order_model->createSn('1', $mobile);
+        //@todo 确定创建订单号为什么用省份？35=全国
+        $data['order_sn'] = $order_model->createSn('35', $mobile);
         $data['business_code'] = RequestHelper::post('business_code', '0', '');
         if (empty($data['business_code'])) {
             $this->returnJsonMsg('900', [], Common::C('code', '900'));
@@ -79,6 +79,14 @@ class ChinaepayController extends BaseController
             $this->returnJsonMsg('902', [], Common::C('code', '902'));
         }
         $data['remark']   = RequestHelper::post('remark', '', '');
+        $data['community_id'] = RequestHelper::post('community_id', '0', 'intval');
+        if (empty($data['community_id'])) {
+            $this->returnJsonMsg('642', [], Common::C('code', '642'));
+        }
+        $data['community_city_id'] = RequestHelper::post('community_city_id', '0', 'intval');
+        if (empty($data['community_city_id'])) {
+            $this->returnJsonMsg('645', [], Common::C('code', '645'));
+        }
         $order_model = new Chinaepay();
         $rs = $order_model->insertInfo($data);
         if (!$rs) {

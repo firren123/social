@@ -96,9 +96,10 @@ class BaseRequestHelps
      */
     public static function getParams($name='', $default = '', $filter = null, $input = null)
     {
+        $filters    =   isset($filter) ? $filter : 'htmlspecialchars';
+        $filters    =   !empty($filters) ? $filters : 'htmlspecialchars';
         if ('' == $name) {
             $data       =   $input;
-            $filters    =   isset($filter)?$filter:'htmlspecialchars';
             if ($filters) {
                 if (is_string($filters)) {
                     $filters    =   explode(',', $filters);
@@ -109,7 +110,6 @@ class BaseRequestHelps
             }
         } elseif (isset($input[$name])) { // 取值操作
             $data       =   $input[$name];
-            $filters    =   isset($filter)?$filter:'htmlspecialchars';
             if ($filters) {
                 if (is_string($filters)) {
                     if (0 === strpos($filters, '/')) {

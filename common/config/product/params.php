@@ -16,7 +16,7 @@ return [
     'hongBaoHost'     => 'http://social.i500m.com/hongbao?sign=',  //红包路径
     'imgHost'         => 'http://img.i500m.com/', //图片服务器
     'channelHost'     => 'http://channel.i500m.com/', //通道服务器
-    'saveSms'         => false, //true = 保存短信内容入库 false = 不保存短信入库
+    'saveSms'         => true, //true = 保存短信内容入库 false = 不保存短信入库
     'openSmsChannel'  => true, //true = 开启短信通道 false = 关闭短信通道
     'openUserActiveTime' => true, //true = 开启记录用户活跃时间 false = 关闭
     'mobilePreg'      => '/^1[34587][0-9]{9}$/',       //Mobile 验证规则
@@ -24,6 +24,8 @@ return [
     'verify_code_timeout'   => 60*60,                  //用户短信验证码有效期
     'maxPageSize'     => 10,         //最大分页数
     'shopScope'       => 2,         //附近商家范围 单位(公里)
+    'money_arrival_time' => 2*24*60*60,     //提现预计到账时间 2天
+    'maxAppointmentNumber' => 100,          //一小时内 最大预约数量
     /**环信相关配置**/
     'openHuanXin'     => true, //true = 开启环信 false = 关闭环信
     'passwordCode'    => '3e4r5t6y7f8d', //环信那边用户密码
@@ -33,6 +35,8 @@ return [
     'hxUsersAPI'      => 'https://a1.easemob.com/iyangpin2015/i500social/users/', //环信注册API
     'regAddFriendCustomerService' => true,  //true = 注册添加客服为好友 false = 不添加
     'customerServiceUserName'  => 'customservice',   //客服账号
+    'defaultNickName'          => '小伙伴', //默认昵称
+    'defaultAvatar'            => 'http://img.i500m.com/uploads/custom/20150924/tx.png',  //默认头像
 
     'sign_debug'      => false,                        //false = 开启验证 true 关闭验证
 

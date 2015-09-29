@@ -59,12 +59,6 @@ class ShopController extends BaseController
         if (empty($lat)) {
             $this->returnJsonMsg('802', [], Common::C('code', '802'));
         }
-        //get缓存
-        $cache_key = 'shop_list_'.md5($lng.$lat);
-        $cache_rs = SsdbHelper::Cache('get', $cache_key);
-        if ($cache_rs) {
-            $this->returnJsonMsg('200', $cache_rs, Common::C('code', '200'));
-        }
         $dis = Common::C('shopScope');
         $url = Common::C('channelHost').'lbs/near-shop?lng='.$lng.'&lat='.$lat.'&dis='.$dis;
         $rs = CurlHelper::get($url, true);
@@ -83,11 +77,6 @@ class ShopController extends BaseController
             $info[$k]['sent_fee']   = number_format($shopInfo['sent_fee']);
             $info[$k]['free_money'] = number_format($shopInfo['free_money']);
             $info[$k]['freight']    = number_format($shopInfo['freight']);
-        }
-        if (empty($info)) {
-            //set缓存
-            SsdbHelper::Cache('set', $cache_key, $info, Common::C('SSDBCacheTime'));
-            $this->returnJsonMsg('200', $info, Common::C('code', '200'));
         }
         $this->returnJsonMsg('200', $info, Common::C('code', '200'));
     }

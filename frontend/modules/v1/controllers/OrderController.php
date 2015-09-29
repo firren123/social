@@ -47,7 +47,7 @@ class OrderController extends BaseController
 
     /**
      * 确认订单页面 [{"product_id":"9000","num":10},{"product_id":"10","num":10}]
-     *
+     * @return json
      */
     public function actionConfirm()
     {
@@ -163,7 +163,7 @@ class OrderController extends BaseController
                 //配送费
                 $data['freight'] = 0;
                 $shop_model  = new Shop();
-                $info = $shop_model->getInfo(['id'=>$this->shop_id], true, 'sent_fee,free_money,freight');
+                $info = $shop_model->getInfo(['id'=>$this->shop_id], true, 'sent_fee,free_money,freight,shop_name,contact_name,mobile,address');
                 if ($info['sent_fee'] > $goods_total) {
                     $this->returnJsonMsg(109, [], '不够起送费');
                 }
@@ -172,11 +172,23 @@ class OrderController extends BaseController
                 }
                 //商品总价
                 $data['goods_total'] = $goods_total;
-                //支付总价
+//                echo "<br />";
+//                //支付总价
+               // echo $coupon_value;
+                //echo "<br />";
+                //echo $goods_total + $data['freight'];
+                //echo 10.01-10;
                 $data['total'] = $goods_total + $data['freight'] - $coupon_value;
+
+                $data['total'] = round($data['total'], 2);
                 if ($data['total'] < 0) {
                     $data['total'] = 0;
                 }
+                $data['shop_address'] = [
+                    'consignee'=>$info['shop_name'],
+                    'consignee_mobile'=>$info['mobile'],
+                    'address'=>$info['address'],
+                ];
                 $this->returnJsonMsg(200, $data, 'SUCCESS');
             }
 
@@ -299,6 +311,10 @@ class OrderController extends BaseController
         //$pay_method_id = RequestHelper::post('pay_method_id', 0, 'intval');//支付方式id
         $dispatch_id = RequestHelper::post('dispatch_id', 0, 'intval');//配送方式id
         $source_type = RequestHelper::post('source_type', 0, 'intval');//配送方式id
+
+        $community_id = RequestHelper::post('community_id', 0, 'intval');//小区id
+
+
         //$mobile = RequestHelper::post('mobile', '', '');
         if (empty($this->shop_id)) {
             $this->returnJsonMsg(101, [], '无效的商家id');
@@ -314,6 +330,12 @@ class OrderController extends BaseController
         }
         if (empty($address_id)) {
             $this->returnJsonMsg(103, [], '请选择有效的收货地址');
+        }
+        if (empty($address_id)) {
+            $this->returnJsonMsg(103, [], '请选择有效的收货地址');
+        }
+        if (empty($community_id)) {
+            $this->returnJsonMsg(103, [], '无效的小区参数');
         }
         $cart_goods = htmlspecialchars_decode($cart_goods);
         $cart_goods = json_decode($cart_goods, true);
@@ -360,6 +382,7 @@ class OrderController extends BaseController
             'source_type'=>$source_type,
             'dispatch_id'=>$dispatch_id,
             'send_time'=>$send_time,
+            'community_id'=>$community_id,
         ];
         $order_detail = '';
         $goods_total = 0;

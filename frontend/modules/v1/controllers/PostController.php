@@ -78,6 +78,14 @@ class PostController extends BaseController
         if (empty($content)) {
             $this->returnJsonMsg('703', [], Common::C('code', '703'));
         }
+        $community_id = RequestHelper::post('community_id', '0', 'intval');
+        if (empty($community_id)) {
+            $this->returnJsonMsg('642', [], Common::C('code', '642'));
+        }
+        $community_city_id = RequestHelper::post('community_city_id', '0', 'intval');
+        if (empty($community_city_id)) {
+            $this->returnJsonMsg('645', [], Common::C('code', '645'));
+        }
         $post_model = new Post();
         $post_where['title'] = $title;
         $post_fields = 'id';
@@ -85,10 +93,13 @@ class PostController extends BaseController
         if (!empty($post_info)) {
             $this->returnJsonMsg('704', [], Common::C('code', '704'));
         }
-        $post_add_data['mobile']   = $mobile;
-        $post_add_data['forum_id'] = $forum_id;
-        $post_add_data['title']    = $title;
-        $post_add_data['post_img'] = $post_img;
+        $post_add_data['uid']               = $uid;
+        $post_add_data['mobile']            = $mobile;
+        $post_add_data['forum_id']          = $forum_id;
+        $post_add_data['title']             = $title;
+        $post_add_data['post_img']          = $post_img;
+        $post_add_data['community_id']      = $community_id;
+        $post_add_data['community_city_id'] = $community_city_id;
         $rs = $post_model->insertOneRecord($post_add_data);
         if (!$rs || empty($rs['data']['new_id'])) {
             $this->returnJsonMsg('400', [], Common::C('code', '400'));
@@ -123,14 +134,24 @@ class PostController extends BaseController
         if (empty($forum_id)) {
             $this->returnJsonMsg('701', [], Common::C('code', '701'));
         }
+        $community_id = RequestHelper::get('community_id', '0', 'intval');
+        if (empty($community_id)) {
+            $this->returnJsonMsg('642', [], Common::C('code', '642'));
+        }
+        $community_city_id = RequestHelper::get('community_city_id', '0', 'intval');
+        if (empty($community_city_id)) {
+            $this->returnJsonMsg('645', [], Common::C('code', '645'));
+        }
         $page      = RequestHelper::get('page', '1', 'intval');
         $page_size = RequestHelper::get('page_size', '6', 'intval');
         if ($page_size > Common::C('maxPageSize')) {
             $this->returnJsonMsg('705', [], Common::C('code', '705'));
         }
-        $post_where['forum_id']   = $forum_id;
-        $post_where['status']     = '2';
-        $post_where['is_deleted'] = '2';
+        $post_where['forum_id']          = $forum_id;
+        $post_where['community_id']      = $community_id;
+        $post_where['community_city_id'] = $community_city_id;
+        $post_where['status']            = '2';
+        $post_where['is_deleted']        = '2';
         $post_fields = 'id,mobile,forum_id,title,post_img,thumbs,views,create_time';
         $post_model = new Post();
         $list = $post_model->getPageList($post_where, $post_fields, 'id desc', $page, $page_size);
@@ -171,10 +192,20 @@ class PostController extends BaseController
         if (empty($post_id)) {
             $this->returnJsonMsg('706', [], Common::C('code', '706'));
         }
+        $community_id = RequestHelper::get('community_id', '0', 'intval');
+        if (empty($community_id)) {
+            $this->returnJsonMsg('642', [], Common::C('code', '642'));
+        }
+        $community_city_id = RequestHelper::get('community_city_id', '0', 'intval');
+        if (empty($community_city_id)) {
+            $this->returnJsonMsg('645', [], Common::C('code', '645'));
+        }
         $post_fields = 'id,mobile,forum_id,title,post_img,thumbs,views,create_time';
-        $post_where['id']         = $post_id;
-        $post_where['status']     = '2';
-        $post_where['is_deleted'] = '2';
+        $post_where['id']                = $post_id;
+        $post_where['community_id']      = $community_id;
+        $post_where['community_city_id'] = $community_city_id;
+        $post_where['status']            = '2';
+        $post_where['is_deleted']        = '2';
         $post_model = new Post();
         $rs = $post_model->getInfo($post_where, true, $post_fields);
         if (empty($rs)) {
@@ -231,6 +262,7 @@ class PostController extends BaseController
             $this->returnJsonMsg('715', [], Common::C('code', '715'));
         }
         $post_comment_model = new PostComments();
+        $post_comment_add_data['uid']     = $uid;
         $post_comment_add_data['mobile']  = $mobile;
         $post_comment_add_data['post_id'] = $post_id;
         $post_comment_add_data['content'] = $content;
@@ -281,6 +313,7 @@ class PostController extends BaseController
             $this->returnJsonMsg('718', [], Common::C('code', '718'));
         }
         $rs = $this->_setPostNumber($post_id, $post_rs['thumbs']+1, '1');
+        $post_thumbs_add_data['uid']     = $uid;
         $post_thumbs_add_data['mobile']  = $mobile;
         $post_thumbs_add_data['post_id'] = $post_id;
         $add_rs = $post_thumbs->insertInfo($post_thumbs_add_data);
@@ -381,6 +414,7 @@ class PostController extends BaseController
         }
         $post_comments_update['thumbs'] = $post_comments_info['thumbs'] + 1;
         $rs = $post_comments_model->updateInfo($post_comments_update, $post_comments_where);
+        $post_comments_thumbs_add_data['uid']        = $uid;
         $post_comments_thumbs_add_data['mobile']     = $mobile;
         $post_comments_thumbs_add_data['comment_id'] = $comment_id;
         $add_rs = $post_comments_thumbs_model->insertInfo($post_comments_thumbs_add_data);

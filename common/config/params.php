@@ -24,6 +24,8 @@ return [
     'verify_code_timeout'   => 60*60,                  //用户短信验证码有效期
     'maxPageSize'     => 10,         //最大分页数
     'shopScope'       => 2,         //附近商家范围 单位(公里)
+    'money_arrival_time' => 2*24*60*60,     //提现预计到账时间 2天
+    'maxAppointmentNumber' => 100,          //一小时内 最大预约数量
     /**环信相关配置**/
     'openHuanXin'     => true, //true = 开启环信 false = 关闭环信
     'passwordCode'    => '3e4r5t6y7f8d', //环信那边用户密码
@@ -33,6 +35,8 @@ return [
     'hxUsersAPI'      => 'https://a1.easemob.com/iyangpin2015/i500social/users/', //环信注册API
     'regAddFriendCustomerService' => true,  //true = 注册添加客服为好友 false = 不添加
     'customerServiceUserName'  => 'customservice',   //客服账号
+    'defaultNickName'          => '小伙伴', //默认昵称
+    'defaultAvatar'            => 'http://img.i500m.com/uploads/custom/20150924/tx.png',  //默认头像
 
     'sign_debug'      => false,                        //false = 开启验证 true 关闭验证
 
@@ -41,4 +45,8 @@ return [
     'hxt_TerminalID' => '81030003',
     'hxt_KeyID' => '25176948',
     'hxt_MacKey' => '1101010101111001000101010110100101110111010110111100100011110111001001001001011001101010100110101000101010101010100101010100101110101001010010101110110010011001011101001100001010010001101010100100010110011101111011000101001010100010110011101001011010110011',
+
+    'icomet_url_admin' => 'http://channel.test.i500m.com/icometa/',
+    'icomet_url_user' => 'http://channel.test.i500m.com/icomet/',
+
 ];

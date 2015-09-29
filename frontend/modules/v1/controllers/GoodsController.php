@@ -283,13 +283,13 @@ class GoodsController extends BaseController
 
 
         }
-        if (!empty($activity_info)) {
-            $p_info['activity_id'] = $activity_info['activity_id'];
-            $p_info['activity_name'] = $activity_info['name'];
-            $p_info['subtitle'] = $activity_info['subtitle'];
-            $p_info['activity_price'] = $activity_info['activity_price'];
-            $p_info['purchase_num'] = $activity_info['purchase_num'];
-        }
+//        if (!empty($activity_info)) {
+//            $p_info['activity_id'] = $activity_info['activity_id'];
+//            $p_info['activity_name'] = $activity_info['name'];
+//            $p_info['subtitle'] = $activity_info['subtitle'];
+//            $p_info['activity_price'] = $activity_info['activity_price'];
+//            $p_info['purchase_num'] = $activity_info['purchase_num'];
+//        }
         $p_info['photo'] = $image_data;
         $this->returnJsonMsg(200, $p_info, 'SUCCESS');
     }

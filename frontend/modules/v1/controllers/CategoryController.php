@@ -20,6 +20,7 @@ use frontend\models\shop\ActivityProducts;
 use frontend\models\shop\ShopActivity;
 use frontend\models\shop\ActProducts;
 use frontend\models\shop\ShopCategory;
+use frontend\models\shop\ShopProducts;
 
 class CategoryController extends BaseController
 {
@@ -30,19 +31,25 @@ class CategoryController extends BaseController
         //$menu[] = ['name'=>'热门推荐', 'id'=>'hot','type'=>'hot'];
         $menu = [];
         //读取活动
-        $activity = new ShopActivity();
-        $activity_name = $activity->getActivityName($this->shop_id);
-        //var_dump($activity_name);exit();
-        foreach($activity_name as $k => $v) {
-            $menu[] = ['name'=>$v['name'], 'id'=>$v['type'], 'type'=>'activity'];
-        }
+//        $activity = new ShopActivity();
+//        $activity_name = $activity->getActivityName($this->shop_id);
+//        //var_dump($activity_name);exit();
+//        foreach($activity_name as $k => $v) {
+//            $menu[] = ['name'=>$v['name'], 'id'=>$v['type'], 'type'=>'activity'];
+//        }
 
 
         //获取分类
         $item = $model->getCategory(['shop_id'=>$this->shop_id]);
         //var_dump($item);
+        $product_model = new ShopProducts();
+
         foreach ($item as $k => $v) {
-            $menu[] = ['name'=>$v['name'], 'id'=>$v['id'], 'type'=>'category'];;
+            $count = $product_model->getCount(['shop_id'=>$this->shop_id, 'cat_id'=>$v['id'], 'status'=>1]);
+            //var_dump($count);
+            if ($count > 0) {
+                $menu[] = ['name'=>$v['name'], 'id'=>$v['id'], 'type'=>'category'];
+            }
         }
         $this->returnJsonMsg(200, $menu, 'SUCCESS');
 
