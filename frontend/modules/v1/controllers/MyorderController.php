@@ -364,6 +364,29 @@ class MyorderController extends BaseController
         $data['remark']      = RequestHelper::post('remark', '', '');
         $data['apply_time']  = date('Y-m-d H:i:s', time());
         $model = new Exchange();
+        //@todo 判断数据库中是否存在相同商品的退换货单
+        $where['shop_id']    = $data['shop_id'];
+        $where['order_sn']   = $data['order_sn'];
+        $where['uid']        = $data['uid'];
+        $where['mobile']     = $data['mobile'];
+        $where['product_id'] = $data['product_id'];
+        $info = $model->getInfo($where, true, 'id,number');
+        $have_number = 0;
+        if (!empty($info)) {
+            $have_number += $info['number'];
+        }
+        //@todo 退换货数量的限制 与 订单表的数量进行比较
+        $number = $data['number'] + $have_number;
+        $order_model = new OrderDetail();
+        $order_d_where['order_sn']   = $data['order_sn'];
+        $order_d_where['product_id'] = $data['product_id'];
+        $order_detail_info = $order_model->getInfo($order_d_where, true, 'num');
+        if (empty($order_detail_info)) {
+            $this->returnJsonMsg('818', [], Common::C('code', '818'));
+        }
+        if ($number > $order_detail_info['num']) {
+            $this->returnJsonMsg('819', [], Common::C('code', '819'));
+        }
         $rs = $model->insertInfo($data);
         //更新订单详情表当前商品的退货数量
         $order_detail_model = new OrderDetail();
