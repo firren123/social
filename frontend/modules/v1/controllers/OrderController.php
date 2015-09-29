@@ -326,14 +326,39 @@ class OrderController extends BaseController
             $this->returnJsonMsg(103, [], '无效的手机号');
         }
         if (empty($send_time)) {
-            $this->returnJsonMsg(103, [], '配送时间为空');
+            $this->returnJsonMsg(104, [], '配送时间为空');
         }
-        if (empty($address_id)) {
+        //配送费
+        $shop_model  = new Shop();
+        $info = $shop_model->getInfo(['id'=>$this->shop_id], true, 'id,shop_name,contact_name,mobile,address,province,sent_fee,free_money,freight');
+        if ($dispatch_id == 2) {//上门自提
+            //$shop_model = new Shop();
+            //$address = $shop_model->getInfo(['id'=>$this->shop_id], 'id,shop_name,contact_name,mobile,address,province');
+            $address_info = [
+                'id'=>$info['id'],
+                'consignee'=>$info['shop_name'],
+                'consignee_mobile'=>$info['mobile'],
+                'province_id'=>$info['province'],
+            ];
+            $address = $info['address'];
+        } else {
+
+            //获取收货地址
+            $address_model = new UserAddress();
+            $address_info = $address_model->getInfo(['id'=>$address_id, 'mobile'=>$mobile]);
+            if (empty($address_info)) {
+                $this->returnJsonMsg(103, [], '收货地址不存在！');
+            }
+            $address = $address_info['search_address'] . ' ' . $address_info['details_address'];
+
+        }
+        if ($dispatch_id == 1) {
+            if (empty($address_id)) {
+                $this->returnJsonMsg(105, [], '请选择有效的收货地址');
+            }
             $this->returnJsonMsg(103, [], '请选择有效的收货地址');
         }
-        if (empty($address_id)) {
-            $this->returnJsonMsg(103, [], '请选择有效的收货地址');
-        }
+
         if (empty($community_id)) {
             $this->returnJsonMsg(103, [], '无效的小区参数');
         }
@@ -342,13 +367,7 @@ class OrderController extends BaseController
         if (empty($cart_goods)) {
             $this->returnJsonMsg(104, [], '无效的json数据');
         }
-        //获取收货地址
-        $address_model = new UserAddress();
-        $address_info = $address_model->getInfo(['id'=>$address_id, 'mobile'=>$mobile]);
-        if (empty($address_info)) {
-            $this->returnJsonMsg(103, [], '收货地址不存在！');
-        }
-        $address = $address_info['search_address'] . ' ' . $address_info['details_address'];
+
         $goods = [];
         $time = time();
         $m_order = new Order();
@@ -495,9 +514,7 @@ class OrderController extends BaseController
 
                 }
 
-                //配送费
-                $shop_model  = new Shop();
-                $info = $shop_model->getInfo(['id'=>$this->shop_id], true, 'sent_fee,free_money,freight');
+
                 if ($info['sent_fee'] > $goods_total) {
                     $this->returnJsonMsg(109, [], '不够起送费');
                 }
