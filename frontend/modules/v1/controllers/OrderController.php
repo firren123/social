@@ -342,7 +342,9 @@ class OrderController extends BaseController
             ];
             $address = $info['address'];
         } else {
-
+            if (empty($address_id)) {
+                $this->returnJsonMsg(105, [], '请选择有效的收货地址');
+            }
             //获取收货地址
             $address_model = new UserAddress();
             $address_info = $address_model->getInfo(['id'=>$address_id, 'mobile'=>$mobile]);
@@ -352,13 +354,6 @@ class OrderController extends BaseController
             $address = $address_info['search_address'] . ' ' . $address_info['details_address'];
 
         }
-        if ($dispatch_id == 1) {
-            if (empty($address_id)) {
-                $this->returnJsonMsg(105, [], '请选择有效的收货地址');
-            }
-            $this->returnJsonMsg(103, [], '请选择有效的收货地址');
-        }
-
         if (empty($community_id)) {
             $this->returnJsonMsg(103, [], '无效的小区参数');
         }
