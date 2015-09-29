@@ -110,8 +110,11 @@ class MyorderController extends BaseController
             $info = $exchange_model->getPageList($exchange_where, $exchange_fields, 'id desc', $page, $page_size);
             if (!empty($info)) {
                 foreach ($info as $k => $v) {
+                    $where[$k]['order_sn']   = $v['order_sn'];
+                    $where[$k]['product_id'] = $v['product_id'];
                     $info[$k]['total']       = $v['price']*$v['num'];
-                    $info[$k]['product_img'] = $this->_formatImg($v['product_img']);
+                    //$info[$k]['product_img'] = $this->_formatImg($v['product_img']);
+                    $info[$k]['product_img'] = $this->_getProductImg($where[$k]);
                     $info[$k]['price']       = $v['price'];
                     unset($info[$k]['price']);
                 }
@@ -547,5 +550,20 @@ class MyorderController extends BaseController
             }
         }
         return $img_data;
+    }
+
+    /**
+     * 获取商品图片
+     * @param array $where 条件
+     * @return string
+     */
+    private function _getProductImg($where = [])
+    {
+        $model = new OrderDetail();
+        $info = $model->getInfo($where, true, 'product_img');
+        if (!empty($info) && !empty($info['product_img'])) {
+            return Common::C('imgHost').$info['product_img'];
+        }
+        return '';
     }
 }
