@@ -330,6 +330,7 @@ class OrderController extends BaseController
         }
         //配送费
         $shop_model  = new Shop();
+        $address_model = new UserAddress();
         $info = $shop_model->getInfo(['id'=>$this->shop_id], true, 'id,shop_name,contact_name,mobile,address,province,sent_fee,free_money,freight');
         if ($dispatch_id == 2) {//上门自提
             //$shop_model = new Shop();
@@ -346,7 +347,7 @@ class OrderController extends BaseController
                 $this->returnJsonMsg(105, [], '请选择有效的收货地址');
             }
             //获取收货地址
-            $address_model = new UserAddress();
+
             $address_info = $address_model->getInfo(['id'=>$address_id, 'mobile'=>$mobile]);
             if (empty($address_info)) {
                 $this->returnJsonMsg(103, [], '收货地址不存在！');
