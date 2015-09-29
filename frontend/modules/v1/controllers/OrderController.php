@@ -490,7 +490,7 @@ class OrderController extends BaseController
                     //$dis_amount = $coupons->getField(['mobile'=>$mobile, 'id'=>$coupon_id], 'par_value');
                     if (!empty($dis_amount)) {
                         $order['coupon_id'] = $coupon_id;
-                        $dis_amount = $dis_amount;
+                        $order['dis_amount'] = $dis_amount;
                     }
 
                 }
