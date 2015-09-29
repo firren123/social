@@ -58,6 +58,36 @@
         <div style="margin-top: 5px;text-align: center;">
             <button type="submit" class="btn btn-default btn-md5">MD5</button>
         </div>
+        <div class="input-group" style="margin-top: 10px;">
+            <span class="input-group-addon">错误代码</span>
+            <input type="text" placeholder="例如：400" class="form-control" id="error_code">
+        </div>
+        <div style="margin-top: 10px;text-align: center;">
+            <button type="submit" class="btn btn-default btn-get-error-msg">获取错误信息</button>
+        </div>
+        <div style="margin-top: 10px; text-align: center; display: none;" class="alert alert-success error-msg" role="alert">
+        </div>
+
+        <div class="input-group" style="margin-top: 10px;">
+            <span class="input-group-addon">解绑号码</span>
+            <input type="text" placeholder="例如：13264185553" class="form-control" id="bind_user">
+        </div>
+        <div style="margin-top: 10px;text-align: center;">
+            <button type="submit" class="btn btn-default btn-remove-bind-user">解绑</button>
+        </div>
+        <div style="margin-top: 10px; text-align: center; display: none;" class="alert alert-success remove-bind-user-msg" role="alert">
+        </div>
+
+        <div class="input-group" style="margin-top: 10px;">
+            <span class="input-group-addon">手机号码</span>
+            <input type="text" placeholder="例如：13264185553" class="form-control" id="remove_user">
+        </div>
+        <div style="margin-top: 10px;text-align: center;">
+            <button type="submit" class="btn btn-default btn-remove-user">删除</button>
+            <button type="submit" class="btn btn-default btn-check-user">是否存在</button>
+        </div>
+        <div style="margin-top: 10px; text-align: center; display: none;" class="alert alert-success user-msg" role="alert">
+        </div>
     </div>
     </body>
 </html>

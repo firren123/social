@@ -1,12 +1,15 @@
 <?php
 /**
- * 公共方法库
- * @category  WAP 
- * @package   公共方法库
+ * Common
+ *
+ * PHP Version 5
+ *
+ * @category  Social
+ * @package   Common
  * @author    linxinliang <linxinliang@iyangpin.com>
- * @time      2015/3/19 16:28
- * @copyright 灵韬致胜（北京）科技发展有限公司
- * @license   http://www.i500m.com
+ * @time      2015/8/12
+ * @copyright 2015 灵韬致胜（北京）科技发展有限公司
+ * @license   http://www.i500m.com license
  * @link      linxinliang@iyangpin.com
  */
 
@@ -14,14 +17,22 @@ namespace common\helpers;
 
 use Yii;
 
-
+/**
+ * Common
+ *
+ * @category Social
+ * @package  Common
+ * @author   linxinliang <linxinliang@iyangpin.com>
+ * @license  http://www.i500m.com/ license
+ * @link     linxinliang@iyangpin.com
+ */
 class Common
 {
     /**
      * 截取字符串
-     * @param $string     字符串
-     * @param $length     限制长度
-     * @param string $etc 后缀
+     * @param string $string 字符串
+     * @param string $length 限制长度
+     * @param string $etc    后缀
      * @return string
      */
     public static function truncate_utf8_string($string, $length, $etc = '...')
@@ -29,35 +40,50 @@ class Common
         $result = '';
         $string = html_entity_decode(trim(strip_tags($string)), ENT_QUOTES, 'UTF-8');
         $strlen = strlen($string);
-        for ($i = 0; (($i < $strlen) && ($length > 0)); $i++)
-        {
-            if ($number = strpos(str_pad(decbin(ord(substr($string, $i, 1))), 8, '0', STR_PAD_LEFT), '0'))
-            {
-                if ($length < 1.0)
-                {
+        for ($i = 0; (($i < $strlen) && ($length > 0)); $i++) {
+            if ($number = strpos(str_pad(decbin(ord(substr($string, $i, 1))), 8, '0', STR_PAD_LEFT), '0')) {
+                if ($length < 1.0) {
                     break;
                 }
                 $result .= substr($string, $i, $number);
                 $length -= 1.0;
                 $i += $number - 1;
-            }
-            else
-            {
+            } else {
                 $result .= substr($string, $i, 1);
                 $length -= 0.5;
             }
         }
         $result = htmlspecialchars($result, ENT_QUOTES, 'UTF-8');
-        if ($i < $strlen)
-        {
+        if ($i < $strlen) {
             $result .= $etc;
         }
         return $result;
     }
 
     /**
+     * 二维数组去重
+     * @param array  $arr 数组
+     * @param string $key 键
+     * @return mixed
+     */
+    public static function arrUnique($arr = [], $key = '')
+    {
+        $tmp_arr = array();
+        foreach ($arr as $k => $v) {
+            if (in_array($v[$key], $tmp_arr)) {
+                //搜索$v[$key]是否在$tmp_arr数组中存在，若存在返回true
+                unset($arr[$k]);
+            } else {
+                $tmp_arr[] = $v[$key];
+            }
+        }
+        //sort($arr); //sort函数对数组进行排序
+        return $arr;
+    }
+
+    /**
      * 验证手机号
-     * @param $mobile 手机号
+     * @param string $mobile 手机号
      * @return bool
      */
     public static function validateMobile($mobile)
@@ -89,6 +115,19 @@ class Common
         return $ip;
     }
 
+    /**
+     * 格式化数字
+     * @param int $num 数字
+     * @return string
+     */
+    public static function formatNumber($num = 0)
+    {
+        /**当数字超过万的时候进行格式化**/
+        if ($num > 10000) {
+            $num = round(($num/10000), 2).'w';
+        }
+        return $num;
+    }
     /**
      * 获取6位随机数
      * @return int
@@ -124,19 +163,72 @@ class Common
         switch ($type) {
             case 1 :
                 /**登陆发送验证码**/
-                $temp = '【i500】尊敬的用户，您的i500登录验证码为'.$code.'，如非本人操作请忽略此短信，如有疑问请咨询400-661-1690';
+                $temp = '校验码 '.$code.'，您正在登录爱500米，需要进行校验。如非本人操作请忽略本条信息';
                 break;
             case 2 :
                 /**第一次登陆发送密码**/
-                $temp = '【i500】登陆密码为'.$code.'，如非本人操作请忽略此短信，如有疑问请咨询400-661-1690';
+                $temp = '终于等到您，成为爱500米的一员。您的登录密码为 '.$code.'请及时登录修改。';
                 break;
             case 3 :
                 /**找回密码**/
-                $temp = '【i500】操作为找回密码的验证码为'.$code.'，如非本人操作请忽略此短信，如有疑问请咨询400-661-1690';
+                $temp = '校验码 '.$code.'，您正在找回爱500米密码，需要进行校验。如非本人操作请忽略本条信息';
+                break;
+            case 4 :
+                /**绑定用户发送密码**/
+                $temp = '终于等到您，成为爱500米的一员。您的登录密码为 '.$code.'请及时登录修改。';
+                break;
+            case 5 :
+                /**注册发送验证码**/
+                $temp = '校验码 '.$code.'，您正在注册爱500米账号，需要进行校验。如非本人操作请忽略本条信息';
+                break;
+            case 6 :
+                /**绑定用户发送验证码**/
+                $temp = '校验码 '.$code.'，您正在使用第三方登录绑定到您的爱500米账号。如非本人操作请忽略本条信息';
                 break;
             default :
                 $temp = '';
         }
         return $temp;
+    }
+
+    /**
+     * 距离当前时间展示方法
+     * @param string $datetime 活跃时间
+     * @param int    $nowtime  当前时间
+     * @return bool|string
+     */
+    function timeAgo($datetime='', $nowtime = 0)
+    {
+        $datetime = strtotime($datetime);
+        if (empty($nowtime)) {
+            $nowtime = time();
+        }
+        $timediff = $nowtime - $datetime;
+        $timediff = $timediff >= 0 ? $timediff : $datetime - $nowtime;
+        // 秒
+        if ($timediff < 60) {
+            return $timediff . '秒前';
+        }
+        // 分
+        if ($timediff < 3600 && $timediff >= 60) {
+            return intval($timediff / 60) . '分钟前';
+        }
+        // 今天
+        $today = mktime(0, 0, 0, date('m'), date('d'), date('Y'));
+        if ($datetime >= $today) {
+            return date('今天 H:i', $datetime);
+        }
+        // 昨天
+        $yestoday = mktime(0, 0, 0, date('m'), date('d') - 1, date('Y'));
+        if ($datetime >= $yestoday) {
+            return date('昨天 H:i', $datetime);
+        }
+        // 今年月份
+        $this_year = mktime(0, 0, 0, 1, 1, date('Y'));
+        if ($datetime >= $this_year) {
+            return date('m月d日 H:i', $datetime);
+        }
+        // 往年
+        return date('Y年m月d日', $datetime);
     }
 }

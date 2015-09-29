@@ -17,8 +17,11 @@ namespace frontend\modules\v1\controllers;
 
 use common\helpers\Common;
 use common\helpers\RequestHelper;
+use common\helpers\CurlHelper;
 use frontend\models\i500_social\User;
+use frontend\models\i500_social\UserActiveTime;
 use frontend\models\i500_social\UserToken;
+use frontend\models\i500_social\UserSms;
 use yii\web\Controller;
 
 /**
@@ -33,6 +36,7 @@ use yii\web\Controller;
 class BaseController extends Controller
 {
     protected $params = null;
+    public $shop_id;
 
     /**
      * 初始化
@@ -54,7 +58,7 @@ class BaseController extends Controller
                 $this->params = RequestHelper::get();
                 break;
         }
-        //file_put_contents('/tmp/app_request_param.log', "请求时间：".date('Y-m-d H:i:s')." 请求参数:". var_export($this->params, true)."\n", FILE_APPEND);
+        $this->saveLog(Common::C('returnLogFile'), var_export($this->params, true));
         if (!\Yii::$app->params['sign_debug']) {
             if (!isset($this->params['appId'])) {
                 $this->returnJsonMsg('501', [], Common::C('code', '501'));
@@ -77,7 +81,7 @@ class BaseController extends Controller
             if (!isset($this->params['dev'])) {
                 $this->returnJsonMsg('509', [], Common::C('code', '509'));
             }
-            if (!in_array($this->params['dev'], array('1', '2', '3'))) {
+            if (!in_array($this->params['dev'], array('1', '2', '3', '4'))) {
                 $this->returnJsonMsg('510', [], Common::C('code', '510'));
             }
             $dev = $this->params['dev'];
@@ -124,7 +128,11 @@ class BaseController extends Controller
         if ($this->params) {
             $params = $this->params;
             //ksort($params);
+            if (isset($params['json_str'])) {
+                $params['json_str'] = $_POST['json_str'];
+            }
             foreach ($params as $k=>$v) {
+                $v = strtolower($v);
                 $val .= $v;
             }
         }
@@ -161,8 +169,7 @@ class BaseController extends Controller
         $user_token_fields = 'id,token,create_time';
         $user_token_info = $user_token_model->getInfo($user_token_where, true, $user_token_fields);
         if (!empty($user_token_info)) {
-            $token_timeout = strtotime($user_info['create_time']) + Common::C('token_timeout');
-
+            $token_timeout = strtotime($user_token_info['create_time']) + Common::C('token_timeout');
             if ($token != $user_token_info['token'] || time() > $token_timeout) {
                 $this->returnJsonMsg('508', [], Common::C('code', '508'));
             }
@@ -185,9 +192,87 @@ class BaseController extends Controller
             'data' => $data,
             'message' => $message,
         );
-        //file_put_contents('/tmp/app_send_log.log', "执行时间：".date('Y-m-d H:i:s')." 返回结果".var_export($arr, true)."\n", FILE_APPEND);
+        $this->saveLog(Common::C('paramsLogFile'), var_export($arr, true));
         $ret = json_encode($arr);
         $ret_str = str_replace('null', '""', $ret);
         die($ret_str);
+    }
+
+    /**
+     * 发送短信通道
+     * @param string $mobile  手机号
+     * @param string $content 短信内容
+     * @return array
+     */
+    public function sendSmsChannel($mobile = '', $content = '')
+    {
+        if (Common::C('openSmsChannel')) {
+            $url = Common::C('channelHost').'sms/get-add';
+            $arr['mobile']  = $mobile;
+            $arr['content'] = $content;
+            $rs = CurlHelper::post($url, $arr, true);
+            if ($rs['code']=='200') {
+                return true;
+            }
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    /**
+     * 保存用户发送短信信息
+     * @param array $data 数据
+     * @return array
+     */
+    public function saveUserSms($data = array())
+    {
+        if (Common::C('saveSms')) {
+            $user_sms_model = new UserSms();
+            return $user_sms_model->insertInfo($data);
+        } else {
+            return true;
+        }
+    }
+
+    /**
+     * 记录用户活跃信息
+     * @param array $data 数据
+     * @return bool
+     */
+    public function saveUserActiveTime($data = array())
+    {
+        if (Common::C('openUserActiveTime')) {
+            if (!empty($data['mobile'])) {
+                $user_user_active_time_model = new UserActiveTime();
+                $user_user_active_time_where['mobile'] = $data['mobile'];
+                $info = $user_user_active_time_model->getInfo($user_user_active_time_where, true, 'id');
+                if (empty($info)) {
+                    //新增
+                    return $user_user_active_time_model->insertInfo($data);
+                } else {
+                    //编辑
+                    $user_user_active_time_data['create_time'] = date('Y-m-d H:i:s', time());
+                    return $user_user_active_time_model->updateInfo($user_user_active_time_data, $user_user_active_time_where);
+                }
+            } else {
+                return true;
+            }
+        } else {
+            return true;
+        }
+    }
+
+    /**
+     * 开启日志
+     * @param string $path 路径
+     * @param string $data 数据
+     * @return bool
+     */
+    public function saveLog($path = '', $data = '')
+    {
+        if (Common::C('openLog')) {
+            file_put_contents($path, "执行时间：" . date('Y-m-d H:i:s') . " 数据：" . var_export($data, true) . "\n", FILE_APPEND);
+        }
     }
 }

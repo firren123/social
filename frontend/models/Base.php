@@ -150,4 +150,268 @@ class Base extends ActiveRecord
         }
         return $re !== false;
     }
+
+    /**
+     * 根据字段名称 和条件获取一个字段信息
+     * @param string $field 查询字段
+     * @param array  $map   查询条件
+     * @return string
+     */
+    public function getField($field, $map)
+    {
+        $name = '';
+        if ($map) {
+            $name = $this->find()->select($field)->where($map)->scalar();
+        }
+        return $name;
+
+    }
+
+
+
+    /**
+     * 查询表，返回分页数据
+     *
+     * Author zhengyu@iyangpin.com
+     *
+     * @param array  $arr_where    arr_where
+     * @param string $str_andwhere 字符串where条件
+     * @param array  $arr_order    arr_order
+     * @param string $str_field    str_field
+     * @param int    $int_offset   int_offset If not set or less than 0, it means starting from the beginning
+     * @param int    $int_limit    int_limit If not set or less than 0, it means no limit
+     *
+     * @return array
+     */
+    public function getRecordList(
+        $arr_where,
+        $str_andwhere = '',
+        $arr_order = array(),
+        $str_field = '*',
+        $int_offset = -1,
+        $int_limit = -1
+    ) {
+        $arr = $this->find()
+            ->select($str_field)
+            ->where($arr_where)
+            ->andWhere($str_andwhere)
+            ->orderBy($arr_order)
+            ->offset($int_offset)
+            ->limit($int_limit)
+            ->asArray()
+            ->all();
+        return $arr;
+    }
+
+    /**
+     * 查询条件的记录总数
+     *
+     * Author zhengyu@iyangpin.com
+     *
+     * @param array  $arr_where    arr_where
+     * @param string $str_andwhere 字符串where条件
+     * @param string $str_field    str_field
+     *
+     * @return array
+     */
+    public function getRecordListCount($arr_where, $str_andwhere = '', $str_field = 'count(*) as num')
+    {
+        $arr = $this->find()
+            ->select($str_field)
+            ->where($arr_where)
+            ->andWhere($str_andwhere)
+            ->asArray()
+            ->one();
+        if (!$arr) {
+            $arr = array();
+        }
+        return $arr;
+    }
+
+    /**
+     * 修改1条记录
+     *
+     * Author zhengyu@iyangpin.com
+     *
+     * @param array  $arr_where    查询条件
+     * @param string $str_andwhere 字符串where条件
+     * @param array  $arr_set      set的数据
+     *
+     * @return array array('result'=>0/1,'data'=>array(),'msg'=>'')
+     */
+    public function updateOneRecord($arr_where, $str_andwhere = '', $arr_set = array())
+    {
+        $active_record = $this->find()
+            ->where($arr_where)
+            ->andWhere($str_andwhere)
+            ->one();
+        foreach ($arr_set as $key => $value) {
+            $active_record->$key = $value;
+        }
+        try {
+            $result = $active_record->update();
+            if ($result === false) {
+                return array('result' => 0, 'data' => array(), 'msg' => 'failed');
+            } else {
+                return array('result' => 1, 'data' => array(), 'msg' => '');
+            }
+        } catch (\Exception $e) {
+            return array('result' => 0, 'data' => array(), 'msg' => $e->getMessage());
+        }
+    }
+
+    /**
+     * Insert 1条记录
+     *
+     * Author zhengyu@iyangpin.com
+     *
+     * @param array $arr_field_value 新记录的数据
+     *
+     * @return array array('result'=>0/1,'data'=>array(),'msg'=>'')
+     */
+    public function insertOneRecord($arr_field_value)
+    {
+        foreach ($arr_field_value as $key => $value) {
+            $this->$key = $value;
+        }
+        try {
+            $result = $this->insert();
+            if ($result === false) {
+                return array('result' => 0, 'data' => array(), 'msg' => 'failed');
+            } else {
+                return array('result' => 1, 'data' => array('new_id' => $this->id), 'msg' => '');
+            }
+        } catch (\Exception $e) {
+            return array('result' => 0, 'data' => array(), 'msg' => $e->getMessage());
+        }
+    }
+
+    /**
+     * 删除1条记录
+     *
+     * Author zhengyu@iyangpin.com
+     *
+     * @param array  $arr_where    查询条件
+     * @param string $str_andwhere 字符串where条件
+     *
+     * @return array array('result'=>0/1,'data'=>array(),'msg'=>'')
+     */
+    public function delOneRecord($arr_where, $str_andwhere = '')
+    {
+        $active_record = $this->find()
+            ->where($arr_where)
+            ->andWhere($str_andwhere)
+            ->one();
+        if ($active_record) {
+            try {
+                $result = $active_record->delete();
+                if ($result === false) {
+                    return array('result' => 0, 'data' => array(), 'msg' => 'failed');
+                } else {
+                    return array('result' => 1, 'data' => array(), 'msg' => '');
+                }
+            } catch (\Exception $e) {
+                return array('result' => 0, 'data' => array(), 'msg' => $e->getMessage());
+            }
+        } else {
+            return array('result' => 0, 'data' => array(), 'msg' => 'failed');
+        }
+    }
+
+    /**
+     * 获取一条记录
+     *
+     * Author zhengyu@iyangpin.com
+     *
+     * @param array  $arr_where    where条件
+     * @param string $str_andwhere 字符串where条件
+     * @param string $str_field    字段
+     *
+     * @return array
+     */
+    public function getOneRecord($arr_where, $str_andwhere = '', $str_field = '*')
+    {
+        $arr = $this->find()
+            ->select($str_field)
+            ->where($arr_where)
+            ->andWhere($str_andwhere)
+            ->asArray()
+            ->one();
+        if (!$arr) {
+            $arr = array();
+        }
+        return $arr;
+    }
+
+
+    /**
+     * 查询表，返回分页数据
+     *
+     * Author zhengyu@iyangpin.com
+     *
+     * @param array  $arr_where          arr_where
+     * @param array  $arr_where_param    where绑定数组
+     * @param string $str_andwhere       字符串where条件
+     * @param array  $arr_andwhere_param andwhere绑定数组
+     * @param array  $arr_order          arr_order
+     * @param string $str_field          str_field
+     * @param int    $int_offset         If not set or less than 0, it means starting from the beginning
+     * @param int    $int_limit          If not set or less than 0, it means no limit
+     *
+     * @return array
+     */
+    public function getRecordListParam(
+        $arr_where,
+        $arr_where_param = array(),
+        $str_andwhere = '',
+        $arr_andwhere_param = array(),
+        $arr_order = array(),
+        $str_field = '*',
+        $int_offset = -1,
+        $int_limit = -1
+    ) {
+        $arr = $this->find()
+            ->select($str_field)
+            ->where($arr_where, $arr_where_param)
+            ->andWhere($str_andwhere, $arr_andwhere_param)
+            ->orderBy($arr_order)
+            ->offset($int_offset)
+            ->limit($int_limit)
+            ->asArray()
+            ->all();
+        return $arr;
+    }
+
+    /**
+     * 查询表，返回分页数据
+     *
+     * Author zhengyu@iyangpin.com
+     *
+     * @param array  $arr_where          arr_where
+     * @param array  $arr_where_param    where绑定数组
+     * @param string $str_andwhere       字符串where条件
+     * @param array  $arr_andwhere_param andwhere绑定数组
+     * @param string $str_field          str_field
+     *
+     * @return array
+     */
+    public function getRecordListParamCount(
+        $arr_where,
+        $arr_where_param = array(),
+        $str_andwhere = '',
+        $arr_andwhere_param = array(),
+        $str_field = 'count(*) as num'
+    ) {
+        $arr = $this->find()
+            ->select($str_field)
+            ->where($arr_where, $arr_where_param)
+            ->andWhere($str_andwhere, $arr_andwhere_param)
+            ->asArray()
+            ->one();
+        if (!$arr) {
+            $arr = array();
+        }
+        return $arr;
+    }
+
 }
