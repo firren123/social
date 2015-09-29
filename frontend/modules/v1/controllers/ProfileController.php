@@ -74,6 +74,12 @@ class ProfileController extends BaseController
             $mobile = $user_mobile;
         }
         $type = RequestHelper::post('type', '0', '');
+        //get缓存
+        $cache_key = 'profile_'.$type.'_'.$mobile;
+        $cache_rs = SsdbHelper::Cache('get', $cache_key);
+        if ($cache_rs) {
+            $this->returnJsonMsg('200', $cache_rs, Common::C('code', '200'));
+        }
         $user_base_model = new UserBasicInfo();
         $user_base_where['mobile'] = $mobile;
         $user_base_fields = 'id,mobile,nickname,avatar,personal_sign,realname,sex,birthday,province_id,city_id,district_id,community_name,push_status';
@@ -106,6 +112,8 @@ class ProfileController extends BaseController
                 $user_base_info['nickname'] = Common::C('defaultNickName');
             }
         }
+        //set缓存
+        SsdbHelper::Cache('set', $cache_key, $user_base_info, Common::C('SSDBCacheTime'));
         $this->returnJsonMsg('200', $user_base_info, Common::C('code', '200'));
     }
 
@@ -183,6 +191,14 @@ class ProfileController extends BaseController
                 if (!empty($nickname)) {
                     HuanXinHelper::hxModifyNickName($mobile, $nickname);
                 }
+                if (!empty($nickname) || !empty($avatar)) {
+                    //del缓存
+                    $cache_key_2 = 'profile_1_'.$mobile;
+                    SsdbHelper::Cache('del', $cache_key_2);
+                }
+                //缓存设置为空
+                $cache_key_1 = 'profile_0_'.$mobile;
+                SsdbHelper::Cache('set', $cache_key_1, '', Common::C('SSDBCacheTime'));
                 $this->returnJsonMsg('200', [], Common::C('code', '200'));
             }
         } else {
