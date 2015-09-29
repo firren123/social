@@ -257,12 +257,15 @@ class ServiceorderController extends BaseController
             $this->returnJsonMsg('1042', [], Common::C('code', '1042'));
         }
         $service_order_model = new ServiceOrder();
-        $fields = 'service_id,service_mobile,service_way,total,service_info_title,service_info_price,service_info_unit,appointment_service_time,appointment_service_address,remark,status,pay_status';
+        $fields = 'service_id,service_mobile,service_way,total,service_info_title,service_info_price,service_info_image,service_info_unit,appointment_service_time,appointment_service_address,remark,status,pay_status';
         $info = $service_order_model->getInfo($where, true, $fields);
         if (empty($info)) {
             $this->returnJsonMsg('1043', [], Common::C('code', '1043'));
         }
         $info['service_info_price'] = $info['service_info_price'].$this->_getServiceUnit($info['service_info_unit']);
+        if (!empty($info['service_info_image'])) {
+            $info['service_info_image'] = Common::C('imgHost').$info['service_info_image'];
+        }
         $info['contact'] = $this->_getSettingInfo($info['service_mobile'], 'user_name', 1);
         $info['contact_mobile'] = $info['service_mobile'];
         unset($info['service_mobile']);
