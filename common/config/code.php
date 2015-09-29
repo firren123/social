@@ -116,6 +116,7 @@ return [
     '814' => '不支持发红包（后台没有配置可用的发放规则）',
     '815' => '只能分享一次红包给朋友们',
     '816' => '未能查询到订单信息',
+    '817' => '当前商品已经申请了退换货操作',
 
     '900' => '缺少参数 business_code',
     '901' => 'business_type 传递错误',
@@ -187,4 +188,5 @@ return [
     //SSDB KEY 备注
     'address_details_{id}_{mobile}' => '用户收货地址详情',
     'address_list_{mobile}'   => '用户收货地址列表',
+    'profile_{type}_{mobile}' => '用户个人信息'
 ];

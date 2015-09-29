@@ -364,6 +364,17 @@ class MyorderController extends BaseController
         $data['remark']      = RequestHelper::post('remark', '', '');
         $data['apply_time']  = date('Y-m-d H:i:s', time());
         $model = new Exchange();
+        //@todo 判断数据库中是否存在相同商品的退换货单
+        //@todo 退换货数量的限制
+        $where['shop_id']    = $data['shop_id'];
+        $where['order_sn']   = $data['order_sn'];
+        $where['uid']        = $data['uid'];
+        $where['mobile']     = $data['mobile'];
+        $where['product_id'] = $data['product_id'];
+        $info = $model->getInfo($where, true, 'id');
+        if (!empty($info)) {
+            $this->returnJsonMsg('817', [], Common::C('code', '817'));
+        }
         $rs = $model->insertInfo($data);
         //更新订单详情表当前商品的退货数量
         $order_detail_model = new OrderDetail();
