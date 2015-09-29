@@ -23,6 +23,8 @@ use frontend\models\i500_social\ServiceOrder;
 use frontend\models\i500_social\Order;
 use frontend\models\i500_social\UserBasicInfo;
 use frontend\models\i500_social\ServiceUnit;
+use frontend\models\i500_social\ServiceSetting;
+use frontend\models\i500_social\ServiceOrderEvaluation;
 
 /**
  * Service time
@@ -81,6 +83,14 @@ class ServiceorderController extends BaseController
             $this->returnJsonMsg('1033', [], Common::C('code', '1033'));
         }
         $data['remark'] = RequestHelper::post('remark', '', '');
+        $data['community_id'] = RequestHelper::post('community_id', '0', 'intval');
+        if (empty($data['community_id'])) {
+            $this->returnJsonMsg('642', [], Common::C('code', '642'));
+        }
+        $data['community_city_id'] = RequestHelper::post('community_city_id', '0', 'intval');
+        if (empty($data['community_city_id'])) {
+            $this->returnJsonMsg('645', [], Common::C('code', '645'));
+        }
         /**获取服务信息**/
         $service_model = new Service();
         $service_where['id']               = $data['service_id'];
@@ -134,10 +144,18 @@ class ServiceorderController extends BaseController
     public function actionList()
     {
         $where = [];
-        $type = RequestHelper::get('type', '', '');
+        $type = RequestHelper::get('type', '0', 'intval');
         if (empty($type)) {
             $this->returnJsonMsg('1037', [], Common::C('code', '1037'));
         }
+        if ($type !='1' && $type !='2') {
+            $this->returnJsonMsg('1014', [], Common::C('code', '1014'));
+        }
+        $order_status = RequestHelper::get('order_status', '0', 'intval');
+        if (empty($order_status)) {
+            $this->returnJsonMsg('1046', [], Common::C('code', '1046'));
+        }
+        $and_where = '';
         if ($type == '1') {
             /**我预约的服务**/
             $where['uid'] = RequestHelper::get('uid', '', '');
@@ -151,7 +169,20 @@ class ServiceorderController extends BaseController
             if (!Common::validateMobile($where['mobile'])) {
                 $this->returnJsonMsg('605', [], Common::C('code', '605'));
             }
-        } elseif ($type == '2') {
+            $fields = 'service_info_title,service_mobile as mobile,appointment_service_time,appointment_service_address,status,pay_status,order_sn';
+            $data = $this->_getStatus($type, $order_status);
+            if (!empty($data['and_where'])) {
+                $and_where = $data['and_where'];
+            }
+            if (!empty($data['where'])) {
+                if (!empty($data['where']['status'])) {
+                    $where['status']     = $data['where']['status'];
+                }
+                if (!empty($data['where']['pay_status'])) {
+                    $where['pay_status'] = $data['where']['pay_status'];
+                }
+            }
+        } else {
             /**别人预约我的服务**/
             $where['service_uid'] = RequestHelper::get('uid', '', '');
             if (empty($where['service_uid'])) {
@@ -164,8 +195,19 @@ class ServiceorderController extends BaseController
             if (!Common::validateMobile($where['service_mobile'])) {
                 $this->returnJsonMsg('605', [], Common::C('code', '605'));
             }
-        } else {
-            $this->returnJsonMsg('1014', [], Common::C('code', '1014'));
+            $fields = 'service_info_title,mobile,appointment_service_time,appointment_service_address,status,pay_status,order_sn';
+            $data = $this->_getStatus($type, $order_status);
+            if (!empty($data['and_where'])) {
+                $and_where = $data['and_where'];
+            }
+            if (!empty($data['where'])) {
+                if (!empty($data['where']['status'])) {
+                    $where['status']     = $data['where']['status'];
+                }
+                if (!empty($data['where']['pay_status'])) {
+                    $where['pay_status'] = $data['where']['pay_status'];
+                }
+            }
         }
         $page      = RequestHelper::get('page', '1', 'intval');
         $page_size = RequestHelper::get('page_size', '6', 'intval');
@@ -173,12 +215,7 @@ class ServiceorderController extends BaseController
             $this->returnJsonMsg('705', [], Common::C('code', '705'));
         }
         $service_order_model = new ServiceOrder();
-        if ($type == '1') {
-            $fields = 'service_info_title,service_mobile as mobile,appointment_service_time,appointment_service_address,status,pay_status,order_sn';
-        } else {
-            $fields = 'service_info_title,mobile,appointment_service_time,appointment_service_address,status,pay_status,order_sn';
-        }
-        $list = $service_order_model->getPageList($where, $fields, 'id desc', $page, $page_size);
+        $list = $service_order_model->getPageList($where, $fields, 'id desc', $page, $page_size, $and_where);
         if (empty($list)) {
             $this->returnJsonMsg('1034', [], Common::C('code', '1034'));
         }
@@ -220,14 +257,250 @@ class ServiceorderController extends BaseController
             $this->returnJsonMsg('1042', [], Common::C('code', '1042'));
         }
         $service_order_model = new ServiceOrder();
-        $fields = 'service_id,service_way,total,service_info_title,service_info_description,service_info_image,service_info_price,service_info_unit,appointment_service_time,appointment_service_address,remark,status,pay_status';
+        $fields = 'service_id,service_mobile,service_way,total,service_info_title,service_info_price,service_info_image,service_info_unit,appointment_service_time,appointment_service_address,remark,status,pay_status';
         $info = $service_order_model->getInfo($where, true, $fields);
         if (empty($info)) {
             $this->returnJsonMsg('1043', [], Common::C('code', '1043'));
         }
         $info['service_info_price'] = $info['service_info_price'].$this->_getServiceUnit($info['service_info_unit']);
+        if (!empty($info['service_info_image'])) {
+            $info['service_info_image'] = Common::C('imgHost').$info['service_info_image'];
+        }
+        $info['contact'] = $this->_getSettingInfo($info['service_mobile'], 'user_name', 1);
+        $info['contact_mobile'] = $info['service_mobile'];
+        unset($info['service_mobile']);
         unset($info['service_info_unit']);
         $this->returnJsonMsg('200', $info, Common::C('code', '200'));
+    }
+
+    /**
+     * 开始服务 - 服务方调用
+     * @return array
+     */
+    public function actionStartService()
+    {
+        $where['uid'] = RequestHelper::post('uid', '', '');
+        if (empty($where['uid'])) {
+            $this->returnJsonMsg('621', [], Common::C('code', '621'));
+        }
+        $where['mobile'] = RequestHelper::post('mobile', '', '');
+        if (empty($where['mobile'])) {
+            $this->returnJsonMsg('604', [], Common::C('code', '604'));
+        }
+        if (!Common::validateMobile($where['mobile'])) {
+            $this->returnJsonMsg('605', [], Common::C('code', '605'));
+        }
+        $where['order_sn'] = RequestHelper::post('order_sn', '', '');
+        if (empty($where['order_sn'])) {
+            $this->returnJsonMsg('1042', [], Common::C('code', '1042'));
+        }
+        $order_model = new ServiceOrder();
+        $info = $order_model->getInfo($where, true, 'status,pay_status');
+        if (empty($info)) {
+            $this->returnJsonMsg('1043', [], Common::C('code', '1043'));
+        }
+        if ($info['status'] != '1' || $info['pay_status'] != '1') {
+            $this->returnJsonMsg('1048', [], Common::C('code', '1048'));
+        }
+        $update_data['status'] = '3';
+        $rs = $order_model->updateInfo($update_data, $where);
+        if (!$rs) {
+            $this->returnJsonMsg('400', [], Common::C('code', '400'));
+        }
+        $this->returnJsonMsg('200', [], Common::C('code', '200'));
+    }
+
+    /**
+     * 确认服务 - 服务方调用
+     * @return array
+     */
+    public function actionConfirmService()
+    {
+        $where['uid'] = RequestHelper::post('uid', '', '');
+        if (empty($where['uid'])) {
+            $this->returnJsonMsg('621', [], Common::C('code', '621'));
+        }
+        $where['mobile'] = RequestHelper::post('mobile', '', '');
+        if (empty($where['mobile'])) {
+            $this->returnJsonMsg('604', [], Common::C('code', '604'));
+        }
+        if (!Common::validateMobile($where['mobile'])) {
+            $this->returnJsonMsg('605', [], Common::C('code', '605'));
+        }
+        $where['order_sn'] = RequestHelper::post('order_sn', '', '');
+        if (empty($where['order_sn'])) {
+            $this->returnJsonMsg('1042', [], Common::C('code', '1042'));
+        }
+        $order_model = new ServiceOrder();
+        $info = $order_model->getInfo($where, true, 'status,pay_status');
+        if (empty($info)) {
+            $this->returnJsonMsg('1043', [], Common::C('code', '1043'));
+        }
+        if ($info['status'] != '0' || $info['pay_status'] != '1') {
+            $this->returnJsonMsg('1049', [], Common::C('code', '1049'));
+        }
+        $update_data['status'] = '1';
+        $rs = $order_model->updateInfo($update_data, $where);
+        if (!$rs) {
+            $this->returnJsonMsg('400', [], Common::C('code', '400'));
+        }
+        $this->returnJsonMsg('200', [], Common::C('code', '200'));
+    }
+
+    /**
+     * 完成服务 - 服务方调用
+     * @return array
+     */
+    public function actionCompleteService()
+    {
+        $where['uid'] = RequestHelper::post('uid', '', '');
+        if (empty($where['uid'])) {
+            $this->returnJsonMsg('621', [], Common::C('code', '621'));
+        }
+        $where['mobile'] = RequestHelper::post('mobile', '', '');
+        if (empty($where['mobile'])) {
+            $this->returnJsonMsg('604', [], Common::C('code', '604'));
+        }
+        if (!Common::validateMobile($where['mobile'])) {
+            $this->returnJsonMsg('605', [], Common::C('code', '605'));
+        }
+        $where['order_sn'] = RequestHelper::post('order_sn', '', '');
+        if (empty($where['order_sn'])) {
+            $this->returnJsonMsg('1042', [], Common::C('code', '1042'));
+        }
+        $order_model = new ServiceOrder();
+        $info = $order_model->getInfo($where, true, 'status,pay_status');
+        if (empty($info)) {
+            $this->returnJsonMsg('1043', [], Common::C('code', '1043'));
+        }
+        if ($info['status'] != '3' || $info['pay_status'] != '1') {
+            $this->returnJsonMsg('1051', [], Common::C('code', '1051'));
+        }
+        $update_data['status'] = '4';
+        $rs = $order_model->updateInfo($update_data, $where);
+        if (!$rs) {
+            $this->returnJsonMsg('400', [], Common::C('code', '400'));
+        }
+        $this->returnJsonMsg('200', [], Common::C('code', '200'));
+    }
+
+    /**
+     * 取消服务 - 体验方调用
+     * @return array
+     */
+    public function actionCancelService()
+    {
+        $where['uid'] = RequestHelper::post('uid', '', '');
+        if (empty($where['uid'])) {
+            $this->returnJsonMsg('621', [], Common::C('code', '621'));
+        }
+        $where['mobile'] = RequestHelper::post('mobile', '', '');
+        if (empty($where['mobile'])) {
+            $this->returnJsonMsg('604', [], Common::C('code', '604'));
+        }
+        if (!Common::validateMobile($where['mobile'])) {
+            $this->returnJsonMsg('605', [], Common::C('code', '605'));
+        }
+        $where['order_sn'] = RequestHelper::post('order_sn', '', '');
+        if (empty($where['order_sn'])) {
+            $this->returnJsonMsg('1042', [], Common::C('code', '1042'));
+        }
+        $order_model = new ServiceOrder();
+        $info = $order_model->getInfo($where, true, 'status,pay_status');
+        if (empty($info)) {
+            $this->returnJsonMsg('1043', [], Common::C('code', '1043'));
+        }
+        if ($info['status'] != '0' || $info['pay_status'] != '0') {
+            $this->returnJsonMsg('1050', [], Common::C('code', '1050'));
+        }
+        $update_data['status'] = '2';
+        $rs = $order_model->updateInfo($update_data, $where);
+        if (!$rs) {
+            $this->returnJsonMsg('400', [], Common::C('code', '400'));
+        }
+        $this->returnJsonMsg('200', [], Common::C('code', '200'));
+    }
+
+    /**
+     * 评价接口
+     * @return array
+     */
+    public function actionEvaluation()
+    {
+        $where['uid'] = RequestHelper::post('uid', '', '');
+        if (empty($where['uid'])) {
+            $this->returnJsonMsg('621', [], Common::C('code', '621'));
+        }
+        $where['mobile'] = RequestHelper::post('mobile', '', '');
+        if (empty($where['mobile'])) {
+            $this->returnJsonMsg('604', [], Common::C('code', '604'));
+        }
+        if (!Common::validateMobile($where['mobile'])) {
+            $this->returnJsonMsg('605', [], Common::C('code', '605'));
+        }
+        $where['order_sn'] = RequestHelper::post('order_sn', '', '');
+        if (empty($where['order_sn'])) {
+            $this->returnJsonMsg('1042', [], Common::C('code', '1042'));
+        }
+        $where['type']     = RequestHelper::post('type', '0', 'intval');
+        $star = RequestHelper::post('type', '0', 'intval');
+        $content = RequestHelper::post('content', '', '');
+        if (empty($where['type'])) {
+            $this->returnJsonMsg('1008', [], Common::C('code', '1008'));
+        }
+        if ($where['type'] !='1' && $where['type'] !='2') {
+            $this->returnJsonMsg('1014', [], Common::C('code', '1014'));
+        }
+        $evaluation_model = new ServiceOrderEvaluation();
+        $info = $evaluation_model->getInfo($where, true, 'id');
+        if (!empty($info)) {
+            $this->returnJsonMsg('1047', [], Common::C('code', '1047'));
+        }
+        $add_data = $where;
+        $add_data['star']    = $star;
+        $add_data['content'] = $content;
+        $rs = $evaluation_model->insertInfo($add_data);
+        if (!$rs) {
+            $this->returnJsonMsg('400', [], Common::C('code', '400'));
+        }
+        /**更新订单状态**/
+        if ($where['type'] == '1') {
+            /**体验方**/
+            $update_data['status'] = '5';
+        } else {
+            /**服务方**/
+            $update_data['status'] = '6';
+        }
+        $order_model = new ServiceOrder();
+        $order_where['order_sn'] = $where['order_sn'];
+        //@todo 评价成功后更新订单状态
+        $order_model->updateInfo($update_data, $order_where);
+        $this->returnJsonMsg('200', [], Common::C('code', '200'));
+    }
+
+    /**
+     * 获取设置信息
+     * @param string $mobile 手机号
+     * @param string $params 参数名
+     * @param int    $type   表示 1=一个参数 返回一个字段值 2=多个参数 返回数组
+     * @return string
+     */
+    private function _getSettingInfo($mobile = '',$params = '',$type = 1)
+    {
+        if (!empty($mobile) && !empty($params)) {
+            $service_setting_model = new ServiceSetting();
+            $where['mobile'] = $mobile;
+            $fields = $params;
+            $info = $service_setting_model->getInfo($where, true, $fields);
+            if (!empty($info)) {
+                if ($type == 1) {
+                    return $info[$params];
+                } else {
+                    return $info;
+                }
+            }
+        }
+        return ($type == 1) ? '' : [] ;
     }
 
     /**
@@ -267,5 +540,59 @@ class ServiceorderController extends BaseController
             }
         }
         return $unit;
+    }
+
+
+    /**
+     * 获取状态
+     * @param int $type   标识值
+     * @param int $status 状态值
+     * @return array
+     */
+    private function _getStatus($type = 0, $status = 0)
+    {
+        $data = [];
+        $data['where'] = [];
+        $data['and_where'] = '';
+        if ($type == '1') {
+            /**体验方**/
+            switch ($status) {
+                case 1:
+                    $data['and_where'] = ['or', ['=', 'status', '0' ], ['=', 'status', '1'], ['=', 'status', '2']];
+                    break;
+                case 2 :
+                    $data['where']['status']     = '3';
+                    $data['where']['pay_status'] = '1';
+                    break;
+                case 3 :
+                    $data['where']['pay_status'] = '1';
+                    $data['and_where'] = ['or', ['=', 'status', '6' ], ['=', 'status', '4' ]];
+                    break;
+                case 4 :
+                    $data['where']['status']     = '5';
+                    $data['where']['pay_status'] = '1';
+                    break;
+            }
+        } else {
+            /**服务方**/
+            switch ($status) {
+                case 1:
+                    $data['and_where'] = ['or', ['=', 'status', '0' ], ['=', 'status', '1'], ['=', 'status', '2']];
+                    break;
+                case 2 :
+                    $data['where']['status']     = '3';
+                    $data['where']['pay_status'] = '1';
+                    break;
+                case 3 :
+                    $data['where']['pay_status'] = '1';
+                    $data['and_where'] = ['or', ['=', 'status', '5' ], ['=', 'status', '4' ]];
+                    break;
+                case 4 :
+                    $data['where']['status']     = '6';
+                    $data['where']['pay_status'] = '1';
+                    break;
+            }
+        }
+        return $data;
     }
 }

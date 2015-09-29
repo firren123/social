@@ -22,6 +22,7 @@ use frontend\models\i500_social\User;
 use frontend\models\i500_social\UserActiveTime;
 use frontend\models\i500_social\UserToken;
 use frontend\models\i500_social\UserSms;
+use frontend\models\i500_social\UserBasicInfo;
 use yii\web\Controller;
 
 /**
@@ -265,14 +266,48 @@ class BaseController extends Controller
 
     /**
      * 推送消息(请求百度推送)
+     * @param string $mobile 手机号
+     * @param int    $type   标识 1=帖子点赞 2=评论点赞 3=评论帖子 4=别人查看自己的主页
+     * @param array  $data   数据
      * @return bool
      */
-    public function pushToApp()
+    public function pushToApp($mobile='',$type=0, $data=[])
     {
         if (Common::C('OpenPushToApp')) {
-
+            if (empty($mobile) || empty($type) || empty($data)) {
+                return false;
+            }
+            /**通过手机号获取是否开通推送**/
+            $user_base_model = new UserBasicInfo();
+            $user_base_where['mobile'] = $mobile;
+            $user_base_fields = 'id,push_status';
+            $user_base_info = $user_base_model->getInfo($user_base_where, true, $user_base_fields);
+            if (empty($user_base_info) || $user_base_info['push_status'] != '1') {
+                return false;
+            }
+            /**已经开启了推送服务**/
+            return $this->_startPush($type, $data);
         } else {
-            return true;
+            return false;
+        }
+    }
+
+    /**
+     * 方法描述
+     * @param int   $type 标识
+     * @param array $data 数据
+     * @return bool
+     */
+    private function _startPush($type=0, $data=[])
+    {
+        switch ($type)
+        {
+            case 1:
+                break;
+            case 2:
+                break;
+            default:
+
         }
     }
 
