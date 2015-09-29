@@ -555,15 +555,15 @@ class MyorderController extends BaseController
     /**
      * 获取商品图片
      * @param array $where 条件
-     * @return string
+     * @return array
      */
     private function _getProductImg($where = [])
     {
         $model = new OrderDetail();
         $info = $model->getInfo($where, true, 'product_img');
         if (!empty($info) && !empty($info['product_img'])) {
-            return Common::C('imgHost').$info['product_img'];
+            return $this->_formatImg($info['product_img']);
         }
-        return '';
+        return [];
     }
 }
