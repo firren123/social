@@ -303,6 +303,7 @@ class ServiceorderController extends BaseController
             $this->returnJsonMsg('1048', [], Common::C('code', '1048'));
         }
         $update_data['status'] = '3';
+        $update_data['start_time'] = date("Y-m-d H:i:s", time());
         $rs = $order_model->updateInfo($update_data, $where);
         if (!$rs) {
             $this->returnJsonMsg('400', [], Common::C('code', '400'));
@@ -340,6 +341,7 @@ class ServiceorderController extends BaseController
             $this->returnJsonMsg('1049', [], Common::C('code', '1049'));
         }
         $update_data['status'] = '1';
+        $update_data['confirm_time'] = date("Y-m-d H:i:s", time());
         $rs = $order_model->updateInfo($update_data, $where);
         if (!$rs) {
             $this->returnJsonMsg('400', [], Common::C('code', '400'));
@@ -377,6 +379,7 @@ class ServiceorderController extends BaseController
             $this->returnJsonMsg('1051', [], Common::C('code', '1051'));
         }
         $update_data['status'] = '4';
+        $update_data['complete_time'] = date("Y-m-d H:i:s", time());
         $rs = $order_model->updateInfo($update_data, $where);
         if (!$rs) {
             $this->returnJsonMsg('400', [], Common::C('code', '400'));
@@ -414,6 +417,7 @@ class ServiceorderController extends BaseController
             $this->returnJsonMsg('1050', [], Common::C('code', '1050'));
         }
         $update_data['status'] = '2';
+        $update_data['cancel_time'] = date("Y-m-d H:i:s", time());
         $rs = $order_model->updateInfo($update_data, $where);
         if (!$rs) {
             $this->returnJsonMsg('400', [], Common::C('code', '400'));
