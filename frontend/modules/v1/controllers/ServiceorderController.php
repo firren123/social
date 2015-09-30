@@ -231,6 +231,8 @@ class ServiceorderController extends BaseController
             $rs_info[$k]['status']     = $v['status'];
             $rs_info[$k]['pay_status'] = $v['pay_status'];
             $rs_info[$k]['order_sn']   = $v['order_sn'];
+            $rs_info[$k]['total']   = $v['total'];
+
         }
         $this->returnJsonMsg('200', $rs_info, Common::C('code', '200'));
     }
