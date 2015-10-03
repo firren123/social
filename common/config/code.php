@@ -190,5 +190,7 @@ return [
     //SSDB KEY 备注
     'address_details_{id}_{mobile}' => '用户收货地址详情',
     'address_list_{mobile}'   => '用户收货地址列表',
-    'profile_{type}_{mobile}' => '用户个人信息'
+    'profile_{mobile}'        => '用户个人信息',
+    'service_top_category'    => '顶级服务分类',
+    'service_son_category_{pid}' => '子服务分类',
 ];

@@ -74,28 +74,26 @@ class ProfileController extends BaseController
             $mobile = $user_mobile;
         }
         $type = RequestHelper::post('type', '0', '');
-        //get缓存
-        $cache_key = 'profile_'.$type.'_'.$mobile;
+        $cache_key = 'profile_'.$mobile;
         $cache_rs = SsdbHelper::Cache('get', $cache_key);
         if ($cache_rs) {
-            $this->returnJsonMsg('200', $cache_rs, Common::C('code', '200'));
-        }
-        $user_base_model = new UserBasicInfo();
-        $user_base_where['mobile'] = $mobile;
-        $user_base_fields = 'id,mobile,nickname,avatar,personal_sign,realname,sex,birthday,province_id,city_id,district_id,community_name,push_status';
-        if ($type == '1') {
-            //仅获取昵称 + 头像
-            $user_base_fields = 'nickname,avatar';
-        }
-        $user_base_info = $user_base_model->getInfo($user_base_where, true, $user_base_fields);
-        if (empty($user_base_info)) {
-            $user_base_data['uid']    = $uid;
-            $user_base_data['mobile'] = $mobile;
-            $rs = $user_base_model->insertInfo($user_base_data);
-            if (!$rs) {
-                $this->returnJsonMsg('400', [], Common::C('code', '400'));
-            }
+            $user_base_info = $cache_rs;
+        } else {
+            $user_base_model = new UserBasicInfo();
+            $user_base_where['mobile'] = $mobile;
+            $user_base_fields = 'id,mobile,nickname,avatar,personal_sign,realname,sex,birthday,province_id,city_id,district_id,community_name,push_status';
             $user_base_info = $user_base_model->getInfo($user_base_where, true, $user_base_fields);
+            if (empty($user_base_info)) {
+                $user_base_data['uid']    = $uid;
+                $user_base_data['mobile'] = $mobile;
+                $rs = $user_base_model->insertInfo($user_base_data);
+                if (!$rs) {
+                    $this->returnJsonMsg('400', [], Common::C('code', '400'));
+                }
+                $user_base_info = $user_base_model->getInfo($user_base_where, true, $user_base_fields);
+            }
+            //set缓存
+            SsdbHelper::Cache('set', $cache_key, $user_base_info, Common::C('SSDBCacheTime'));
         }
         if (!empty($user_base_info)) {
             if ($user_base_info['avatar']) {
@@ -109,12 +107,15 @@ class ProfileController extends BaseController
         if ($type == '1') {
             //仅获取昵称 + 头像
             if (empty($user_base_info['nickname'])) {
-                $user_base_info['nickname'] = Common::C('defaultNickName');
+                $rs['nickname'] = Common::C('defaultNickName');
+            } else {
+                $rs['nickname'] = $user_base_info['nickname'];
             }
+            $rs['avatar'] = $user_base_info['avatar'];
+            $this->returnJsonMsg('200', $rs, Common::C('code', '200'));
+        } else {
+            $this->returnJsonMsg('200', $user_base_info, Common::C('code', '200'));
         }
-        //set缓存
-        SsdbHelper::Cache('set', $cache_key, $user_base_info, Common::C('SSDBCacheTime'));
-        $this->returnJsonMsg('200', $user_base_info, Common::C('code', '200'));
     }
 
     /**
@@ -191,14 +192,8 @@ class ProfileController extends BaseController
                 if (!empty($nickname)) {
                     HuanXinHelper::hxModifyNickName($mobile, $nickname);
                 }
-                if (!empty($nickname) || !empty($avatar)) {
-                    //del缓存
-                    $cache_key_2 = 'profile_1_'.$mobile;
-                    SsdbHelper::Cache('del', $cache_key_2);
-                }
-                //缓存设置为空
-                $cache_key_1 = 'profile_0_'.$mobile;
-                SsdbHelper::Cache('set', $cache_key_1, '', Common::C('SSDBCacheTime'));
+                $cache_key = 'profile_'.$mobile;
+                SsdbHelper::Cache('del', $cache_key);
                 $this->returnJsonMsg('200', [], Common::C('code', '200'));
             }
         } else {
