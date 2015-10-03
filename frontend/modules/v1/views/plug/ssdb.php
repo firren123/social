@@ -17,7 +17,7 @@
         <h2>SSDB Manage</h2>
 
         <div style="margin-top: 15px;margin-bottom: 15px;text-align: center;">
-            <button type="button" class="btn btn-default btn-get-all-key">获取所有SSDB KEY</button>
+            <button type="button" class="btn btn-default btn-get-all-key">获取所有SSDB KEY(<=1000)</button>
         </div>
 
         <div class="row all-keys" style="margin-bottom: 15px;">

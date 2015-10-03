@@ -74,8 +74,8 @@ class SsdbCache extends Cache
      */
     public function getkeys()
     {
-        //return $this->getSsdbCache()->keys($this->_keyPre,'',1000);
-        return $this->getSsdbCache()->hkeys($this->_keyPre, "", "", $this->getSsdbCache()->hsize($this->_keyPre));
+        return $this->getSsdbCache()->keys($this->_keyPre,'',1000);
+        //return $this->getSsdbCache()->hkeys($this->_keyPre, "", "", $this->getSsdbCache()->hsize($this->_keyPre));
     }
 
     /**
