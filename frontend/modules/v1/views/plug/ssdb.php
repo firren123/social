@@ -30,7 +30,7 @@
         <!-- ssdb_key -->
         <div class="input-group" style="margin-top: 5px;">
             <span class="input-group-addon">SSDB KEY</span>
-            <input type="text" class="form-control" id="ssdb_key">
+            <input type="text" placeholder="不要输入前缀" class="form-control" id="ssdb_key">
         </div>
         <div style="margin-top: 15px;text-align: center;">
             <button type="button" class="btn btn-default btn-get-key">获取Value</button>
