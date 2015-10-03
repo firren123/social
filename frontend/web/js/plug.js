@@ -191,6 +191,94 @@ var Plug={
                     }
                 }
             });
+    },
+    /**
+     * 获取所有SSDB KEY
+     */
+    'getAllKey' : function() {
+        $.ajax(
+            {
+                type: "GET",
+                url : "/v1/plug/get-all-key",
+                data: {},
+                async: false,
+                dataType: "json",
+                beforeSend: function () {
+
+                },
+                success: function (result) {
+                    if (result.code==='ok') {
+                        var rs = result.data;
+                        if (rs) {
+                            var html = '';
+                            for(var i = 0;i < rs.length; i++) {
+                                html += '<div class="col-xs-6 col-sm-3">'+rs[i]+'</div>';
+                            }
+                            $('.all-keys').html(html);
+                        } else {
+                            alert('获取为空');
+                        }
+                    } else {
+                        alert('获取失败。');
+                    }
+                }
+            });
+    },
+    /**
+     * 获取所有 KEY
+     */
+    'getKey' : function() {
+        $.ajax(
+            {
+                type: "GET",
+                url : "/v1/plug/get-key",
+                data: {
+                    'key'   : $("#ssdb_key").val(),
+                },
+                async: false,
+                dataType: "json",
+                beforeSend: function () {
+                    $('.key-value').css('display', 'none');
+                },
+                success: function (result) {
+                    if (result.code==='ok') {
+                        var rs = result.data;
+                        if (rs) {
+                            $('.key-value').show();
+                            $('.key-value').html(rs);
+                        } else {
+                            alert('获取为空');
+                        }
+                    } else {
+                        alert('获取失败。');
+                    }
+                }
+            });
+    },
+    /**
+     * 删除KEY
+     */
+    'delKey' : function() {
+        $.ajax(
+            {
+                type: "GET",
+                url : "/v1/plug/del-key",
+                data: {
+                    'key'   : $("#ssdb_key").val(),
+                },
+                async: false,
+                dataType: "json",
+                beforeSend: function () {
+                },
+                success: function (result) {
+                    if (result.code==='ok') {
+                        alert('删除成功');
+                        window.location.reload();
+                    } else {
+                        alert('删除失败');
+                    }
+                }
+            });
     }
 };
 $(function(){
@@ -249,6 +337,27 @@ $(function(){
             Plug.checkUser();
         } else {
             alert('请输入检测号码');
+        }
+    });
+    $(".btn-get-all-key").click(function(){
+        Plug.getAllKey();
+    });
+    $(".btn-get-key").click(function(){
+        var key = $("#ssdb_key").val();
+        if (key) {
+            Plug.getKey();
+        } else {
+            alert('请输入SSDB KEY');
+        }
+    });
+    $(".btn-del-key").click(function(){
+        var key = $("#ssdb_key").val();
+        if (key) {
+            if (confirm("确定要删除key:"+key+"吗？")) {
+                Plug.delKey();
+            }
+        } else {
+            alert('请输入SSDB KEY');
         }
     });
 });
