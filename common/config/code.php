@@ -79,6 +79,7 @@ return [
     '643' => '缺少参数 push_channel',
     '644' => '缺少参数 push_id',
     '645' => '缺少参数 community_city_id',
+    '646' => '最多只能创建10个收货地址',
 
     '701' => '版块ID不能为空',
     '702' => '帖子标题不能为空',
@@ -188,9 +189,12 @@ return [
 
 
     //SSDB KEY 备注
-    'address_details_{id}_{mobile}' => '用户收货地址详情',
+    'open_province'           => 'CRM中已经开通的省份',
+    'province_name_{id}'      => '开通省份的名称',
+    'address_details_{id}'    => '用户收货地址详情',
     'address_list_{mobile}'   => '用户收货地址列表',
     'profile_{mobile}'        => '用户个人信息',
     'service_top_category'    => '顶级服务分类',
     'service_son_category_{pid}' => '子服务分类',
+    'service_unit' => '服务单位',
 ];
