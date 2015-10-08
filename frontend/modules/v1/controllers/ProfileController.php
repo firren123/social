@@ -81,7 +81,7 @@ class ProfileController extends BaseController
         } else {
             $user_base_model = new UserBasicInfo();
             $user_base_where['mobile'] = $mobile;
-            $user_base_fields = 'id,mobile,nickname,avatar,personal_sign,realname,sex,birthday,age,constellation,province_id,city_id,district_id,community_name,push_status';
+            $user_base_fields = 'id,mobile,nickname,avatar,personal_sign,realname,sex,birthday,age,user_card,card_audit_status,constellation,province_id,city_id,district_id,community_name,push_status';
             $user_base_info = $user_base_model->getInfo($user_base_where, true, $user_base_fields);
             if (empty($user_base_info)) {
                 $user_base_data['uid']    = $uid;
@@ -102,6 +102,10 @@ class ProfileController extends BaseController
                 }
             } else {
                 $user_base_info['avatar'] = Common::C('defaultAvatar');
+            }
+            //@todo 返回的身份证号码进行加*
+            if (!empty($user_base_info['user_card'])) {
+                $user_base_info['user_card'] = substr_replace($user_base_info['user_card'], '****', 10, 4);
             }
         }
         if ($type == '1') {
@@ -167,6 +171,22 @@ class ProfileController extends BaseController
         $constellation = RequestHelper::post('constellation', '0', 'intval');
         if (!empty($constellation)) {
             $user_base_update_data['constellation'] = $constellation;
+        }
+        $user_card = RequestHelper::post('user_card', '0', 'intval');
+        if (!empty($user_card)) {
+            $user_base_update_data['user_card'] = $user_card;
+            //验证身份证
+            if (strlen($user_base_update_data['user_card']) != '18') {
+                $this->returnJsonMsg('1017', [], Common::C('code', '1017'));
+            }
+            if (!Common::isIdCard($user_base_update_data['user_card'])) {
+                $this->returnJsonMsg('1018', [], Common::C('code', '1018'));
+            }
+            //@todo 验证身份证的合法性
+            $user_base_update_data['age'] = Common::getAgeByCard($user_base_update_data['user_card']);
+            $user_base_update_data['sex'] = Common::getSexByCard($user_base_update_data['user_card']);
+            $user_base_update_data['constellation'] = Common::getConstellationByCard($user_base_update_data['user_card']);
+            $user_base_update_data['birthday'] = Common::getBirthdayByCard($user_base_update_data['user_card']);
         }
         $province_id = RequestHelper::post('province_id', '', 'intval');
         if (!empty($province_id)) {
