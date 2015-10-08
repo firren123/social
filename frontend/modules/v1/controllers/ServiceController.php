@@ -661,7 +661,9 @@ class ServiceController extends BaseController
         if (empty($info)) {
             $this->returnJsonMsg('1015', [], Common::C('code', '1015'));
         }
-        //@todo 身份证号码需要处理，考虑是否需要返回
+        if (!empty($info['user_card'])) {
+            $info['user_card'] = Common::hiddenUserCard($info['user_card']);
+        }
         $this->returnJsonMsg('200', $info, Common::C('code', '200'));
     }
 

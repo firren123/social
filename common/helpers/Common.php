@@ -326,6 +326,16 @@ class Common
     }
 
     /**
+     * 隐藏身份证信息
+     * @param string $card 身份证
+     * @return string
+     */
+    public static function hiddenUserCard($card = '')
+    {
+        return substr_replace($card, '****', 10, 4);
+    }
+
+    /**
      * 距离当前时间展示方法
      * @param string $datetime 活跃时间
      * @param int    $nowtime  当前时间

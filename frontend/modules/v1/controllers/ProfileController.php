@@ -105,7 +105,7 @@ class ProfileController extends BaseController
             }
             //@todo 返回的身份证号码进行加*
             if (!empty($user_base_info['user_card'])) {
-                $user_base_info['user_card'] = substr_replace($user_base_info['user_card'], '****', 10, 4);
+                $user_base_info['user_card'] = Common::hiddenUserCard($user_base_info['user_card']);
             }
         }
         if ($type == '1') {
