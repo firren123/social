@@ -181,6 +181,12 @@ class ServiceorderController extends BaseController
                 if (!empty($data['where']['pay_status'])) {
                     $where['pay_status'] = $data['where']['pay_status'];
                 }
+                if (isset($data['where']['user_evaluation_status'])) {
+                    $where['user_evaluation_status'] = $data['where']['user_evaluation_status'];
+                }
+                if (isset($data['where']['servicer_evaluation_status'])) {
+                    $where['servicer_evaluation_status'] = $data['where']['servicer_evaluation_status'];
+                }
             }
         } else {
             /**别人预约我的服务**/
@@ -207,6 +213,12 @@ class ServiceorderController extends BaseController
                 if (!empty($data['where']['pay_status'])) {
                     $where['pay_status'] = $data['where']['pay_status'];
                 }
+                if (isset($data['where']['user_evaluation_status'])) {
+                    $where['user_evaluation_status'] = $data['where']['user_evaluation_status'];
+                }
+                if (isset($data['where']['servicer_evaluation_status'])) {
+                    $where['servicer_evaluation_status'] = $data['where']['servicer_evaluation_status'];
+                }
             }
         }
         $page      = RequestHelper::get('page', '1', 'intval');
@@ -231,7 +243,7 @@ class ServiceorderController extends BaseController
             $rs_info[$k]['status']     = $v['status'];
             $rs_info[$k]['pay_status'] = $v['pay_status'];
             $rs_info[$k]['order_sn']   = $v['order_sn'];
-            $rs_info[$k]['total']   = $v['total'];
+            $rs_info[$k]['total']      = $v['total'];
 
         }
         $this->returnJsonMsg('200', $rs_info, Common::C('code', '200'));
@@ -352,7 +364,7 @@ class ServiceorderController extends BaseController
     }
 
     /**
-     * 完成服务 - 服务方调用
+     * 完成服务
      * @return array
      */
     public function actionCompleteService()
@@ -372,6 +384,13 @@ class ServiceorderController extends BaseController
         if (empty($where['order_sn'])) {
             $this->returnJsonMsg('1042', [], Common::C('code', '1042'));
         }
+        $type = RequestHelper::post('type', '0', 'intval');  //1=体验方 2=服务方
+        if (empty($type)) {
+            $this->returnJsonMsg('1008', [], Common::C('code', '1008'));
+        }
+        if ($type !='1' && $type !='2') {
+            $this->returnJsonMsg('1014', [], Common::C('code', '1014'));
+        }
         $order_model = new ServiceOrder();
         $info = $order_model->getInfo($where, true, 'status,pay_status');
         if (empty($info)) {
@@ -380,8 +399,13 @@ class ServiceorderController extends BaseController
         if ($info['status'] != '3' || $info['pay_status'] != '1') {
             $this->returnJsonMsg('1051', [], Common::C('code', '1051'));
         }
-        $update_data['status'] = '4';
-        $update_data['complete_time'] = date("Y-m-d H:i:s", time());
+        if ($type == '1') {
+            $update_data['status'] = '5';
+            $update_data['user_complete_time'] = date("Y-m-d H:i:s", time());
+        } else {
+            $update_data['status'] = '4';
+            $update_data['servicer_complete_time'] = date("Y-m-d H:i:s", time());
+        }
         $rs = $order_model->updateInfo($update_data, $where);
         if (!$rs) {
             $this->returnJsonMsg('400', [], Common::C('code', '400'));
@@ -449,7 +473,7 @@ class ServiceorderController extends BaseController
             $this->returnJsonMsg('1042', [], Common::C('code', '1042'));
         }
         $where['type']     = RequestHelper::post('type', '0', 'intval');
-        $star = RequestHelper::post('type', '0', 'intval');
+        $star = RequestHelper::post('star', '0', 'intval');
         $content = RequestHelper::post('content', '', '');
         if (empty($where['type'])) {
             $this->returnJsonMsg('1008', [], Common::C('code', '1008'));
@@ -472,10 +496,10 @@ class ServiceorderController extends BaseController
         /**更新订单状态**/
         if ($where['type'] == '1') {
             /**体验方**/
-            $update_data['status'] = '5';
+            $update_data['user_evaluation_status'] = '1';
         } else {
             /**服务方**/
-            $update_data['status'] = '6';
+            $update_data['servicer_evaluation_status'] = '1';
         }
         $order_model = new ServiceOrder();
         $order_where['order_sn'] = $where['order_sn'];
@@ -567,16 +591,17 @@ class ServiceorderController extends BaseController
                     $data['and_where'] = ['or', ['=', 'status', '0' ], ['=', 'status', '1'], ['=', 'status', '2']];
                     break;
                 case 2 :
-                    $data['where']['status']     = '3';
+                    $data['and_where'] = ['or', ['=', 'status', '3' ], ['=', 'status', '4'], ['=', 'status', '2']];
                     $data['where']['pay_status'] = '1';
                     break;
                 case 3 :
-                    $data['where']['pay_status'] = '1';
-                    $data['and_where'] = ['or', ['=', 'status', '6' ], ['=', 'status', '4' ]];
+                    $data['where']['status']                 = '5';
+                    $data['where']['user_evaluation_status'] = '0';
+                    $data['where']['pay_status']             = '1';
                     break;
                 case 4 :
-                    $data['where']['status']     = '5';
-                    $data['where']['pay_status'] = '1';
+                    $data['where']['user_evaluation_status'] = '1';
+                    $data['where']['pay_status']             = '1';
                     break;
             }
         } else {
@@ -584,18 +609,20 @@ class ServiceorderController extends BaseController
             switch ($status) {
                 case 1:
                     $data['and_where'] = ['or', ['=', 'status', '0' ], ['=', 'status', '1'], ['=', 'status', '2']];
+                    $data['where']['pay_status'] = '1';
                     break;
                 case 2 :
-                    $data['where']['status']     = '3';
+                    $data['and_where'] = ['or', ['=', 'status', '3' ], ['=', 'status', '4'], ['=', 'status', '2']];
                     $data['where']['pay_status'] = '1';
                     break;
                 case 3 :
-                    $data['where']['pay_status'] = '1';
-                    $data['and_where'] = ['or', ['=', 'status', '5' ], ['=', 'status', '4' ]];
+                    $data['where']['status']                     = '5';
+                    $data['where']['servicer_evaluation_status'] = '0';
+                    $data['where']['pay_status']                 = '1';
                     break;
                 case 4 :
-                    $data['where']['status']     = '6';
-                    $data['where']['pay_status'] = '1';
+                    $data['where']['servicer_evaluation_status'] = '1';
+                    $data['where']['pay_status']                 = '1';
                     break;
             }
         }
