@@ -81,7 +81,7 @@ class ProfileController extends BaseController
         } else {
             $user_base_model = new UserBasicInfo();
             $user_base_where['mobile'] = $mobile;
-            $user_base_fields = 'id,mobile,nickname,avatar,personal_sign,realname,sex,birthday,province_id,city_id,district_id,community_name,push_status';
+            $user_base_fields = 'id,mobile,nickname,avatar,personal_sign,realname,sex,birthday,age,constellation,province_id,city_id,district_id,community_name,push_status';
             $user_base_info = $user_base_model->getInfo($user_base_where, true, $user_base_fields);
             if (empty($user_base_info)) {
                 $user_base_data['uid']    = $uid;
@@ -159,6 +159,14 @@ class ProfileController extends BaseController
         $birthday = RequestHelper::post('birthday', '', 'trim');
         if (!empty($birthday)) {
             $user_base_update_data['birthday'] = $birthday;
+        }
+        $age = RequestHelper::post('age', '0', 'intval');
+        if (!empty($age)) {
+            $user_base_update_data['age'] = $age;
+        }
+        $constellation = RequestHelper::post('constellation', '0', 'intval');
+        if (!empty($constellation)) {
+            $user_base_update_data['constellation'] = $constellation;
         }
         $province_id = RequestHelper::post('province_id', '', 'intval');
         if (!empty($province_id)) {
