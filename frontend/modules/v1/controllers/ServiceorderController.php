@@ -169,7 +169,7 @@ class ServiceorderController extends BaseController
             if (!Common::validateMobile($where['mobile'])) {
                 $this->returnJsonMsg('605', [], Common::C('code', '605'));
             }
-            $fields = 'service_info_title,service_mobile as mobile,appointment_service_time,appointment_service_address,status,pay_status,order_sn,total';
+            $fields = 'service_info_title,service_mobile as mobile,appointment_service_time,appointment_service_address,status,pay_status,order_sn,total,service_id,service_info_image';
             $data = $this->_getStatus($type, $order_status);
             if (!empty($data['and_where'])) {
                 $and_where = $data['and_where'];
@@ -233,18 +233,19 @@ class ServiceorderController extends BaseController
         }
         $rs_info = [];
         foreach ($list as $k => $v) {
-            $rs_info[$k]['day']        = date('Y-m-d', strtotime($v['appointment_service_time']));
-            $rs_info[$k]['week']       = "周".Common::getWeek($rs_info[$k]['day']);
-            $rs_info[$k]['hour']       = date('H', strtotime($v['appointment_service_time']));
-            $rs_info[$k]['title']      = $v['service_info_title'];
-            $rs_info[$k]['mobile']     = $v['mobile'];
-            $rs_info[$k]['name']       = $this->_getUserInfo($v['mobile']);
-            $rs_info[$k]['address']    = $v['appointment_service_address'];
-            $rs_info[$k]['status']     = $v['status'];
-            $rs_info[$k]['pay_status'] = $v['pay_status'];
-            $rs_info[$k]['order_sn']   = $v['order_sn'];
-            $rs_info[$k]['total']      = $v['total'];
-
+            $rs_info[$k]['day']                = date('Y-m-d', strtotime($v['appointment_service_time']));
+            $rs_info[$k]['week']               = "周".Common::getWeek($rs_info[$k]['day']);
+            $rs_info[$k]['hour']               = date('H', strtotime($v['appointment_service_time']));
+            $rs_info[$k]['title']              = $v['service_info_title'];
+            $rs_info[$k]['mobile']             = $v['mobile'];
+            $rs_info[$k]['name']               = $this->_getUserInfo($v['mobile']);
+            $rs_info[$k]['address']            = $v['appointment_service_address'];
+            $rs_info[$k]['status']             = $v['status'];
+            $rs_info[$k]['pay_status']         = $v['pay_status'];
+            $rs_info[$k]['order_sn']           = $v['order_sn'];
+            $rs_info[$k]['total']              = $v['total'];
+            $rs_info[$k]['service_id']         = $v['service_id'];
+            $rs_info[$k]['service_info_image'] = $this->_formatImg($v['service_info_image']);
         }
         $this->returnJsonMsg('200', $rs_info, Common::C('code', '200'));
     }
@@ -627,5 +628,20 @@ class ServiceorderController extends BaseController
             }
         }
         return $data;
+    }
+
+    /**
+     * 格式化图片
+     * @param string $image 图片地址
+     * @return string
+     */
+    private function _formatImg($image = '')
+    {
+        if (!empty($image)) {
+            if (!strstr($image, 'http')) {
+                return Common::C('imgHost').$image;
+            }
+        }
+        return '';
     }
 }
