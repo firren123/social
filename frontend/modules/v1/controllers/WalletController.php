@@ -21,6 +21,7 @@ use frontend\models\i500_social\UserWallet;
 use frontend\models\i500_social\ServiceSetting;
 use frontend\models\i500_social\UserCoupons;
 use frontend\models\i500_social\UserWithdrawal;
+use frontend\models\i500_social\UserBankCard;
 
 /**
  * Wallet
@@ -79,6 +80,9 @@ class WalletController extends BaseController
         $coupon_where['mobile'] = $where['mobile'];
         $coupon_where['status'] = '0';
         $wallet_info['coupon_count'] = $coupon_model->getCount($coupon_where);
+        $bank_card_model = new UserBankCard();
+        $bank_card_where['mobile'] = $where['mobile'];
+        $wallet_info['bankcard_count'] = $bank_card_model->getCount($bank_card_where);
         $this->returnJsonMsg('200', $wallet_info, Common::C('code', '200'));
     }
 
