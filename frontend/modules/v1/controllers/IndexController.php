@@ -56,7 +56,6 @@ class IndexController extends BaseController
                 $this->returnJsonMsg('605', [], Common::C('code', '605'));
             }
         }
-        //@todo 获取最新的5条帖子
         $post_where['status']     = '2';
         $post_where['is_deleted'] = '2';
         $post_fields = 'id,mobile,forum_id,title,post_img,thumbs,views,create_time';

@@ -10,6 +10,8 @@ return [
     'openLog'         => false, //true = 开始日志 false = 关闭日志
     'returnLogFile'   => '/tmp/return_log.txt', //返回值日志文件
     'paramsLogFile'   => '/tmp/params_log.txt', //客户端传递参数日志
+    'openCacheLog'    => true, //true = 开启缓存日志 false = 关闭缓存日志
+    'ssdbLogFile'     => '/tmp/ssdb_cache_log.txt', //缓存日志文件
     'hongBaoShareImg'     => 'http://img.i500m.com/uploads/custom/20150909/hongbao.jpg',  //红包分享图片
     'hongBaoShareTitle'   => 'i500m领券啦——积少成多，不做败家婆！',  //红包分享文字标题
     'hongBaoShareText'    => '我在这里派发i500m抵用券啦。心若在钱就在，能省一块是一块！',  //红包分享文字内容
@@ -26,6 +28,7 @@ return [
     'shopScope'       => 2,         //附近商家范围 单位(公里)
     'money_arrival_time' => 2*24*60*60,     //提现预计到账时间 2天
     'maxAppointmentNumber' => 100,          //一小时内 最大预约数量
+    'OpenPushToApp'        => true,        //是否开启推送给App true=开启 false=关闭
     /**环信相关配置**/
     'openHuanXin'     => true, //true = 开启环信 false = 关闭环信
     'passwordCode'    => '3e4r5t6y7f8d', //环信那边用户密码

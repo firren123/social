@@ -16,6 +16,7 @@
 namespace frontend\modules\v1\controllers;
 
 use frontend\models\i500_social\User;
+use common\helpers\SsdbHelper;
 use frontend\models\i500_social\UserChannel;
 use frontend\models\i500_social\UserBasicInfo;
 use frontend\models\i500_social\UserToken;
@@ -92,6 +93,51 @@ class PlugController extends Controller
     }
 
     /**
+     * 管理SSDB
+     * @return string
+     */
+    public function actionSsdb()
+    {
+        return $this->render('ssdb');
+    }
+
+    /**
+     * 获取所有Key
+     * @return array
+     */
+    public function actionGetAllKey()
+    {
+        $rs = SsdbHelper::Cache('keys');
+        echo json_encode(['code' => 'ok', 'data' => $rs]);
+    }
+
+    /**
+     * 获取Key
+     * @return array
+     */
+    public function actionGetKey()
+    {
+        $key = RequestHelper::get('key', '', '');
+        $value = SsdbHelper::Cache('get', $key);
+        echo json_encode(['code' => 'ok', 'data' => var_export($value, true)]);
+    }
+
+    /**
+     * 删除Key
+     * @return array
+     */
+    public function actionDelKey()
+    {
+        $key = RequestHelper::get('key', '', '');
+        $rs = SsdbHelper::Cache('del', $key);
+        if ($rs) {
+            echo json_encode(['code' => 'ok']);
+        } else {
+            echo json_encode(['code' => 'no']);
+        }
+    }
+
+    /**
      * 删除用户
      * @return array
      */
@@ -152,6 +198,7 @@ class PlugController extends Controller
             echo json_encode(['code'=>'ok','msg'=>'抱歉，未能查询到。']);
         }
     }
+
     /**
      * 获取Token的方法
      * @return array

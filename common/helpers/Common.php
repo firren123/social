@@ -236,7 +236,14 @@ class Common
      */
     public static function getBirthdayByCard($card = '')
     {
-        return strlen($card)==15 ? ('19' . substr($card, 6, 6)) : substr($card, 6, 8);
+        $birthday = strlen($card)==15 ? ('19' . substr($card, 6, 6)) : substr($card, 6, 8);
+        if (strlen($card) != 15) {
+            $year  = substr($birthday, 0, 4);
+            $month = substr($birthday, 4, 2);
+            $day   = substr($birthday, -2);
+            return $year.'-'.$month.'-'.$day;
+        }
+        return $birthday;
     }
 
     /**
@@ -266,6 +273,45 @@ class Common
     }
 
     /**
+     * 通过身份证获取星座
+     * @param string $card 身份证
+     * @return string
+     */
+    public static function getConstellationByCard($card = '')
+    {
+        $bir   = substr($card, 10, 4);
+        $month = (int)substr($bir, 0, 2);
+        $day   = (int)substr($bir, 2);
+        $strValue = '0';
+        if (($month == 1 && $day >= 20) || ($month == 2 && $day <= 18)) {
+            $strValue = "1"; //水瓶座
+        } else if (($month == 2 && $day >= 19) || ($month == 3 && $day <= 20)) {
+            $strValue = "2"; //双鱼座
+        } else if (($month == 3 && $day > 20) || ($month == 4 && $day <= 19)) {
+            $strValue = "3"; //白羊座
+        } else if (($month == 4 && $day >= 20) || ($month == 5 && $day <= 20)) {
+            $strValue = "4"; //金牛座
+        } else if (($month == 5 && $day >= 21) || ($month == 6 && $day <= 21)) {
+            $strValue = "5"; //双子座
+        } else if (($month == 6 && $day > 21) || ($month == 7 && $day <= 22)) {
+            $strValue = "6"; //巨蟹座
+        } else if (($month == 7 && $day > 22) || ($month == 8 && $day <= 22)) {
+            $strValue = "7"; //狮子座
+        } else if (($month == 8 && $day >= 23) || ($month == 9 && $day <= 22)) {
+            $strValue = "8"; //处女座
+        } else if (($month == 9 && $day >= 23) || ($month == 10 && $day <= 23)) {
+            $strValue = "9"; //天秤座
+        } else if (($month == 10 && $day > 23) || ($month == 11 && $day <= 22)) {
+            $strValue = "10"; //天蝎座
+        } else if (($month == 11 && $day > 22) || ($month == 12 && $day <= 21)) {
+            $strValue = "11"; //射手座
+        } else if (($month == 12 && $day > 21) || ($month == 1 && $day <= 19)) {
+            $strValue = "12"; //魔羯座
+        }
+        return $strValue;
+    }
+
+    /**
      * 通过日期获取星期
      * @param string $day 日期
      * @return string
@@ -277,6 +323,16 @@ class Common
             return $week_array[@date("w", strtotime($day))];
         }
         return "";
+    }
+
+    /**
+     * 隐藏身份证信息
+     * @param string $card 身份证
+     * @return string
+     */
+    public static function hiddenUserCard($card = '')
+    {
+        return substr_replace($card, '****', 10, 4);
     }
 
     /**

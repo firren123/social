@@ -26,7 +26,7 @@ class SsdbCache extends Cache
 
     private $_servers = [];
 
-    private $_keyPre  = '';
+    protected $_keyPre  = 'SOCIAL_API_';
 
     /**
      * 初始化
@@ -44,9 +44,9 @@ class SsdbCache extends Cache
      */
     public function getSsdbCache()
     {
-        if ($this->_cache !== null)
+        if ($this->_cache !== null) {
             return $this->_cache;
-        else {
+        } else {
             $servers = $this->getServers();
             foreach ($servers as $server) {
                 if ($server['host'] === null) {
@@ -74,8 +74,8 @@ class SsdbCache extends Cache
      */
     public function getkeys()
     {
-        //return $this->getSsdbCache()->keys('a','z',10);
-        return $this->getSsdbCache()->hkeys($this->_keyPre, "", "", $this->getSsdbCache()->hsize($this->_keyPre));
+        return $this->getSsdbCache()->keys($this->_keyPre,'',1000);
+        //return $this->getSsdbCache()->hkeys($this->_keyPre, "", "", $this->getSsdbCache()->hsize($this->_keyPre));
     }
 
     /**
@@ -100,6 +100,7 @@ class SsdbCache extends Cache
      */
     public function setValue($key, $value, $expire)
     {
+        $key = $this->_keyPre.$key;
         $this->getSsdbCache()->hset($this->_keyPre, $key, 1);
         if ($expire > 0) {
             //$expire += time();

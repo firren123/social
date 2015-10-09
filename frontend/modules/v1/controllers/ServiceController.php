@@ -16,6 +16,7 @@ namespace frontend\modules\v1\controllers;
 
 use Yii;
 use common\helpers\Common;
+use common\helpers\SsdbHelper;
 use common\helpers\RequestHelper;
 use frontend\models\i500_social\Service;
 use frontend\models\i500_social\ServiceCategory;
@@ -660,7 +661,9 @@ class ServiceController extends BaseController
         if (empty($info)) {
             $this->returnJsonMsg('1015', [], Common::C('code', '1015'));
         }
-        //@todo 身份证号码需要处理，考虑是否需要返回
+        if (!empty($info['user_card'])) {
+            $info['user_card'] = Common::hiddenUserCard($info['user_card']);
+        }
         $this->returnJsonMsg('200', $info, Common::C('code', '200'));
     }
 
@@ -771,13 +774,23 @@ class ServiceController extends BaseController
         if (empty($type)) {
             $this->returnJsonMsg('1008', [], Common::C('code', '1008'));
         }
-        $service_category_model = new ServiceCategory();
-        $where['pid']        = '0';
-        $where['status']     = '2';
-        $where['is_deleted'] = '2';
-        $fields = 'id,name,image';
-        $order  = 'sort desc';
-        $info = $service_category_model->getList($where, $fields, $order);
+        $info = [];
+        //get缓存
+        $cache_key = 'service_top_category';
+        $cache_rs = SsdbHelper::Cache('get', $cache_key);
+        if ($cache_rs) {
+            $info = $cache_rs;
+        } else {
+            $service_category_model = new ServiceCategory();
+            $where['pid']        = '0';
+            $where['status']     = '2';
+            $where['is_deleted'] = '2';
+            $fields = 'id,name,image';
+            $order  = 'sort desc';
+            $info = $service_category_model->getList($where, $fields, $order);
+            //set缓存
+            SsdbHelper::Cache('set', $cache_key, $info, Common::C('SSDBCacheTime'));
+        }
         if (!empty($info)) {
             foreach ($info as $k => $v) {
                 if ($v['image']) {
@@ -818,11 +831,20 @@ class ServiceController extends BaseController
         if (!Common::validateMobile($data['mobile'])) {
             $this->returnJsonMsg('605', [], Common::C('code', '605'));
         }
-        $unit_model = new ServiceUnit();
-        $unit_where['status'] = '2';
-        $unit_list = $unit_model->getList($unit_where, 'id,unit', 'id asc');
-        if (empty($unit_list)) {
-            $this->returnJsonMsg('1039', [], Common::C('code', '1039'));
+        //get缓存
+        $cache_key = 'service_unit';
+        $cache_rs = SsdbHelper::Cache('get', $cache_key);
+        if ($cache_rs) {
+            $unit_list = $cache_rs;
+        } else {
+            $unit_model = new ServiceUnit();
+            $unit_where['status'] = '2';
+            $unit_list = $unit_model->getList($unit_where, 'id,unit', 'id asc');
+            if (empty($unit_list)) {
+                $this->returnJsonMsg('1039', [], Common::C('code', '1039'));
+            }
+            //set缓存
+            SsdbHelper::Cache('set', $cache_key, $unit_list, Common::C('SSDBCacheTime'));
         }
         $this->returnJsonMsg('200', $unit_list, Common::C('code', '200'));
     }
@@ -880,13 +902,22 @@ class ServiceController extends BaseController
             $rs['image'] = '';
         }
         if (!empty($pid)) {
-            $service_category_model = new ServiceCategory();
-            $fields = 'id,name,image';
-            $where['pid']        = $pid;
-            $where['status']     = '2';
-            $where['is_deleted'] = '2';
-            $order  = 'sort desc';
-            $info = $service_category_model->getList($where, $fields, $order);
+            //get缓存
+            $cache_key = 'service_son_category_'.$pid;
+            $cache_rs = SsdbHelper::Cache('get', $cache_key);
+            if ($cache_rs) {
+                $info = $cache_rs;
+            } else {
+                $service_category_model = new ServiceCategory();
+                $fields = 'id,name,image';
+                $where['pid']        = $pid;
+                $where['status']     = '2';
+                $where['is_deleted'] = '2';
+                $order  = 'sort desc';
+                $info = $service_category_model->getList($where, $fields, $order);
+                //set缓存
+                SsdbHelper::Cache('set', $cache_key, $info, Common::C('SSDBCacheTime'));
+            }
             if (!empty($type)) {
                 array_unshift($info, $rs);//向数组插入元素
             }
@@ -909,12 +940,19 @@ class ServiceController extends BaseController
      */
     private function _getUserInfo($mobile = '')
     {
-        $user_base_info_model = new UserBasicInfo();
-        $user_base_info_where['mobile'] = $mobile;
-        $user_base_info_fields = 'avatar';
         $rs['avatar']   = '';
         $rs['nickname'] = '';
-        $rs = $user_base_info_model->getInfo($user_base_info_where, true, $user_base_info_fields);
+        //get缓存
+        $cache_key = 'profile_'.$mobile;
+        $cache_rs = SsdbHelper::Cache('get', $cache_key);
+        if ($cache_rs) {
+            $rs = $cache_rs;
+        } else {
+            $user_base_info_model = new UserBasicInfo();
+            $user_base_info_where['mobile'] = $mobile;
+            $user_base_info_fields = 'avatar';
+            $rs = $user_base_info_model->getInfo($user_base_info_where, true, $user_base_info_fields);
+        }
         if (!empty($rs)) {
             if ($rs['avatar']) {
                 if (!strstr($rs['avatar'], 'http')) {
@@ -934,9 +972,18 @@ class ServiceController extends BaseController
     {
         $unit = '';
         if (!empty($unit_id)) {
-            $unit_model = new ServiceUnit();
-            $unit_where['status'] = '2';
-            $unit_list = $unit_model->getList($unit_where, 'id,unit', 'id asc');
+            //get缓存
+            $cache_key = 'service_unit';
+            $cache_rs = SsdbHelper::Cache('get', $cache_key);
+            if ($cache_rs) {
+                $unit_list = $cache_rs;
+            } else {
+                $unit_model = new ServiceUnit();
+                $unit_where['status'] = '2';
+                $unit_list = $unit_model->getList($unit_where, 'id,unit', 'id asc');
+                //set缓存
+                SsdbHelper::Cache('set', $cache_key, $unit_list, Common::C('SSDBCacheTime'));
+            }
             if (!empty($unit_list)) {
                 foreach ($unit_list as $k => $v) {
                     if ($unit_list[$k]['id'] == $unit_id) {
