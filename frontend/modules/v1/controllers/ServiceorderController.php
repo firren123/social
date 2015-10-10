@@ -275,7 +275,7 @@ class ServiceorderController extends BaseController
             if (!Common::validateMobile($where['mobile'])) {
                 $this->returnJsonMsg('605', [], Common::C('code', '605'));
             }
-            $fields = 'service_id,service_mobile,service_way,total,service_info_title,service_info_price,service_info_image,service_info_unit,appointment_service_time,appointment_service_address,remark,status,pay_status';
+            $fields = 'service_id,service_mobile,service_way,total,service_info_title,service_info_price,service_info_image,service_info_unit,appointment_service_time,appointment_service_address,remark,status,pay_status,user_evaluation_status,servicer_evaluation_status';
         } else {
             $where['service_uid'] = RequestHelper::get('uid', '', '');
             if (empty($where['service_uid'])) {
@@ -288,7 +288,7 @@ class ServiceorderController extends BaseController
             if (!Common::validateMobile($where['service_mobile'])) {
                 $this->returnJsonMsg('605', [], Common::C('code', '605'));
             }
-            $fields = 'service_id,mobile,service_way,total,service_info_title,service_info_price,service_info_image,service_info_unit,appointment_service_time,appointment_service_address,remark,status,pay_status';
+            $fields = 'service_id,mobile,service_way,total,service_info_title,service_info_price,service_info_image,service_info_unit,appointment_service_time,appointment_service_address,remark,status,pay_status,user_evaluation_status,servicer_evaluation_status';
         }
         $where['order_sn'] = RequestHelper::get('order_sn', '', '');
         if (empty($where['order_sn'])) {
