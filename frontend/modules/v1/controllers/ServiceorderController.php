@@ -201,7 +201,7 @@ class ServiceorderController extends BaseController
             if (!Common::validateMobile($where['service_mobile'])) {
                 $this->returnJsonMsg('605', [], Common::C('code', '605'));
             }
-            $fields = 'service_info_title,mobile,appointment_service_time,appointment_service_address,status,pay_status,order_sn,total';
+            $fields = 'service_info_title,mobile,appointment_service_time,appointment_service_address,status,pay_status,order_sn,total,service_id,service_info_image';
             $data = $this->_getStatus($type, $order_status);
             if (!empty($data['and_where'])) {
                 $and_where = $data['and_where'];
