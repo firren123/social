@@ -294,15 +294,15 @@ class ServiceorderController extends BaseController
      */
     public function actionStartService()
     {
-        $where['uid'] = RequestHelper::post('uid', '', '');
-        if (empty($where['uid'])) {
+        $where['service_uid'] = RequestHelper::post('uid', '', '');
+        if (empty($where['service_uid'])) {
             $this->returnJsonMsg('621', [], Common::C('code', '621'));
         }
-        $where['mobile'] = RequestHelper::post('mobile', '', '');
-        if (empty($where['mobile'])) {
+        $where['service_mobile'] = RequestHelper::post('mobile', '', '');
+        if (empty($where['service_mobile'])) {
             $this->returnJsonMsg('604', [], Common::C('code', '604'));
         }
-        if (!Common::validateMobile($where['mobile'])) {
+        if (!Common::validateMobile($where['service_mobile'])) {
             $this->returnJsonMsg('605', [], Common::C('code', '605'));
         }
         $where['order_sn'] = RequestHelper::post('order_sn', '', '');
@@ -332,15 +332,15 @@ class ServiceorderController extends BaseController
      */
     public function actionConfirmService()
     {
-        $where['uid'] = RequestHelper::post('uid', '', '');
-        if (empty($where['uid'])) {
+        $where['service_uid'] = RequestHelper::post('uid', '', '');
+        if (empty($where['service_uid'])) {
             $this->returnJsonMsg('621', [], Common::C('code', '621'));
         }
-        $where['mobile'] = RequestHelper::post('mobile', '', '');
-        if (empty($where['mobile'])) {
+        $where['service_mobile'] = RequestHelper::post('mobile', '', '');
+        if (empty($where['service_mobile'])) {
             $this->returnJsonMsg('604', [], Common::C('code', '604'));
         }
-        if (!Common::validateMobile($where['mobile'])) {
+        if (!Common::validateMobile($where['service_mobile'])) {
             $this->returnJsonMsg('605', [], Common::C('code', '605'));
         }
         $where['order_sn'] = RequestHelper::post('order_sn', '', '');
@@ -370,27 +370,41 @@ class ServiceorderController extends BaseController
      */
     public function actionCompleteService()
     {
-        $where['uid'] = RequestHelper::post('uid', '', '');
-        if (empty($where['uid'])) {
-            $this->returnJsonMsg('621', [], Common::C('code', '621'));
-        }
-        $where['mobile'] = RequestHelper::post('mobile', '', '');
-        if (empty($where['mobile'])) {
-            $this->returnJsonMsg('604', [], Common::C('code', '604'));
-        }
-        if (!Common::validateMobile($where['mobile'])) {
-            $this->returnJsonMsg('605', [], Common::C('code', '605'));
-        }
-        $where['order_sn'] = RequestHelper::post('order_sn', '', '');
-        if (empty($where['order_sn'])) {
-            $this->returnJsonMsg('1042', [], Common::C('code', '1042'));
-        }
         $type = RequestHelper::post('type', '0', 'intval');  //1=体验方 2=服务方
         if (empty($type)) {
             $this->returnJsonMsg('1008', [], Common::C('code', '1008'));
         }
         if ($type !='1' && $type !='2') {
             $this->returnJsonMsg('1014', [], Common::C('code', '1014'));
+        }
+        if ($type == '1') {
+            $where['uid'] = RequestHelper::post('uid', '', '');
+            if (empty($where['uid'])) {
+                $this->returnJsonMsg('621', [], Common::C('code', '621'));
+            }
+            $where['mobile'] = RequestHelper::post('mobile', '', '');
+            if (empty($where['mobile'])) {
+                $this->returnJsonMsg('604', [], Common::C('code', '604'));
+            }
+            if (!Common::validateMobile($where['mobile'])) {
+                $this->returnJsonMsg('605', [], Common::C('code', '605'));
+            }
+        } else {
+            $where['service_uid'] = RequestHelper::post('uid', '', '');
+            if (empty($where['service_uid'])) {
+                $this->returnJsonMsg('621', [], Common::C('code', '621'));
+            }
+            $where['service_mobile'] = RequestHelper::post('mobile', '', '');
+            if (empty($where['service_mobile'])) {
+                $this->returnJsonMsg('604', [], Common::C('code', '604'));
+            }
+            if (!Common::validateMobile($where['service_mobile'])) {
+                $this->returnJsonMsg('605', [], Common::C('code', '605'));
+            }
+        }
+        $where['order_sn'] = RequestHelper::post('order_sn', '', '');
+        if (empty($where['order_sn'])) {
+            $this->returnJsonMsg('1042', [], Common::C('code', '1042'));
         }
         $order_model = new ServiceOrder();
         $info = $order_model->getInfo($where, true, 'status,pay_status');
@@ -458,6 +472,13 @@ class ServiceorderController extends BaseController
      */
     public function actionEvaluation()
     {
+        $where['type']     = RequestHelper::post('type', '0', 'intval');
+        if (empty($where['type'])) {
+            $this->returnJsonMsg('1008', [], Common::C('code', '1008'));
+        }
+        if ($where['type'] !='1' && $where['type'] !='2') {
+            $this->returnJsonMsg('1014', [], Common::C('code', '1014'));
+        }
         $where['uid'] = RequestHelper::post('uid', '', '');
         if (empty($where['uid'])) {
             $this->returnJsonMsg('621', [], Common::C('code', '621'));
@@ -473,15 +494,8 @@ class ServiceorderController extends BaseController
         if (empty($where['order_sn'])) {
             $this->returnJsonMsg('1042', [], Common::C('code', '1042'));
         }
-        $where['type']     = RequestHelper::post('type', '0', 'intval');
         $star = RequestHelper::post('star', '0', 'intval');
         $content = RequestHelper::post('content', '', '');
-        if (empty($where['type'])) {
-            $this->returnJsonMsg('1008', [], Common::C('code', '1008'));
-        }
-        if ($where['type'] !='1' && $where['type'] !='2') {
-            $this->returnJsonMsg('1014', [], Common::C('code', '1014'));
-        }
         $evaluation_model = new ServiceOrderEvaluation();
         $info = $evaluation_model->getInfo($where, true, 'id');
         if (!empty($info)) {
