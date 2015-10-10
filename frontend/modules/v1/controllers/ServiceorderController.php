@@ -256,23 +256,45 @@ class ServiceorderController extends BaseController
      */
     public function actionDetail()
     {
-        $where['uid'] = RequestHelper::get('uid', '', '');
-        if (empty($where['uid'])) {
-            $this->returnJsonMsg('621', [], Common::C('code', '621'));
+        $type = RequestHelper::get('type', '0', 'intval');  //1=体验方 2=服务方
+        if (empty($type)) {
+            $this->returnJsonMsg('1008', [], Common::C('code', '1008'));
         }
-        $where['mobile'] = RequestHelper::get('mobile', '', '');
-        if (empty($where['mobile'])) {
-            $this->returnJsonMsg('604', [], Common::C('code', '604'));
+        if ($type !='1' && $type !='2') {
+            $this->returnJsonMsg('1014', [], Common::C('code', '1014'));
         }
-        if (!Common::validateMobile($where['mobile'])) {
-            $this->returnJsonMsg('605', [], Common::C('code', '605'));
+        if ($type == '1') {
+            $where['uid'] = RequestHelper::get('uid', '', '');
+            if (empty($where['uid'])) {
+                $this->returnJsonMsg('621', [], Common::C('code', '621'));
+            }
+            $where['mobile'] = RequestHelper::get('mobile', '', '');
+            if (empty($where['mobile'])) {
+                $this->returnJsonMsg('604', [], Common::C('code', '604'));
+            }
+            if (!Common::validateMobile($where['mobile'])) {
+                $this->returnJsonMsg('605', [], Common::C('code', '605'));
+            }
+            $fields = 'service_id,service_mobile,service_way,total,service_info_title,service_info_price,service_info_image,service_info_unit,appointment_service_time,appointment_service_address,remark,status,pay_status';
+        } else {
+            $where['service_uid'] = RequestHelper::get('uid', '', '');
+            if (empty($where['service_uid'])) {
+                $this->returnJsonMsg('621', [], Common::C('code', '621'));
+            }
+            $where['service_mobile'] = RequestHelper::get('mobile', '', '');
+            if (empty($where['service_mobile'])) {
+                $this->returnJsonMsg('604', [], Common::C('code', '604'));
+            }
+            if (!Common::validateMobile($where['service_mobile'])) {
+                $this->returnJsonMsg('605', [], Common::C('code', '605'));
+            }
+            $fields = 'service_id,mobile,service_way,total,service_info_title,service_info_price,service_info_image,service_info_unit,appointment_service_time,appointment_service_address,remark,status,pay_status';
         }
         $where['order_sn'] = RequestHelper::get('order_sn', '', '');
         if (empty($where['order_sn'])) {
             $this->returnJsonMsg('1042', [], Common::C('code', '1042'));
         }
         $service_order_model = new ServiceOrder();
-        $fields = 'service_id,service_mobile,service_way,total,service_info_title,service_info_price,service_info_image,service_info_unit,appointment_service_time,appointment_service_address,remark,status,pay_status';
         $info = $service_order_model->getInfo($where, true, $fields);
         if (empty($info)) {
             $this->returnJsonMsg('1043', [], Common::C('code', '1043'));
@@ -281,9 +303,15 @@ class ServiceorderController extends BaseController
         if (!empty($info['service_info_image'])) {
             $info['service_info_image'] = Common::C('imgHost').$info['service_info_image'];
         }
-        $info['contact'] = $this->_getSettingInfo($info['service_mobile'], 'user_name', 1);
-        $info['contact_mobile'] = $info['service_mobile'];
-        unset($info['service_mobile']);
+        if ($type == '1') {
+            $info['contact'] = $this->_getSettingInfo($info['service_mobile'], 'user_name', 1);
+            $info['contact_mobile'] = $info['service_mobile'];
+            unset($info['service_mobile']);
+        } else {
+            $info['contact'] = $this->_getSettingInfo($info['mobile'], 'user_name', 1);
+            $info['contact_mobile'] = $info['mobile'];
+            unset($info['mobile']);
+        }
         unset($info['service_info_unit']);
         $this->returnJsonMsg('200', $info, Common::C('code', '200'));
     }
