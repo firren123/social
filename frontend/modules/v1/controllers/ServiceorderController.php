@@ -631,7 +631,7 @@ class ServiceorderController extends BaseController
             /**体验方**/
             switch ($status) {
                 case 1:
-                    $data['and_where'] = ['or', ['=', 'status', '0' ], ['=', 'status', '1'], ['=', 'status', '2']];
+                    $data['and_where'] = ['or', ['=', 'status', '0' ], ['=', 'status', '1']];
                     break;
                 case 2 :
                     $data['and_where'] = ['or', ['=', 'status', '3' ], ['=', 'status', '4'], ['=', 'status', '2']];
@@ -651,7 +651,7 @@ class ServiceorderController extends BaseController
             /**服务方**/
             switch ($status) {
                 case 1:
-                    $data['and_where'] = ['or', ['=', 'status', '0' ], ['=', 'status', '1'], ['=', 'status', '2']];
+                    $data['and_where'] = ['or', ['=', 'status', '0' ], ['=', 'status', '1']];
                     $data['where']['pay_status'] = '1';
                     break;
                 case 2 :
