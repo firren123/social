@@ -137,10 +137,6 @@ class PostController extends BaseController
             }
             $post_where['mobile'] = $mobile;
         }
-        $forum_id = RequestHelper::get('forum_id', '0', 'intval');
-        if (empty($forum_id)) {
-            $this->returnJsonMsg('701', [], Common::C('code', '701'));
-        }
         $community_id = RequestHelper::get('community_id', '0', 'intval');
         if (empty($community_id)) {
             $this->returnJsonMsg('642', [], Common::C('code', '642'));
@@ -154,7 +150,6 @@ class PostController extends BaseController
         if ($page_size > Common::C('maxPageSize')) {
             $this->returnJsonMsg('705', [], Common::C('code', '705'));
         }
-        $post_where['forum_id']          = $forum_id;
         $post_where['community_id']      = $community_id;
         $post_where['community_city_id'] = $community_city_id;
         $post_where['status']            = '2';
