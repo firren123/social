@@ -439,7 +439,7 @@ class ServiceorderController extends BaseController
         if (empty($info)) {
             $this->returnJsonMsg('1043', [], Common::C('code', '1043'));
         }
-        if ($info['status'] != '3' || $info['pay_status'] != '1') {
+        if (($info['status'] != '3' && $info['status'] != '4') || $info['pay_status'] != '1') {
             $this->returnJsonMsg('1051', [], Common::C('code', '1051'));
         }
         if ($type == '1') {
