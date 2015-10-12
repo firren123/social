@@ -135,7 +135,7 @@ class PostController extends BaseController
             if (!Common::validateMobile($user_mobile)) {
                 $this->returnJsonMsg('605', [], Common::C('code', '605'));
             }
-            $post_where['mobile'] = $mobile;
+            $post_where['mobile'] = $user_mobile;
         }
         $community_id = RequestHelper::get('community_id', '0', 'intval');
         if (empty($community_id)) {
