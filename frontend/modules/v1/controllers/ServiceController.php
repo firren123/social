@@ -457,7 +457,6 @@ class ServiceController extends BaseController
                 $user_info = $this->_getUserInfo($service_setting_info['mobile']);
                 $service_setting_info['user_avatar'] = $user_info['avatar'];
             }
-            unset($service_setting_info['mobile']);
             $service_setting_info['star']     = '5';
             //@todo 距离需求请求仪能的接口
             $service_setting_info['distance'] = '1.0公里';
