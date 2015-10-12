@@ -90,6 +90,9 @@ class BaseController extends Controller
 
             if (isset($this->params['uid']) && $this->params['uid']) {
                 /**验证签名**/
+                if (empty($this->params['token'])) {
+                    $this->returnJsonMsg('507', [], Common::C('code', '507'));
+                }
                 $this->_checkToken($this->params['token'], $this->params['mobile']);
             }
             if (isset($this->params['token'])) {
