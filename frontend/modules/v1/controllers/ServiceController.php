@@ -808,7 +808,7 @@ class ServiceController extends BaseController
         } else {
             if (!empty($user_name) || !empty($user_card) || !empty($user_description)) {
                 //审核状态 0=未审核1=审核中2=审核成功3=审核失败
-                if ($info['audit_status'] == '1') {
+                if ($info['audit_status'] != '3') {
                     $this->returnJsonMsg('1021', [], Common::C('code', '1021'));
                 }
                 $update_data['audit_status'] = '0';
