@@ -48,10 +48,10 @@ class ServiceController extends BaseController
     }
 
     /**
-     * 服务主页
+     * 服务主页 - 弃用 - 备份20151010
      * @return array
      */
-    public function actionIndex()
+    public function actionIndexBak()
     {
         $uuid = RequestHelper::get('uuid', '', '');
         if (empty($uuid)) {
@@ -77,6 +77,67 @@ class ServiceController extends BaseController
         $service_setting_info['distance'] = '1.0公里';
         $rs['service_setting'] = $service_setting_info;
         $rs['service_list']    = [];
+        $page      = RequestHelper::get('page', '1', 'intval');
+        $page_size = RequestHelper::get('page_size', '6', 'intval');
+        if ($page_size > Common::C('maxPageSize')) {
+            $this->returnJsonMsg('705', [], Common::C('code', '705'));
+        }
+        $service_model = new Service();
+        $service_where['uid']                  = $uuid;
+        $service_where['audit_status']         = '2';
+        $service_where['user_auth_status']     = '1';
+        $service_where['servicer_info_status'] = '1';
+        $service_where['status']               = '1';
+        $service_where['is_deleted']           = '2';
+        $service_fields = 'id,mobile,image,title,description as service_description,price,unit,service_way';
+        $list = $service_model->getPageList($service_where, $service_fields, 'id desc', $page, $page_size);
+        if (!empty($list)) {
+            foreach ($list as $k => $v) {
+                if ($v['image']) {
+                    $list[$k]['image'] = $this->_formatImg($v['image']);
+                }
+                $list[$k]['price'] = $v['price'].$this->_getServiceUnit($v['unit']);
+                unset($list[$k]['mobile']);
+                unset($list[$k]['unit']);
+            }
+        }
+        $rs['service_list'] = $list;
+        $this->returnJsonMsg('200', $rs, Common::C('code', '200'));
+    }
+
+    /**
+     * 服务主页
+     * @return array
+     */
+    public function actionIndex()
+    {
+        $uuid = RequestHelper::get('uuid', '0', 'intval');
+        if (empty($uuid)) {
+            $this->returnJsonMsg('1035', [], Common::C('code', '1035'));
+        }
+        $rs['service_setting'] = [];
+        $rs['service_list']    = [];
+        $type = RequestHelper::get('type', '0', 'intval');
+        if ($type != '1') {
+            /**获取服务设置信息**/
+            $service_setting_where['uid']          = $uuid;
+            $service_setting_where['audit_status'] = '2';
+            $service_setting_where['status']       = '2';
+            $service_setting_where['is_deleted']   = '2';
+            $service_setting_fields = 'mobile,name';
+            $service_setting_model = new ServiceSetting();
+            $service_setting_info = $service_setting_model->getInfo($service_setting_where, true, $service_setting_fields);
+            if (empty($service_setting_info)) {
+                $this->returnJsonMsg('1015', [], Common::C('code', '1015'));
+            }
+            if (!empty($service_setting_info['mobile'])) {
+                $user_info = $this->_getUserInfo($service_setting_info['mobile']);
+                $service_setting_info['user_avatar'] = $user_info['avatar'];
+                $service_setting_info['user_sex']    = $user_info['sex'];
+                $service_setting_info['user_auth']   = $user_info['card_audit_status'];
+            }
+            $rs['service_setting'] = $service_setting_info;
+        }
         $page      = RequestHelper::get('page', '1', 'intval');
         $page_size = RequestHelper::get('page_size', '6', 'intval');
         if ($page_size > Common::C('maxPageSize')) {
@@ -942,6 +1003,8 @@ class ServiceController extends BaseController
     {
         $rs['avatar']   = '';
         $rs['nickname'] = '';
+        $rs['sex']      = '0';
+        $rs['card_audit_status'] = '1';
         //get缓存
         $cache_key = 'profile_'.$mobile;
         $cache_rs = SsdbHelper::Cache('get', $cache_key);
@@ -950,7 +1013,7 @@ class ServiceController extends BaseController
         } else {
             $user_base_info_model = new UserBasicInfo();
             $user_base_info_where['mobile'] = $mobile;
-            $user_base_info_fields = 'avatar';
+            $user_base_info_fields = 'avatar,nickname,sex,card_audit_status';
             $rs = $user_base_info_model->getInfo($user_base_info_where, true, $user_base_info_fields);
         }
         if (!empty($rs)) {

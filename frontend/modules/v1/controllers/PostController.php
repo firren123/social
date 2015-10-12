@@ -119,6 +119,72 @@ class PostController extends BaseController
     }
 
     /**
+     * 别人动态-帖子列表
+     * @return array
+     */
+    public function actionDynamic()
+    {
+        $mobile = RequestHelper::get('mobile', '', '');
+        if (!empty($mobile)) {
+            if (!Common::validateMobile($mobile)) {
+                $this->returnJsonMsg('605', [], Common::C('code', '605'));
+            }
+        }
+        $user_mobile = RequestHelper::get('user_mobile', '', '');
+        if (!empty($user_mobile)) {
+            if (!Common::validateMobile($user_mobile)) {
+                $this->returnJsonMsg('605', [], Common::C('code', '605'));
+            }
+            $post_where['mobile'] = $mobile;
+        }
+        $forum_id = RequestHelper::get('forum_id', '0', 'intval');
+        if (empty($forum_id)) {
+            $this->returnJsonMsg('701', [], Common::C('code', '701'));
+        }
+        $community_id = RequestHelper::get('community_id', '0', 'intval');
+        if (empty($community_id)) {
+            $this->returnJsonMsg('642', [], Common::C('code', '642'));
+        }
+        $community_city_id = RequestHelper::get('community_city_id', '0', 'intval');
+        if (empty($community_city_id)) {
+            $this->returnJsonMsg('645', [], Common::C('code', '645'));
+        }
+        $page      = RequestHelper::get('page', '1', 'intval');
+        $page_size = RequestHelper::get('page_size', '6', 'intval');
+        if ($page_size > Common::C('maxPageSize')) {
+            $this->returnJsonMsg('705', [], Common::C('code', '705'));
+        }
+        $post_where['forum_id']          = $forum_id;
+        $post_where['community_id']      = $community_id;
+        $post_where['community_city_id'] = $community_city_id;
+        $post_where['status']            = '2';
+        $post_where['is_deleted']        = '2';
+        $post_fields = 'id,mobile,forum_id,title,post_img,thumbs,views,create_time';
+        $post_model = new Post();
+        $list = $post_model->getPageList($post_where, $post_fields, 'id desc', $page, $page_size);
+        if (empty($list)) {
+            $this->returnJsonMsg('708', [], Common::C('code', '708'));
+        }
+        foreach ($list as $k => $v) {
+            $list[$k]['post_img'] = $this->_formatImg($v['post_img']);
+            if (empty($mobile)) {
+                $list[$k]['is_thumbs'] = '0';
+            } else {
+                $list[$k]['is_thumbs'] = $this->_checkPostThumbs($mobile, $v['id']);
+            }
+            if (!empty($v['mobile'])) {
+                $user_info = $this->_getUserInfo($v['mobile']);
+                $list[$k]['user_nickname'] = $user_info['nickname'];
+                $list[$k]['user_avatar'] = $user_info['avatar'];
+            }
+            $list[$k]['thumbs']   = Common::formatNumber($v['thumbs']);
+            $list[$k]['views']    = Common::formatNumber($v['views']);
+            $list[$k]['time_ago'] = Common::timeAgo($v['create_time']);
+        }
+        $this->returnJsonMsg('200', $list, Common::C('code', '200'));
+    }
+
+    /**
      * 帖子列表
      * @return array
      */
@@ -129,6 +195,13 @@ class PostController extends BaseController
             if (!Common::validateMobile($mobile)) {
                 $this->returnJsonMsg('605', [], Common::C('code', '605'));
             }
+        }
+        $user_mobile = RequestHelper::get('user_mobile', '', '');
+        if (!empty($user_mobile)) {
+            if (!Common::validateMobile($user_mobile)) {
+                $this->returnJsonMsg('605', [], Common::C('code', '605'));
+            }
+            $post_where['mobile'] = $mobile;
         }
         $forum_id = RequestHelper::get('forum_id', '0', 'intval');
         if (empty($forum_id)) {
