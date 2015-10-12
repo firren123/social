@@ -1022,6 +1022,8 @@ class ServiceController extends BaseController
                     $rs['avatar'] = Common::C('imgHost').$rs['avatar'];
                 }
             }
+            $rs['sex'] = empty($rs['sex']) ? "0" : $rs['sex'];
+            $rs['card_audit_status'] = empty($rs['card_audit_status']) ? "1" : $rs['card_audit_status'];
         }
         return $rs;
     }
