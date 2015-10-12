@@ -98,6 +98,7 @@ class BaseRequestHelps
     {
         $filters    =   isset($filter) ? $filter : 'htmlspecialchars';
         $filters    =   !empty($filters) ? $filters : 'htmlspecialchars';
+        $filters    .= ',removeXSS,abacaAddslashes';
         if ('' == $name) {
             $data       =   $input;
             if ($filters) {
@@ -112,34 +113,20 @@ class BaseRequestHelps
             $data       =   $input[$name];
             if ($filters) {
                 if (is_string($filters)) {
-                    if (0 === strpos($filters, '/')) {
-                        if (1 !== preg_match($filters, (string)$data)) {
-                            // 支持正则验证
-                            return   isset($default) ? $default : null;
-                        }
-                    } else {
-                        $filters    =   explode(',', $filters);
-                    }
-                } elseif (is_int($filters)) {
-                    $filters    =   array($filters);
+                    $filters    =   explode(',', $filters);
                 }
-
                 if (is_array($filters)) {
                     foreach ($filters as $filter) {
                         if (function_exists($filter)) {
-                            $data = is_array($data) ? self::array_map_recursive($filter, $data) : $filter($data); // 参数过滤
+                            $data = is_array($data) ? self::array_map_recursive($filter, $data) : $filter($data);
                         } else {
-                            $data = filter_var($data, is_int($filter) ? $filter : filter_id($filter));
-                            if (false === $data) {
-                                return   isset($default) ? $default : null;
-                            }
+                            $data = is_array($data) ? self::array_map_recursive($filter, $data) : self::$filter($data);
                         }
                     }
                 }
             }
-
         } else { // 变量默认值
-            $data       =    isset($default)?$default:null;
+            $data = isset($default) ? $default : '';
         }
         return $data;
     }
@@ -156,8 +143,72 @@ class BaseRequestHelps
         foreach ($data as $key => $val) {
             $result[$key] = is_array($val)
                 ? self::array_map_recursive($filter, $val)
-                : call_user_func($filter, $val);
+                : @call_user_func($filter, $val);
         }
         return $result;
+    }
+
+    /**
+     * 移除XSS
+     * @param string $val 值
+     * @return mixed
+     */
+    public static function removeXSS($val = '')
+    {
+        $val = preg_replace('/([\x00-\x08,\x0b-\x0c,\x0e-\x19])/', '', $val);
+        $search = 'abcdefghijklmnopqrstuvwxyz';
+        $search .= 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        $search .= '1234567890!@#$%^&*()';
+        $search .= '~`";:?+/={}[]-_|\'\\';
+        for ($i = 0; $i < strlen($search); $i++) {
+            $val = preg_replace('/(&#[xX]0{0,8}'.dechex(ord($search[$i])).';?)/i', $search[$i], $val);
+            $val = preg_replace('/(�{0,8}'.ord($search[$i]).';?)/', $search[$i], $val);
+        }
+        $ra1 = array('javascript', 'vbscript', 'expression', 'applet', 'meta', 'xml', 'blink', 'link', 'style', 'script', 'embed', 'object', 'iframe', 'frame', 'frameset', 'ilayer', 'layer', 'bgsound', 'title', 'base');
+        $ra2 = array('onabort', 'onactivate', 'onafterprint', 'onafterupdate', 'onbeforeactivate', 'onbeforecopy', 'onbeforecut', 'onbeforedeactivate', 'onbeforeeditfocus', 'onbeforepaste', 'onbeforeprint', 'onbeforeunload', 'onbeforeupdate', 'onblur', 'onbounce', 'oncellchange', 'onchange', 'onclick', 'oncontextmenu', 'oncontrolselect', 'oncopy', 'oncut', 'ondataavailable', 'ondatasetchanged', 'ondatasetcomplete', 'ondblclick', 'ondeactivate', 'ondrag', 'ondragend', 'ondragenter', 'ondragleave', 'ondragover', 'ondragstart', 'ondrop', 'onerror', 'onerrorupdate', 'onfilterchange', 'onfinish', 'onfocus', 'onfocusin', 'onfocusout', 'onhelp', 'onkeydown', 'onkeypress', 'onkeyup', 'onlayoutcomplete', 'onload', 'onlosecapture', 'onmousedown', 'onmouseenter', 'onmouseleave', 'onmousemove', 'onmouseout', 'onmouseover', 'onmouseup', 'onmousewheel', 'onmove', 'onmoveend', 'onmovestart', 'onpaste', 'onpropertychange', 'onreadystatechange', 'onreset', 'onresize', 'onresizeend', 'onresizestart', 'onrowenter', 'onrowexit', 'onrowsdelete', 'onrowsinserted', 'onscroll', 'onselect', 'onselectionchange', 'onselectstart', 'onstart', 'onstop', 'onsubmit', 'onunload');
+        $ra = array_merge($ra1, $ra2);
+        $found = true;
+        while ($found == true) {
+            $val_before = $val;
+            for ($i = 0; $i < sizeof($ra); $i++) {
+                $pattern = '/';
+                for ($j = 0; $j < strlen($ra[$i]); $j++) {
+                    if ($j > 0) {
+                        $pattern .= '(';
+                        $pattern .= '(&#[xX]0{0,8}([9ab]);)';
+                        $pattern .= '|';
+                        $pattern .= '|(�{0,8}([9|10|13]);)';
+                        $pattern .= ')*';
+                    }
+                    $pattern .= $ra[$i][$j];
+                }
+                $pattern .= '/i';
+                $replacement = substr($ra[$i], 0, 2).'<x>'.substr($ra[$i], 2);
+                $val = preg_replace($pattern, $replacement, $val);
+                if ($val_before == $val) {
+                    $found = false;
+                }
+            }
+        }
+        return $val;
+    }
+
+    /**
+     * SQl 防注入
+     * @param string $var 值
+     * @return array|string
+     */
+    public static function abacaAddslashes($var = '')
+    {
+        if (!get_magic_quotes_gpc()) {
+            if (is_array($var)) {
+                foreach ($var as $key => $val) {
+                    $var[$key] = self::abacaAddslashes($val);
+                }
+            } else {
+                $var = addslashes($var);
+            }
+        }
+        return $var;
     }
 }
