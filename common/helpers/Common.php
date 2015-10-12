@@ -336,12 +336,12 @@ class Common
     }
 
     /**
-     * 距离当前时间展示方法
+     * 距离当前时间展示方法 - 【权威的】
      * @param string $datetime 活跃时间
      * @param int    $nowtime  当前时间
      * @return bool|string
      */
-    public static function timeAgo($datetime='', $nowtime = 0)
+    public static function timeAgoBAK($datetime='', $nowtime = 0)
     {
         $datetime = strtotime($datetime);
         if (empty($nowtime)) {
@@ -374,5 +374,46 @@ class Common
         }
         // 往年
         return date('Y年m月d日', $datetime);
+    }
+
+    /**
+     * 距离当前时间展示方法 - 【产品非要这样的，沟通无果,所以...】
+     * @param string $datetime 活跃时间
+     * @param int    $nowtime  当前时间
+     * @return bool|string
+     */
+    public static function timeAgo($datetime='', $nowtime = 0)
+    {
+        $datetime = strtotime($datetime);
+        if (empty($nowtime)) {
+            $nowtime = time();
+        }
+        $timediff = $nowtime - $datetime;
+        $timediff = $timediff >= 0 ? $timediff : $datetime - $nowtime;
+        // 秒
+        if ($timediff < 60) {
+            return '今天';
+        }
+        // 分
+        if ($timediff < 3600 && $timediff >= 60) {
+            return '今天';
+        }
+        // 今天
+        $today = mktime(0, 0, 0, date('m'), date('d'), date('Y'));
+        if ($datetime >= $today) {
+            return '今天';
+        }
+        // 昨天
+        $yestoday = mktime(0, 0, 0, date('m'), date('d') - 1, date('Y'));
+        if ($datetime >= $yestoday) {
+            return '昨天';
+        }
+        // 今年月份
+        $this_year = mktime(0, 0, 0, 1, 1, date('Y'));
+        if ($datetime >= $this_year) {
+            return date('m月d日', $datetime);
+        }
+        // 往年
+        return date('m月d日Y年', $datetime);
     }
 }
