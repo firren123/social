@@ -98,7 +98,7 @@ class BaseRequestHelps
     {
         $filters    =   isset($filter) ? $filter : 'htmlspecialchars';
         $filters    =   !empty($filters) ? $filters : 'htmlspecialchars';
-        $filters    .= ',removeXSS,abacaAddslashes';
+        //$filters    .= ',removeXSS,abacaAddslashes';
         if ('' == $name) {
             $data       =   $input;
             if ($filters) {
