@@ -41,7 +41,7 @@ return [
     'defaultNickName'          => '小伙伴', //默认昵称
     'defaultAvatar'            => 'http://img.i500m.com/uploads/custom/20150924/tx.png',  //默认头像
 
-    'sign_debug'      => false,                        //false = 开启验证 true 关闭验证
+    'sign_debug'      => true,                        //false = 开启验证 true 关闭验证
 
     //恒信通相关
     'hxt_soap_url' => 'http://114.113.238.50:8765/Service.asmx?WSDL',//恒信通会员缴费业务接口
