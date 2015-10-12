@@ -15,6 +15,7 @@
 
 namespace common\helpers;
 
+
 /**
  * BaseRequest
  *
@@ -26,12 +27,13 @@ namespace common\helpers;
  */
 class BaseRequestHelps
 {
-
     /**
      * Get
-     * @param string $name    参数名
-     * @param string $default 默认值
-     * @param null   $filter  过滤方法
+     *
+     * @param string $name    name
+     * @param string $default default
+     * @param null   $filter  $filter
+     *
      * @return array|mixed|null|string
      */
     public static function get($name = '', $default = '', $filter = null)
@@ -41,9 +43,11 @@ class BaseRequestHelps
 
     /**
      * Post
-     * @param string $name    参数名
-     * @param string $default 默认值
-     * @param null   $filter  过滤方法
+     *
+     * @param string $name    name
+     * @param string $default default
+     * @param null   $filter  filter
+     *
      * @return array|mixed|null|string
      */
     public static function post($name = '', $default = '', $filter = null)
@@ -53,9 +57,11 @@ class BaseRequestHelps
 
     /**
      * Put
-     * @param string $name    参数名
-     * @param string $default 默认值
-     * @param null   $filter  过滤方法
+     *
+     * @param string $name    name
+     * @param string $default default
+     * @param null   $filter  filter
+     *
      * @return array|mixed|null|string
      */
     public static function put($name = '', $default = '', $filter = null)
@@ -68,12 +74,13 @@ class BaseRequestHelps
     }
 
     /**
-     * 获取方法
+     * GetMethod
+     *
      * @return string
      */
     public static function getMethod()
     {
-        switch($_SERVER['REQUEST_METHOD']) {
+        switch ($_SERVER['REQUEST_METHOD']) {
             case 'POST':
                 $input = 'POST';
                 break;
@@ -87,54 +94,71 @@ class BaseRequestHelps
     }
 
     /**
-     * 获取参数
-     * @param string $name    参数名称
-     * @param string $default 默认值
-     * @param null   $filter  过滤方法
-     * @param null   $input   Input
+     * GetParams
+     *
+     * @param string $name    name
+     * @param string $default default
+     * @param null   $filter  filter
+     * @param null   $input   input
+     *
      * @return array|mixed|null|string
      */
-    public static function getParams($name='', $default = '', $filter = null, $input = null)
+    public static function getParams($name, $default = '', $filter = null, $input = null)
     {
         $filters    =   isset($filter) ? $filter : 'htmlspecialchars';
         $filters    =   !empty($filters) ? $filters : 'htmlspecialchars';
-        $filters    .= ',removeXSS,abacaAddslashes';
         if ('' == $name) {
-            $data       =   $input;
+            $data = $input;
             if ($filters) {
                 if (is_string($filters)) {
-                    $filters    =   explode(',', $filters);
+                    $filters = explode(',', $filters);
                 }
                 foreach ($filters as $filter) {
-                    $data   =   self::array_map_recursive($filter, $data); // 参数过滤
+                    $data = self::array_map_recursive($filter, $data); // 参数过滤
                 }
             }
         } elseif (isset($input[$name])) { // 取值操作
-            $data       =   $input[$name];
+            $data = $input[$name];
             if ($filters) {
                 if (is_string($filters)) {
-                    $filters    =   explode(',', $filters);
+                    if (0 === strpos($filters, '/')) {
+                        if (1 !== preg_match($filters, (string)$data)) {
+                            // 支持正则验证
+                            return isset($default) ? $default : null;
+                        }
+                    } else {
+                        $filters = explode(',', $filters);
+                    }
+                } elseif (is_int($filters)) {
+                    $filters = array($filters);
                 }
+
                 if (is_array($filters)) {
                     foreach ($filters as $filter) {
                         if (function_exists($filter)) {
-                            $data = is_array($data) ? self::array_map_recursive($filter, $data) : $filter($data);
+                            $data = is_array($data) ? self::array_map_recursive($filter, $data) : $filter($data); // 参数过滤
                         } else {
-                            $data = is_array($data) ? self::array_map_recursive($filter, $data) : self::$filter($data);
+                            $data = filter_var($data, is_int($filter) ? $filter : filter_id($filter));
+                            if (false === $data) {
+                                return isset($default) ? $default : null;
+                            }
                         }
                     }
                 }
             }
+
         } else { // 变量默认值
-            $data = isset($default) ? $default : '';
+            $data = isset($default) ? $default : null;
         }
         return $data;
     }
 
     /**
-     * 递归
-     * @param null $filter 过滤方法
-     * @param null $data   数据
+     * Array_map_recursive
+     *
+     * @param string $filter filter
+     * @param array  $data   data
+     *
      * @return array
      */
     public static function array_map_recursive($filter, $data)
@@ -143,72 +167,8 @@ class BaseRequestHelps
         foreach ($data as $key => $val) {
             $result[$key] = is_array($val)
                 ? self::array_map_recursive($filter, $val)
-                : @call_user_func($filter, $val);
+                : call_user_func($filter, $val);
         }
         return $result;
-    }
-
-    /**
-     * 移除XSS
-     * @param string $val 值
-     * @return mixed
-     */
-    public static function removeXSS($val = '')
-    {
-        $val = preg_replace('/([\x00-\x08,\x0b-\x0c,\x0e-\x19])/', '', $val);
-        $search = 'abcdefghijklmnopqrstuvwxyz';
-        $search .= 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-        $search .= '1234567890!@#$%^&*()';
-        $search .= '~`";:?+/={}[]-_|\'\\';
-        for ($i = 0; $i < strlen($search); $i++) {
-            $val = preg_replace('/(&#[xX]0{0,8}'.dechex(ord($search[$i])).';?)/i', $search[$i], $val);
-            $val = preg_replace('/(�{0,8}'.ord($search[$i]).';?)/', $search[$i], $val);
-        }
-        $ra1 = array('javascript', 'vbscript', 'expression', 'applet', 'meta', 'xml', 'blink', 'link', 'style', 'script', 'embed', 'object', 'iframe', 'frame', 'frameset', 'ilayer', 'layer', 'bgsound', 'title', 'base');
-        $ra2 = array('onabort', 'onactivate', 'onafterprint', 'onafterupdate', 'onbeforeactivate', 'onbeforecopy', 'onbeforecut', 'onbeforedeactivate', 'onbeforeeditfocus', 'onbeforepaste', 'onbeforeprint', 'onbeforeunload', 'onbeforeupdate', 'onblur', 'onbounce', 'oncellchange', 'onchange', 'onclick', 'oncontextmenu', 'oncontrolselect', 'oncopy', 'oncut', 'ondataavailable', 'ondatasetchanged', 'ondatasetcomplete', 'ondblclick', 'ondeactivate', 'ondrag', 'ondragend', 'ondragenter', 'ondragleave', 'ondragover', 'ondragstart', 'ondrop', 'onerror', 'onerrorupdate', 'onfilterchange', 'onfinish', 'onfocus', 'onfocusin', 'onfocusout', 'onhelp', 'onkeydown', 'onkeypress', 'onkeyup', 'onlayoutcomplete', 'onload', 'onlosecapture', 'onmousedown', 'onmouseenter', 'onmouseleave', 'onmousemove', 'onmouseout', 'onmouseover', 'onmouseup', 'onmousewheel', 'onmove', 'onmoveend', 'onmovestart', 'onpaste', 'onpropertychange', 'onreadystatechange', 'onreset', 'onresize', 'onresizeend', 'onresizestart', 'onrowenter', 'onrowexit', 'onrowsdelete', 'onrowsinserted', 'onscroll', 'onselect', 'onselectionchange', 'onselectstart', 'onstart', 'onstop', 'onsubmit', 'onunload');
-        $ra = array_merge($ra1, $ra2);
-        $found = true;
-        while ($found == true) {
-            $val_before = $val;
-            for ($i = 0; $i < sizeof($ra); $i++) {
-                $pattern = '/';
-                for ($j = 0; $j < strlen($ra[$i]); $j++) {
-                    if ($j > 0) {
-                        $pattern .= '(';
-                        $pattern .= '(&#[xX]0{0,8}([9ab]);)';
-                        $pattern .= '|';
-                        $pattern .= '|(�{0,8}([9|10|13]);)';
-                        $pattern .= ')*';
-                    }
-                    $pattern .= $ra[$i][$j];
-                }
-                $pattern .= '/i';
-                $replacement = substr($ra[$i], 0, 2).'<x>'.substr($ra[$i], 2);
-                $val = preg_replace($pattern, $replacement, $val);
-                if ($val_before == $val) {
-                    $found = false;
-                }
-            }
-        }
-        return $val;
-    }
-
-    /**
-     * SQl 防注入
-     * @param string $var 值
-     * @return array|string
-     */
-    public static function abacaAddslashes($var = '')
-    {
-        if (!get_magic_quotes_gpc()) {
-            if (is_array($var)) {
-                foreach ($var as $key => $val) {
-                    $var[$key] = self::abacaAddslashes($val);
-                }
-            } else {
-                $var = addslashes($var);
-            }
-        }
-        return $var;
     }
 }
