@@ -93,11 +93,12 @@ class ServiceorderController extends BaseController
         }
         /**获取服务信息**/
         $service_model = new Service();
-        $service_where['id']               = $data['service_id'];
-        $service_where['audit_status']     = '2';
-        $service_where['status']           = '1';
-        $service_where['user_auth_status'] = '1';
-        $service_where['is_deleted']       = '2';
+        $service_where['id']                   = $data['service_id'];
+        $service_where['audit_status']         = '2';
+        $service_where['status']               = '1';
+        $service_where['user_auth_status']     = '1';
+        $service_where['servicer_info_status'] = '1';
+        $service_where['is_deleted']           = '2';
         $service_fields = 'uid,mobile,image,title,price,unit,service_way,description';
         $service_info = $service_model->getInfo($service_where, true, $service_fields);
         if (empty($service_info)) {
