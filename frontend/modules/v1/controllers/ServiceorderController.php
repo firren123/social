@@ -137,8 +137,9 @@ class ServiceorderController extends BaseController
         if (!empty($day) && !empty($hour)) {
             $time_status = $service_time_model->updateTimeStatus($service_info['uid'], $day, $hour);
         }
+        $rs_info['order_sn'] = $data['order_sn'];
         //@todo 应该用事务 判断这两个逻辑。
-        $this->returnJsonMsg('200', [], Common::C('code', '200'));
+        $this->returnJsonMsg('200', $rs_info, Common::C('code', '200'));
     }
 
     /**
