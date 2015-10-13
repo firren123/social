@@ -218,6 +218,7 @@ class BaseController extends Controller
             if ($rs['code']=='200') {
                 return true;
             }
+            $this->returnJsonMsg('401', [], Common::C('code', '401'));
             return false;
         } else {
             return true;
