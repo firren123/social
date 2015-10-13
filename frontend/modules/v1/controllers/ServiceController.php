@@ -771,7 +771,6 @@ class ServiceController extends BaseController
             $update_data['mobile'] = $where['mobile'];
             $rs = $service_setting_model->insertInfo($update_data);
         } else {
-            $update_data['status']      = '2'; //可用  编辑后信息默认可用
             $update_data['update_time'] = date('Y-m-d H:i:s', time());
             /**执行更新**/
             $rs = $service_setting_model->updateInfo($update_data, $where);

@@ -110,6 +110,9 @@ class ServiceorderController extends BaseController
         $order_model = new Order();
         //@todo 确定创建订单号为什么用省份？35=全国
         $data['order_sn']                 = $order_model->createSn('35', $data['mobile']);
+        if (empty($data['order_sn'])) {
+            $this->returnJsonMsg('1053', [], Common::C('code', '1053'));
+        }
         $data['service_uid']              = $service_info['uid'];
         $data['service_mobile']           = $service_info['mobile'];
         $data['service_way']              = $service_info['service_way'];
