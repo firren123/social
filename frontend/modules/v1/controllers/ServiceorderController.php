@@ -239,7 +239,7 @@ class ServiceorderController extends BaseController
             $rs_info[$k]['hour']               = date('H', strtotime($v['appointment_service_time']));
             $rs_info[$k]['title']              = $v['service_info_title'];
             $rs_info[$k]['mobile']             = $v['mobile'];
-            $rs_info[$k]['name']               = $this->_getUserInfo($v['mobile']);
+            $rs_info[$k]['name']               = $this->_getUserInfo($v['mobile'], 'nickname');
             $rs_info[$k]['address']            = $v['appointment_service_address'];
             $rs_info[$k]['status']             = $v['status'];
             $rs_info[$k]['pay_status']         = $v['pay_status'];
@@ -305,11 +305,11 @@ class ServiceorderController extends BaseController
             $info['service_info_image'] = Common::C('imgHost').$info['service_info_image'];
         }
         if ($type == '1') {
-            $info['contact'] = $this->_getSettingInfo($info['service_mobile'], 'user_name', 1);
+            $info['contact'] = $this->_getUserInfo($info['service_mobile'], 'nickname');
             $info['contact_mobile'] = $info['service_mobile'];
             unset($info['service_mobile']);
         } else {
-            $info['contact'] = $this->_getSettingInfo($info['mobile'], 'user_name', 1);
+            $info['contact'] = $this->_getUserInfo($info['mobile'], 'nickname');
             $info['contact_mobile'] = $info['mobile'];
             unset($info['mobile']);
         }
@@ -580,16 +580,17 @@ class ServiceorderController extends BaseController
     /**
      * 获取用户信息
      * @param string $mobile 电话
+     * @param string $param  参数
      * @return array
      */
-    private function _getUserInfo($mobile = '')
+    private function _getUserInfo($mobile = '',$param = '')
     {
         $user_base_info_model = new UserBasicInfo();
         $user_base_info_where['mobile'] = $mobile;
-        $user_base_info_fields = 'nickname';
-        $rs['nickname'] = '';
+        $user_base_info_fields = $param;
+        $rs[$param] = '';
         $rs = $user_base_info_model->getInfo($user_base_info_where, true, $user_base_info_fields);
-        return $rs['nickname'];
+        return $rs[$param];
     }
 
     /**
