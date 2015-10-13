@@ -305,11 +305,11 @@ class ServiceorderController extends BaseController
             $info['service_info_image'] = Common::C('imgHost').$info['service_info_image'];
         }
         if ($type == '1') {
-            $info['contact'] = $this->_getUserInfo($info['service_mobile'], 'nickname');
+            $info['contact'] = $this->_getUserInfo($info['service_mobile'], 'realname');
             $info['contact_mobile'] = $info['service_mobile'];
             unset($info['service_mobile']);
         } else {
-            $info['contact'] = $this->_getUserInfo($info['mobile'], 'nickname');
+            $info['contact'] = $this->_getUserInfo($info['mobile'], 'realname');
             $info['contact_mobile'] = $info['mobile'];
             unset($info['mobile']);
         }
