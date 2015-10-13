@@ -198,7 +198,8 @@ class BaseController extends Controller
         );
         $this->saveLog(Common::C('paramsLogFile'), var_export($arr, true));
         $ret = json_encode($arr);
-        $ret_str = str_replace('null', '""', $ret);
+        $ret_str = str_replace('(null)', '', $ret);
+        $ret_str = str_replace('null', '', $ret_str);
         die($ret_str);
     }
 
