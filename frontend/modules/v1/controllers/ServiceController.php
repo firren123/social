@@ -59,7 +59,6 @@ class ServiceController extends BaseController
         }
         /**获取服务设置信息**/
         $service_setting_where['uid']          = $uuid;
-        $service_setting_where['audit_status'] = '2';
         $service_setting_where['status']       = '2';
         $service_setting_where['is_deleted']   = '2';
         $service_setting_fields = 'mobile,name,search_address';
@@ -121,7 +120,6 @@ class ServiceController extends BaseController
         if ($type != '1') {
             /**获取服务设置信息**/
             $service_setting_where['uid']          = $uuid;
-            $service_setting_where['audit_status'] = '2';
             $service_setting_where['status']       = '2';
             $service_setting_where['is_deleted']   = '2';
             $service_setting_fields = 'mobile,name';
@@ -184,14 +182,19 @@ class ServiceController extends BaseController
             $this->returnJsonMsg('605', [], Common::C('code', '605'));
         }
         $service_setting_model = new ServiceSetting();
-        $info = $service_setting_model->getInfo($where, true, 'user_name,audit_status,status');
-        if (empty($info) || $info['audit_status'] != '2') {
-            $this->returnJsonMsg('1038', [], Common::C('code', '1038'));
+        $info = $service_setting_model->getInfo($where, true, 'status');
+        if (empty($info)) {
+            $this->returnJsonMsg('1015', [], Common::C('code', '1015'));
         }
         if ($info['status'] != '2') {
             $this->returnJsonMsg('1044', [], Common::C('code', '1044'));
         }
-        $rs_info['user_name'] = $info['user_name'];
+        $user_info = $this->_getUserInfo($where['mobile']);
+        if ($user_info['card_audit_status'] != '2') {
+            //!=2 表示审核不成功
+            $this->returnJsonMsg('1052', [], Common::C('code', '1052'));
+        }
+        $rs_info['user_name'] = $user_info['realname'];
         $this->returnJsonMsg('200', $rs_info, Common::C('code', '200'));
     }
     /**
@@ -251,29 +254,22 @@ class ServiceController extends BaseController
         if (empty($data['community_city_id'])) {
             $this->returnJsonMsg('645', [], Common::C('code', '645'));
         }
-        /**查看该用户是否已经认证**/
-        $service_setting_info = $this->_getSettingInfo($data['mobile'], 'audit_status,status', 2);
-        $audit_status = $service_setting_info['audit_status'];
-        $status       = $service_setting_info['status'];
-        if ($audit_status == "") {
-            $this->returnJsonMsg('1019', [], Common::C('code', '1019'));
-        }
+        $status = $this->_getSettingInfo($data['mobile'], 'status', 1);
         if ($status == '2') {
             /**servicer_info_status=1表示服务人(店铺)信息审核成功**/
             $data['servicer_info_status'] = '1';
         } else {
-            //@todo 未审核成功 抛出提示
             $this->returnJsonMsg('1044', [], Common::C('code', '1044'));
-            /**servicer_info_status=2表示服务人(店铺)信息审核成功**/
+            /**servicer_info_status=2表示服务人(店铺)信息不审核成功**/
             $data['servicer_info_status'] = '2';
         }
-        if ($audit_status == '2') {
-            /**user_auth_status=1表示认证成功**/
+        $user_info = $this->_getUserInfo($data['mobile']);
+        if ($user_info['card_audit_status'] == '2') {
+            /**user_auth_status=1用户认证状态成功**/
             $data['user_auth_status'] = '1';
         } else {
-            //@todo 未认证成功 抛出提示
-            $this->returnJsonMsg('1038', [], Common::C('code', '1038'));
-            /**user_auth_status=2表示认证失败**/
+            $this->returnJsonMsg('1052', [], Common::C('code', '1052'));
+            /**user_auth_status=2用户认证状态失败**/
             $data['user_auth_status'] = '2';
         }
         $service_model = new Service();
@@ -352,27 +348,22 @@ class ServiceController extends BaseController
             $this->returnJsonMsg('1020', [], Common::C('code', '1020'));
         }
         $data['audit_status'] = '0';
-        /**查看该用户是否已经认证**/
-        $service_setting_info = $this->_getSettingInfo($data['mobile'], 'audit_status,status', 2);
-        $audit_status = $service_setting_info['audit_status'];
-        $status       = $service_setting_info['status'];
-        if ($audit_status == "") {
-            $this->returnJsonMsg('1019', [], Common::C('code', '1019'));
-        }
+        $status = $this->_getSettingInfo($data['mobile'], 'status', 1);
         if ($status == '2') {
             /**servicer_info_status=1表示服务人(店铺)信息审核成功**/
             $data['servicer_info_status'] = '1';
         } else {
-            //@todo 未审核成功 抛出提示
             $this->returnJsonMsg('1044', [], Common::C('code', '1044'));
             /**servicer_info_status=2表示服务人(店铺)信息审核成功**/
             $data['servicer_info_status'] = '2';
         }
-        if ($audit_status == '2') {
-            /**user_auth_status=1表示认证成功**/
+        $user_info = $this->_getUserInfo($data['mobile']);
+        if ($user_info['card_audit_status'] == '2') {
+            /**user_auth_status=1用户认证状态成功**/
             $data['user_auth_status'] = '1';
         } else {
-            /**user_auth_status=2表示认证失败**/
+            $this->returnJsonMsg('1052', [], Common::C('code', '1052'));
+            /**user_auth_status=2用户认证状态失败**/
             $data['user_auth_status'] = '2';
         }
         $rs = $service_model->updateInfo($data, $where);
@@ -444,7 +435,6 @@ class ServiceController extends BaseController
         if ($type == '1') {
             /**获取服务设置信息**/
             $service_setting_where['uid']          = $info['uid'];
-            $service_setting_where['audit_status'] = '2';
             $service_setting_where['status']       = '2';
             $service_setting_where['is_deleted']   = '2';
             $service_setting_fields = 'uid,mobile,name,search_address';
@@ -715,7 +705,7 @@ class ServiceController extends BaseController
         if (!Common::validateMobile($where['mobile'])) {
             $this->returnJsonMsg('605', [], Common::C('code', '605'));
         }
-        $fields = 'name,description,province_id,search_address,details_address,lng,lat,user_name,user_card,user_description,audit_status';
+        $fields = 'name,description,province_id,search_address,details_address,lng,lat,status';
         $service_setting_model = new ServiceSetting();
         $info = $service_setting_model->getInfo($where, true, $fields);
         if (empty($info)) {
@@ -773,47 +763,18 @@ class ServiceController extends BaseController
         if (!empty($lat)) {
             $update_data['lat'] = $lat;
         }
-        $user_name = RequestHelper::post('user_name', '', '');
-        if (!empty($user_name)) {
-            $update_data['user_name'] = $user_name;
-        }
-        $user_card = RequestHelper::post('user_card', '', '');
-        if (!empty($user_card)) {
-            $update_data['user_card'] = $user_card;
-            //验证身份证
-            //@todo 通过身份证号未能获取到地址所在地
-            if (strlen($update_data['user_card']) != '18') {
-                $this->returnJsonMsg('1017', [], Common::C('code', '1017'));
-            }
-            if (!Common::isIdCard($update_data['user_card'])) {
-                $this->returnJsonMsg('1018', [], Common::C('code', '1018'));
-            }
-            $update_data['user_age'] = Common::getAgeByCard($update_data['user_card']);
-            $update_data['user_sex'] = Common::getSexByCard($update_data['user_card']);
-        }
-        $user_description = RequestHelper::post('user_description', '', '');
-        if (!empty($user_description)) {
-            $update_data['user_description'] = $user_description;
-        }
         if (empty($update_data)) {
             $this->returnJsonMsg('1016', [], Common::C('code', '1016'));
         }
         $service_setting_model = new ServiceSetting();
-        $info = $service_setting_model->getInfo($where, true, 'id,audit_status');
+        $info = $service_setting_model->getInfo($where, true, 'id');
         if (empty($info)) {
             /**执行添加**/
             $update_data['uid']    = $where['uid'];
             $update_data['mobile'] = $where['mobile'];
             $rs = $service_setting_model->insertInfo($update_data);
         } else {
-            if (!empty($user_name) || !empty($user_card) || !empty($user_description)) {
-                //审核状态 0=未审核1=审核中2=审核成功3=审核失败
-                if ($info['audit_status'] != '3') {
-                    $this->returnJsonMsg('1021', [], Common::C('code', '1021'));
-                }
-                $update_data['audit_status'] = '0';
-            }
-            $update_data['status']      = '1'; //禁用  编辑后信息需要审核
+            $update_data['status']      = '2'; //可用  编辑后信息默认可用
             $update_data['update_time'] = date('Y-m-d H:i:s', time());
             /**执行更新**/
             $rs = $service_setting_model->updateInfo($update_data, $where);
@@ -1000,6 +961,7 @@ class ServiceController extends BaseController
      */
     private function _getUserInfo($mobile = '')
     {
+        $rs['realname'] = '';
         $rs['avatar']   = '';
         $rs['nickname'] = '';
         $rs['sex']      = '0';
@@ -1012,7 +974,7 @@ class ServiceController extends BaseController
         } else {
             $user_base_info_model = new UserBasicInfo();
             $user_base_info_where['mobile'] = $mobile;
-            $user_base_info_fields = 'avatar,nickname,sex,card_audit_status';
+            $user_base_info_fields = 'realname,avatar,nickname,sex,card_audit_status';
             $rs = $user_base_info_model->getInfo($user_base_info_where, true, $user_base_info_fields);
         }
         if (!empty($rs)) {
