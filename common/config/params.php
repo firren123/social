@@ -42,6 +42,7 @@ return [
     'defaultAvatar'            => 'http://img.i500m.com/uploads/custom/20150924/tx.png',  //默认头像
 
     'sign_debug'      => false,                        //false = 开启验证 true 关闭验证
+    'error_control'   => true,                        //true = 开启错误监控 false = 关闭错误监控
 
     //恒信通相关
     'hxt_soap_url' => 'http://114.113.238.50:8765/Service.asmx?WSDL',//恒信通会员缴费业务接口
