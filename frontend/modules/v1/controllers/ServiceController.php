@@ -72,7 +72,7 @@ class ServiceController extends BaseController
             $service_setting_info['user_avatar'] = $user_info['avatar'];
         }
         $service_setting_info['star']     = '5';
-        //@todo 距离需求请求仪能的接口
+        //@todo 距离需求请求仪能的接口[当前方法弃用]
         $service_setting_info['distance'] = '1.0公里';
         $rs['service_setting'] = $service_setting_info;
         $rs['service_list']    = [];
@@ -391,6 +391,14 @@ class ServiceController extends BaseController
         if (empty($where['community_city_id'])) {
             $this->returnJsonMsg('645', [], Common::C('code', '645'));
         }
+        $lat = RequestHelper::get('lat', '0', 'intval');
+        if (empty($lat)) {
+            $this->returnJsonMsg('1057', [], Common::C('code', '1057'));
+        }
+        $lng = RequestHelper::get('lng', '0', 'intval');
+        if (empty($lng)) {
+            $this->returnJsonMsg('1056', [], Common::C('code', '1056'));
+        }
         $type = RequestHelper::get('type', '0', 'intval');
         if (empty($type)) {
             $this->returnJsonMsg('1008', [], Common::C('code', '1008'));
@@ -437,7 +445,7 @@ class ServiceController extends BaseController
             $service_setting_where['uid']          = $info['uid'];
             $service_setting_where['status']       = '2';
             $service_setting_where['is_deleted']   = '2';
-            $service_setting_fields = 'uid,mobile,name,search_address';
+            $service_setting_fields = 'uid,mobile,name,search_address,lat,lng';
             $service_setting_model = new ServiceSetting();
             $service_setting_info = $service_setting_model->getInfo($service_setting_where, true, $service_setting_fields);
             if (empty($service_setting_info)) {
@@ -448,10 +456,12 @@ class ServiceController extends BaseController
                 $service_setting_info['user_avatar'] = $user_info['avatar'];
             }
             $service_setting_info['star']     = '5';
-            //@todo 距离需求请求仪能的接口
-            $service_setting_info['distance'] = '1.0公里';
+            //计算距离
+            $service_setting_info['distance'] = Common::getDistance($lat, $lng, $service_setting_info['lat'], $service_setting_info['lng']);
             $info['service_setting'] = $service_setting_info;
             unset($info['uid']);
+            unset($info['service_setting']['lat']);
+            unset($info['service_setting']['lng']);
         }
         $this->returnJsonMsg('200', $info, Common::C('code', '200'));
     }
@@ -542,6 +552,14 @@ class ServiceController extends BaseController
         if (empty($community_city_id)) {
             $this->returnJsonMsg('645', [], Common::C('code', '645'));
         }
+        $lat = RequestHelper::get('lat', '0', 'intval');
+        if (empty($lat)) {
+            $this->returnJsonMsg('1057', [], Common::C('code', '1057'));
+        }
+        $lng = RequestHelper::get('lng', '0', 'intval');
+        if (empty($lng)) {
+            $this->returnJsonMsg('1056', [], Common::C('code', '1056'));
+        }
         $page      = RequestHelper::get('page', '1', 'intval');
         $page_size = RequestHelper::get('page_size', '6', 'intval');
         if ($page_size > Common::C('maxPageSize')) {
@@ -567,9 +585,10 @@ class ServiceController extends BaseController
             if (!empty($v['mobile'])) {
                 $user_info = $this->_getUserInfo($v['mobile']);
                 $list[$k]['user_avatar']    = $user_info['avatar'];
-                $list[$k]['search_address'] = $this->_getSettingInfo($v['mobile'], 'search_address', 1);
-                //@todo 距离需求请求仪能的接口
-                $list[$k]['distance']       = '1.5公里';
+                $service_setting_info = $this->_getSettingInfo($v['mobile'], 'search_address,lng,lat', 2);
+                $list[$k]['search_address'] = $service_setting_info['search_address'];
+                //判断距离
+                $list[$k]['distance']       = Common::getDistance($lat, $lng, $service_setting_info['lat'], $service_setting_info['lng']);
             }
             $list[$k]['price'] = $v['price'].$this->_getServiceUnit($v['unit']);
             unset($list[$k]['mobile']);
@@ -609,6 +628,14 @@ class ServiceController extends BaseController
             if (empty($community_city_id)) {
                 $this->returnJsonMsg('645', [], Common::C('code', '645'));
             }
+            $lat = RequestHelper::get('lat', '0', 'intval');
+            if (empty($lat)) {
+                $this->returnJsonMsg('1057', [], Common::C('code', '1057'));
+            }
+            $lng = RequestHelper::get('lng', '0', 'intval');
+            if (empty($lng)) {
+                $this->returnJsonMsg('1056', [], Common::C('code', '1056'));
+            }
             $page      = RequestHelper::get('page', '1', 'intval');
             $page_size = RequestHelper::get('page_size', '6', 'intval');
             if ($page_size > Common::C('maxPageSize')) {
@@ -634,9 +661,10 @@ class ServiceController extends BaseController
                 if (!empty($v['mobile'])) {
                     $user_info = $this->_getUserInfo($v['mobile']);
                     $list[$k]['user_avatar']    = $user_info['avatar'];
-                    $list[$k]['search_address'] = $this->_getSettingInfo($v['mobile'], 'search_address', 1);
-                    //@todo 距离需求请求仪能的接口
-                    $list[$k]['distance']       = '1.5公里';
+                    $service_setting_info = $this->_getSettingInfo($v['mobile'], 'search_address,lng,lat', 2);
+                    $list[$k]['search_address'] = $service_setting_info['search_address'];
+                    //判断距离
+                    $list[$k]['distance']       = Common::getDistance($lat, $lng, $service_setting_info['lat'], $service_setting_info['lng']);
                 }
                 $list[$k]['price'] = $v['price'].$this->_getServiceUnit($v['unit']);
                 unset($list[$k]['mobile']);

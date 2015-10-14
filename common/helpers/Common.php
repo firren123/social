@@ -416,4 +416,32 @@ class Common
         // 往年
         return date('m月d日Y年', $datetime);
     }
+
+    /**
+     * 根据经纬度获取两个两点之间的距离
+     * @param int $lat1 纬度
+     * @param int $lng1 经度
+     * @param int $lat2 纬度
+     * @param int $lng2 经度
+     * @return float
+     */
+    public static function getDistance($lat1 = 0,$lng1 = 0,$lat2 = 0,$lng2 = 0)
+    {
+        //地球半径
+        $R = 6378137;
+
+        //将角度转为弧度
+        $radLat1 = deg2rad($lat1);
+        $radLat2 = deg2rad($lat2);
+        $radLng1 = deg2rad($lng1);
+        $radLng2 = deg2rad($lng2);
+
+        //结果
+        $s = acos(cos($radLat1)*cos($radLat2)*cos($radLng1-$radLng2)+sin($radLat1)*sin($radLat2))*$R;
+
+        //精度
+        $s = round($s* 10000)/10000;
+
+        return  round($s).'m';
+    }
 }
