@@ -131,7 +131,6 @@ class AddressController extends BaseController
         $data['tag'] = RequestHelper::post('tag', '0', '');
         $data['lng'] = RequestHelper::post('lng', '0', '');
         $data['lat'] = RequestHelper::post('lat', '0', '');
-        //@todo 最多只能添加10个
         $where['is_deleted'] = '2';
         $where['mobile']     = $data['mobile'];
         $user_address_model = new UserAddress();
@@ -143,6 +142,7 @@ class AddressController extends BaseController
         } else {
             $count = $user_address_model->getCount($where);
         }
+        //最多只能添加10个
         if ($count >= 10) {
             $this->returnJsonMsg('646', [], Common::C('code', '646'));
         }
