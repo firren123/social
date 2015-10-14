@@ -227,7 +227,7 @@ class WalletController extends BaseController
         if (!empty($mobile)) {
             $user_base_info_model = new UserBasicInfo();
             $user_base_info_where['mobile'] = $mobile;
-            $user_base_info_fields = 'real_name';
+            $user_base_info_fields = 'realname';
             $info = $user_base_info_model->getInfo($user_base_info_where, true, $user_base_info_fields);
             if (!empty($info)) {
                 $real_name = $info['realname'];
