@@ -391,20 +391,20 @@ class ServiceController extends BaseController
         if (empty($where['community_city_id'])) {
             $this->returnJsonMsg('645', [], Common::C('code', '645'));
         }
-        $lat = RequestHelper::get('lat', '0', 'intval');
-        if (empty($lat)) {
-            $this->returnJsonMsg('1057', [], Common::C('code', '1057'));
-        }
-        $lng = RequestHelper::get('lng', '0', 'intval');
-        if (empty($lng)) {
-            $this->returnJsonMsg('1056', [], Common::C('code', '1056'));
-        }
         $type = RequestHelper::get('type', '0', 'intval');
         if (empty($type)) {
             $this->returnJsonMsg('1008', [], Common::C('code', '1008'));
         }
         $fields = '*';
         if ($type == '1') {
+            $lat = RequestHelper::get('lat', '0', 'intval');
+            if (empty($lat)) {
+                $this->returnJsonMsg('1057', [], Common::C('code', '1057'));
+            }
+            $lng = RequestHelper::get('lng', '0', 'intval');
+            if (empty($lng)) {
+                $this->returnJsonMsg('1056', [], Common::C('code', '1056'));
+            }
             /**在首页或服务广场页查看服务详情**/
             $where['status']               = '1';
             $where['user_auth_status']     = '1';
