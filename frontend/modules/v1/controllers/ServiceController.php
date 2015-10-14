@@ -397,11 +397,11 @@ class ServiceController extends BaseController
         }
         $fields = '*';
         if ($type == '1') {
-            $lat = RequestHelper::get('lat', '0', 'intval');
+            $lat = RequestHelper::get('lat', '0', '');
             if (empty($lat)) {
                 $this->returnJsonMsg('1057', [], Common::C('code', '1057'));
             }
-            $lng = RequestHelper::get('lng', '0', 'intval');
+            $lng = RequestHelper::get('lng', '0', '');
             if (empty($lng)) {
                 $this->returnJsonMsg('1056', [], Common::C('code', '1056'));
             }
@@ -552,11 +552,11 @@ class ServiceController extends BaseController
         if (empty($community_city_id)) {
             $this->returnJsonMsg('645', [], Common::C('code', '645'));
         }
-        $lat = RequestHelper::get('lat', '0', 'intval');
+        $lat = RequestHelper::get('lat', '0', '');
         if (empty($lat)) {
             $this->returnJsonMsg('1057', [], Common::C('code', '1057'));
         }
-        $lng = RequestHelper::get('lng', '0', 'intval');
+        $lng = RequestHelper::get('lng', '0', '');
         if (empty($lng)) {
             $this->returnJsonMsg('1056', [], Common::C('code', '1056'));
         }
@@ -628,11 +628,11 @@ class ServiceController extends BaseController
             if (empty($community_city_id)) {
                 $this->returnJsonMsg('645', [], Common::C('code', '645'));
             }
-            $lat = RequestHelper::get('lat', '0', 'intval');
+            $lat = RequestHelper::get('lat', '0', '');
             if (empty($lat)) {
                 $this->returnJsonMsg('1057', [], Common::C('code', '1057'));
             }
-            $lng = RequestHelper::get('lng', '0', 'intval');
+            $lng = RequestHelper::get('lng', '0', '');
             if (empty($lng)) {
                 $this->returnJsonMsg('1056', [], Common::C('code', '1056'));
             }
@@ -780,11 +780,11 @@ class ServiceController extends BaseController
         if (!empty($details_address)) {
             $update_data['details_address'] = $details_address;
         }
-        $lng = RequestHelper::post('lng', '', '');
+        $lng = RequestHelper::post('lng', '0', '');
         if (!empty($lng)) {
             $update_data['lng'] = $lng;
         }
-        $lat = RequestHelper::post('lat', '', '');
+        $lat = RequestHelper::post('lat', '0', '');
         if (!empty($lat)) {
             $update_data['lat'] = $lat;
         }
