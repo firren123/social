@@ -18,7 +18,7 @@ use Yii;
 use common\helpers\Common;
 use common\helpers\RequestHelper;
 use frontend\models\i500_social\UserWallet;
-use frontend\models\i500_social\ServiceSetting;
+use frontend\models\i500_social\UserBasicInfo;
 use frontend\models\i500_social\UserCoupons;
 use frontend\models\i500_social\UserWithdrawal;
 use frontend\models\i500_social\UserBankCard;
@@ -225,12 +225,12 @@ class WalletController extends BaseController
     {
         $real_name = '';
         if (!empty($mobile)) {
-            $service_setting_model = new ServiceSetting();
-            $service_setting_where['mobile'] = $mobile;
-            $service_setting_fields = 'user_name';
-            $info = $service_setting_model->getInfo($service_setting_where, true, $service_setting_fields);
+            $user_base_info_model = new UserBasicInfo();
+            $user_base_info_where['mobile'] = $mobile;
+            $user_base_info_fields = 'real_name';
+            $info = $user_base_info_model->getInfo($user_base_info_where, true, $user_base_info_fields);
             if (!empty($info)) {
-                $real_name = $info['user_name'];
+                $real_name = $info['realname'];
             }
         }
         return $real_name;
