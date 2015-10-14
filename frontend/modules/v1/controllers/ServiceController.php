@@ -769,6 +769,24 @@ class ServiceController extends BaseController
             /**执行添加**/
             $update_data['uid']    = $where['uid'];
             $update_data['mobile'] = $where['mobile'];
+            if (empty($update_data['name'])) {
+                $this->returnJsonMsg('1058', [], Common::C('code', '1058'));
+            }
+            if (empty($update_data['province_id'])) {
+                $this->returnJsonMsg('638', [], Common::C('code', '638'));
+            }
+            if (empty($update_data['search_address'])) {
+                $this->returnJsonMsg('1054', [], Common::C('code', '1054'));
+            }
+            if (empty($update_data['details_address'])) {
+                $this->returnJsonMsg('1055', [], Common::C('code', '1055'));
+            }
+            if (empty($update_data['lng'])) {
+                $this->returnJsonMsg('1056', [], Common::C('code', '1056'));
+            }
+            if (empty($update_data['lat'])) {
+                $this->returnJsonMsg('1057', [], Common::C('code', '1057'));
+            }
             $rs = $service_setting_model->insertInfo($update_data);
         } else {
             $update_data['update_time'] = date('Y-m-d H:i:s', time());
