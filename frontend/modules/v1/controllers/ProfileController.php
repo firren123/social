@@ -226,6 +226,19 @@ class ProfileController extends BaseController
                     $this->returnJsonMsg('648', [], Common::C('code', '648'));
                 }
             }
+            if (!empty($user_base_update_data['realname'])) {
+                if (empty($user_base_update_data['user_card'])) {
+                    $this->returnJsonMsg('649', [], Common::C('code', '649'));
+                }
+            }
+            if (!empty($user_base_update_data['user_card'])) {
+                if (empty($user_base_update_data['realname'])) {
+                    $this->returnJsonMsg('650', [], Common::C('code', '650'));
+                }
+            }
+            if (!empty($user_base_update_data['realname']) && !empty($user_base_update_data['user_card'])) {
+                $user_base_update_data['card_audit_status'] = '1';
+            }
             $rs = $user_base_model->updateInfo($user_base_update_data, $user_base_where);
             if (!$rs) {
                 $this->returnJsonMsg('623', [], Common::C('code', '623'));
