@@ -92,7 +92,7 @@ class ServicetimeController extends BaseController
         $service_time_fields = 'hours';
         $info = $service_time_model->getInfo($where, true, $service_time_fields);
         if (empty($info)) {
-            $this->returnJsonMsg('1024', $info, Common::C('code', '1024'));
+            $this->returnJsonMsg('1024', [], Common::C('code', '1024'));
         }
         $rs_info = json_decode(htmlspecialchars_decode($info['hours']), true);
         $this->returnJsonMsg('200', $rs_info, Common::C('code', '200'));
