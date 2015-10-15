@@ -198,8 +198,8 @@ class BaseController extends Controller
         );
         $this->saveLog(Common::C('paramsLogFile'), var_export($arr, true));
         $ret = json_encode($arr);
-        $ret_str = str_replace('(null)', '', $ret);
-        $ret_str = str_replace('null', '', $ret_str);
+        $ret_str = str_replace('(null)', '', $ret);      //出现在数据库中
+        $ret_str = str_replace('null', '""', $ret_str);  //出现在返回值中
         die($ret_str);
     }
 
