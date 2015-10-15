@@ -213,6 +213,19 @@ class ProfileController extends BaseController
         if (!empty($user_base_update_data)) {
             $user_base_model = new UserBasicInfo();
             $user_base_where['mobile'] = $mobile;
+            if (!empty($user_base_update_data['realname']) || !empty($user_base_update_data['user_card'])) {
+                //判断认证状态
+                $user_basic_info_where['mobile'] = $mobile;
+                $user_basic_info = $user_base_model->getInfo($user_basic_info_where, true, 'card_audit_status');
+                if ($user_basic_info['card_audit_status'] == '1') {
+                    //认证中
+                    $this->returnJsonMsg('647', [], Common::C('code', '647'));
+                }
+                if ($user_basic_info['card_audit_status'] == '2') {
+                    //认证成功
+                    $this->returnJsonMsg('648', [], Common::C('code', '648'));
+                }
+            }
             $rs = $user_base_model->updateInfo($user_base_update_data, $user_base_where);
             if (!$rs) {
                 $this->returnJsonMsg('623', [], Common::C('code', '623'));

@@ -82,7 +82,7 @@ class ErrorController extends Controller
             $route_arr = explode('/', $route);
             $data['module']     = isset($route_arr[0]) ? $route_arr[0] : '';
             $data['controller'] = isset($route_arr[1]) ? $route_arr[1] : '';
-            $data['action']     = isset($route_arr[2]) ? $route_arr[2] : '';
+            $data['action']     = isset($route_arr[2]) ? $route_arr[2] : 'index';
             $data['ip'] = Common::getIp();
             $model = new ApiErrorLog();
             return $model->insertInfo($data);
