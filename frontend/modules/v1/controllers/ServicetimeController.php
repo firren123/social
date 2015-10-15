@@ -121,7 +121,9 @@ class ServicetimeController extends BaseController
             $list[$i]['week']     = Common::getWeek($list[$i]['day']);
             $list[$i]['show_day'] = date('m.d', strtotime($list[$i]['day']));
         }
-        $this->returnJsonMsg('200', $list, Common::C('code', '200'));
+        $rs_info['now_hour'] = date('H', time());
+        $rs_info['days']     = $list;
+        $this->returnJsonMsg('200', $rs_info, Common::C('code', '200'));
     }
     /**
      *【单天】设置时间
