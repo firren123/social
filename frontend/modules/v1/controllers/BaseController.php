@@ -174,10 +174,7 @@ class BaseController extends Controller
         $user_token_info = $user_token_model->getInfo($user_token_where, true, $user_token_fields);
         if (!empty($user_token_info)) {
             $token_timeout = strtotime($user_token_info['create_time']) + Common::C('token_timeout');
-            if ($token != $user_token_info['token']) {
-                $this->returnJsonMsg('511', [], Common::C('code', '511'));
-            }
-            if (time() > $token_timeout) {
+            if ($token != $user_token_info['token'] || time() > $token_timeout) {
                 $this->returnJsonMsg('508', [], Common::C('code', '508'));
             }
         } else {
