@@ -172,7 +172,7 @@ class ProfileController extends BaseController
         if (!empty($constellation)) {
             $user_base_update_data['constellation'] = $constellation;
         }
-        $user_card = RequestHelper::post('user_card', '0', 'intval');
+        $user_card = RequestHelper::post('user_card', '0', '');
         if (!empty($user_card)) {
             $user_base_update_data['user_card'] = $user_card;
             //验证身份证
