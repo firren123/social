@@ -254,7 +254,9 @@ class Common
     public static function getSexByCard($card = '')
     {
         //1=男 2=女
-        return substr($card, (strlen($card)==15 ? -2 : -1), 1) % 2 ? '1' : '2';
+        $sex = (int)substr($card, 16, 1);
+        return $sex % 2 === 0 ? '2' : '1';
+        //return substr($card, (strlen($card)==15 ? -2 : -1), 1) % 2 ? '1' : '2';
     }
 
     /**
