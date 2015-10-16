@@ -523,7 +523,7 @@ class OrderController extends BaseController
                 //支付总价
                 $order['total'] = $goods_total + $order['freight'] - $dis_amount;
                 $pay_type = 'pay';
-                if ($order['total'] < 0) {
+                if ($order['total'] <= 0) {
                     $order['total'] = 0;
                     $pay_type = 'nopay';
                 }
