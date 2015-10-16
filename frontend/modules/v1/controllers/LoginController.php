@@ -147,7 +147,13 @@ class LoginController extends BaseController
         $user_m = new User();
         $user_cond['mobile']     = $mobile;
         $user_cond['is_deleted'] = '2';
-        $user_info = $user_m->getInfo($user_cond, true, 'id,login_count,salt');
+        $user_info = $user_m->getInfo($user_cond, true, 'id,login_count,salt,status');
+        if (empty($user_info)) {
+            $this->returnJsonMsg('602', [], Common::C('code', '602'));
+        }
+        if ($user_info['status'] == '1') {
+            $this->returnJsonMsg('601', [], Common::C('code', '601'));
+        }
         if ($type != '1') {
             $password_random = Common::getRandomNumber();
             if ($first_login == '1') {
