@@ -383,14 +383,14 @@ class ServiceController extends BaseController
         if (empty($where['id'])) {
             $this->returnJsonMsg('1010', [], Common::C('code', '1010'));
         }
-        $where['community_id'] = RequestHelper::get('community_id', '0', 'intval');
-        if (empty($where['community_id'])) {
-            $this->returnJsonMsg('642', [], Common::C('code', '642'));
-        }
-        $where['community_city_id'] = RequestHelper::get('community_city_id', '0', 'intval');
-        if (empty($where['community_city_id'])) {
-            $this->returnJsonMsg('645', [], Common::C('code', '645'));
-        }
+//        $where['community_id'] = RequestHelper::get('community_id', '0', 'intval');
+//        if (empty($where['community_id'])) {
+//            $this->returnJsonMsg('642', [], Common::C('code', '642'));
+//        }
+//        $where['community_city_id'] = RequestHelper::get('community_city_id', '0', 'intval');
+//        if (empty($where['community_city_id'])) {
+//            $this->returnJsonMsg('645', [], Common::C('code', '645'));
+//        }
         $type = RequestHelper::get('type', '0', 'intval');
         if (empty($type)) {
             $this->returnJsonMsg('1008', [], Common::C('code', '1008'));
