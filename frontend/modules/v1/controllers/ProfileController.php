@@ -525,6 +525,7 @@ class ProfileController extends BaseController
                 if (!$add_rs) {
                     return false;
                 }
+                return true;
             }
         }
         return false;
