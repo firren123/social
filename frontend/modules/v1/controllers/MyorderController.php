@@ -89,11 +89,11 @@ class MyorderController extends BaseController
             }
             if ($order_status == '2') {
                 /**待收货**/
-                $order_and_where = ['and', ['!=', 'ship_status', '2'], ['=', 'status', '1']];
+                $order_and_where = ['or', ['=', 'status', '4'], ['=', 'status', '1']];
             }
             if ($order_status == '3') {
                 /**已完成**/
-                $order_and_where = ['or', ['=', 'ship_status', '2'], ['=', 'status', '2']];
+                $order_and_where = ['or', ['=', 'ship_status', '2'], ['=', 'status', '2'], ['=', 'status', '5']];
             }
             $info = $order_model->getPageList($order_where, $order_fields, 'id desc', $page, $page_size, $order_and_where);
             if (!empty($info)) {
