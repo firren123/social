@@ -380,6 +380,7 @@ class OrderController extends BaseController
             'total'=>0,
             'remark'=>'',
             'status'=>0,
+            'code'=>rand(1000, 9999),
             'pay_status'=>0,
             'pay_method_id'=>0,
             'ship_status'=>0,
