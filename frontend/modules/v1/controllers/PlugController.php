@@ -51,7 +51,7 @@ class PlugController extends Controller
         $data['msg'] = '';
         if ($params) {
             //ksort($params);
-            foreach ($params as $k=>$v) {
+            foreach ($params as $k => $v) {
                 $val .= strtolower($v);
             }
             $sign = md5(md5(md5($app_code.$timestamp).md5($timestamp)).md5($val));

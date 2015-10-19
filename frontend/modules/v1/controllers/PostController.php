@@ -552,7 +552,7 @@ class PostController extends BaseController
      * @param int    $type    类型 1=详情页调用
      * @return array
      */
-    public function actionCommentsList($mobile = '' ,$post_id = 0, $type = 0)
+    public function actionCommentsList($mobile = '', $post_id = 0, $type = 0)
     {
         if (empty($post_id)) {
             $post_id = RequestHelper::get('post_id', '0', 'intval');

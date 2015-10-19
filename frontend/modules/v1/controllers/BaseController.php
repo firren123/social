@@ -135,7 +135,7 @@ class BaseController extends Controller
             if (isset($params['json_str'])) {
                 $params['json_str'] = $_POST['json_str'];
             }
-            foreach ($params as $k=>$v) {
+            foreach ($params as $k => $v) {
                 $v = strtolower($v);
                 $val .= $v;
             }
@@ -189,7 +189,7 @@ class BaseController extends Controller
      * @param string $message 错误说明
      * @return array
      */
-    public function returnJsonMsg($code='',$data=array(),$message='')
+    public function returnJsonMsg($code='', $data=array(), $message='')
     {
         $arr = array(
             'code' => $code,
@@ -276,7 +276,7 @@ class BaseController extends Controller
      * @param array  $data   数据
      * @return bool
      */
-    public function pushToApp($mobile='',$type=0, $data=[])
+    public function pushToApp($mobile='', $type=0, $data=[])
     {
         if (Common::C('OpenPushToApp')) {
             if (empty($mobile) || empty($type) || empty($data)) {

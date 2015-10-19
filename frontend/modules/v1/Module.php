@@ -33,5 +33,4 @@ class Module extends \Yii\Base\Module
     {
         parent::init();
     }
-
 }

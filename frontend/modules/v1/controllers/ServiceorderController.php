@@ -563,7 +563,7 @@ class ServiceorderController extends BaseController
      * @param int    $type   表示 1=一个参数 返回一个字段值 2=多个参数 返回数组
      * @return string
      */
-    private function _getSettingInfo($mobile = '',$params = '',$type = 1)
+    private function _getSettingInfo($mobile = '', $params = '', $type = 1)
     {
         if (!empty($mobile) && !empty($params)) {
             $service_setting_model = new ServiceSetting();
@@ -587,7 +587,7 @@ class ServiceorderController extends BaseController
      * @param string $param  参数
      * @return array
      */
-    private function _getUserInfo($mobile = '',$param = '')
+    private function _getUserInfo($mobile = '', $param = '')
     {
         $user_base_info_model = new UserBasicInfo();
         $user_base_info_where['mobile'] = $mobile;

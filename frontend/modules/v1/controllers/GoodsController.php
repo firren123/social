@@ -14,7 +14,6 @@
  */
 namespace frontend\modules\v1\controllers;
 
-
 use frontend\models\i500m\Brand;
 use frontend\models\i500m\Category;
 use frontend\models\i500m\Product;

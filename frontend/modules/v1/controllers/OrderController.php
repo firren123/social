@@ -14,7 +14,6 @@
  */
 namespace frontend\modules\v1\controllers;
 
-
 use frontend\models\i500_social\Cart;
 use frontend\models\i500_social\Dispatch;
 use frontend\models\i500_social\Order;
@@ -103,7 +102,7 @@ class OrderController extends BaseController
         }
         if (!empty($cart_goods)) {
             $product_ids = $cart_list = $goods_lists = [];
-            foreach ($cart_goods as $k=>$v) {
+            foreach ($cart_goods as $k => $v) {
                 $product_ids[] = $v['product_id'];
                 $cart_list[$v['product_id']] = $v;
             }
@@ -116,7 +115,7 @@ class OrderController extends BaseController
                 $p_list = $p_model->getList(['id'=>$product_ids, 'status'=>1], 'id,name,image');
                 $p_list = ArrayHelper::index($p_list, 'id');
 
-                foreach ($goods_arr as $k=>$v) {
+                foreach ($goods_arr as $k => $v) {
                     if ($v['status'] != 1) {
                         $this->returnJsonMsg(105, [], '有商品下架');
                     }
@@ -406,7 +405,7 @@ class OrderController extends BaseController
         //$coupon_id = 0;
         if (!empty($cart_goods)) {
             $product_ids = $cart_list = $goods_lists = [];
-            foreach ($cart_goods as $k=>$v) {
+            foreach ($cart_goods as $k => $v) {
                 $product_ids[] = $v['product_id'];
                 $cart_list[$v['product_id']] = $v;
             }
@@ -419,7 +418,7 @@ class OrderController extends BaseController
                 $p_list = $p_model->getList(['id'=>$product_ids, 'status'=>1], 'id,name,image,attr_value');
                 $p_list = ArrayHelper::index($p_list, 'id');
 
-                foreach ($goods_arr as $k=>$v) {
+                foreach ($goods_arr as $k => $v) {
                     if ($v['status'] != 1) {
                         $this->returnJsonMsg(105, [], '有商品下架');
                     }

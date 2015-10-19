@@ -918,7 +918,7 @@ class ServiceController extends BaseController
      * @param int    $type   表示 1=一个参数 返回一个字段值 2=多个参数 返回数组
      * @return string
      */
-    private function _getSettingInfo($mobile = '',$params = '',$type = 1)
+    private function _getSettingInfo($mobile = '', $params = '', $type = 1)
     {
         if (!empty($mobile) && !empty($params)) {
             $service_setting_model = new ServiceSetting();
