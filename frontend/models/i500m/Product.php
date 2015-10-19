@@ -1,14 +1,13 @@
 <?php
 /**
- * 一行的文件介绍
+ * 商品表
  *
  * PHP Version 5
- * 可写多行的文件相关说明
  *
- * @category  I500M
- * @package   Member
+ * @category  MODEL
+ * @package   Social
  * @author    renyineng <renyineng@iyangpin.com>
- * @time      15/8/25 上午10:58 
+ * @time      2015-08-25
  * @copyright 2015 灵韬致胜（北京）科技发展有限公司
  * @license   http://www.i500m.com license
  * @link      renyineng@iyangpin.com

@@ -146,7 +146,7 @@ class HongBaoController extends Controller
             die(json_encode(['code' => 'have','msg' => '已经领取过该优惠券']));
         }
         $user_coupons_count = $user_coupons_model->getCount(['coupon_type_id'=>$coupons_type_info['type_id']]);
-        if ($user_coupons_count < $rs['num'] ) {
+        if ($user_coupons_count < $rs['num']) {
             $data['mobile'] = $mobile;
             $data['coupon_type_id'] = $coupons_type_info['type_id'];
             $data['serial_number']  = time() . '1' . rand(10000, 99999);
