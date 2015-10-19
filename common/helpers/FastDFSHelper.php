@@ -36,7 +36,7 @@ class FastDFSHelper
      */
     public function __construct()
     {
-		$this->storage = fastdfs_tracker_query_storage_store();
+        $this->storage = fastdfs_tracker_query_storage_store();
         //echo 'ip_addr:'.$this->storage['ip_addr'].'<br>port:'.$this->storage['port'];
         $this->server  = fastdfs_connect_server($this->storage['ip_addr'], $this->storage['port']);
         if (!$this->server) {
