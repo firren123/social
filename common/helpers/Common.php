@@ -287,27 +287,27 @@ class Common
         $strValue = '0';
         if (($month == 1 && $day >= 20) || ($month == 2 && $day <= 18)) {
             $strValue = "1"; //水瓶座
-        } else if (($month == 2 && $day >= 19) || ($month == 3 && $day <= 20)) {
+        } elseif (($month == 2 && $day >= 19) || ($month == 3 && $day <= 20)) {
             $strValue = "2"; //双鱼座
-        } else if (($month == 3 && $day > 20) || ($month == 4 && $day <= 19)) {
+        } elseif (($month == 3 && $day > 20) || ($month == 4 && $day <= 19)) {
             $strValue = "3"; //白羊座
-        } else if (($month == 4 && $day >= 20) || ($month == 5 && $day <= 20)) {
+        } elseif (($month == 4 && $day >= 20) || ($month == 5 && $day <= 20)) {
             $strValue = "4"; //金牛座
-        } else if (($month == 5 && $day >= 21) || ($month == 6 && $day <= 21)) {
+        } elseif (($month == 5 && $day >= 21) || ($month == 6 && $day <= 21)) {
             $strValue = "5"; //双子座
-        } else if (($month == 6 && $day > 21) || ($month == 7 && $day <= 22)) {
+        } elseif (($month == 6 && $day > 21) || ($month == 7 && $day <= 22)) {
             $strValue = "6"; //巨蟹座
-        } else if (($month == 7 && $day > 22) || ($month == 8 && $day <= 22)) {
+        } elseif (($month == 7 && $day > 22) || ($month == 8 && $day <= 22)) {
             $strValue = "7"; //狮子座
-        } else if (($month == 8 && $day >= 23) || ($month == 9 && $day <= 22)) {
+        } elseif (($month == 8 && $day >= 23) || ($month == 9 && $day <= 22)) {
             $strValue = "8"; //处女座
-        } else if (($month == 9 && $day >= 23) || ($month == 10 && $day <= 23)) {
+        } elseif (($month == 9 && $day >= 23) || ($month == 10 && $day <= 23)) {
             $strValue = "9"; //天秤座
-        } else if (($month == 10 && $day > 23) || ($month == 11 && $day <= 22)) {
+        } elseif (($month == 10 && $day > 23) || ($month == 11 && $day <= 22)) {
             $strValue = "10"; //天蝎座
-        } else if (($month == 11 && $day > 22) || ($month == 12 && $day <= 21)) {
+        } elseif (($month == 11 && $day > 22) || ($month == 12 && $day <= 21)) {
             $strValue = "11"; //射手座
-        } else if (($month == 12 && $day > 21) || ($month == 1 && $day <= 19)) {
+        } elseif (($month == 12 && $day > 21) || ($month == 1 && $day <= 19)) {
             $strValue = "12"; //魔羯座
         }
         return $strValue;
