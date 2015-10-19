@@ -73,7 +73,7 @@ class BaseRequestHelps
      */
     public static function getMethod()
     {
-        switch($_SERVER['REQUEST_METHOD']) {
+        switch ($_SERVER['REQUEST_METHOD']) {
             case 'POST':
                 $input = 'POST';
                 break;

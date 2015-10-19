@@ -427,7 +427,7 @@ class Common
      * @param int $lng2 经度
      * @return float
      */
-    public static function getDistance($lat1 = 0,$lng1 = 0,$lat2 = 0,$lng2 = 0)
+    public static function getDistance($lat1 = 0, $lng1 = 0, $lat2 = 0, $lng2 = 0)
     {
         //地球半径
         $R = 6378137;
