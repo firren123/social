@@ -13,6 +13,7 @@
  * @link      linxinliang@iyangpin.com
  */
 namespace frontend\modules\v1\controllers;
+
 use frontend\models\i500m\AppLog;
 
 /**
