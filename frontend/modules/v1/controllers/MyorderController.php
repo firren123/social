@@ -273,6 +273,7 @@ class MyorderController extends BaseController
         if ($rs['ship_status'] != '1') {
             $this->returnJsonMsg('806', [], Common::C('code', '806'));
         }
+        $order_update_data['status']        = '5';  //订单完成
         $order_update_data['ship_status']   = '2';  //确定收货
         $order_update_data['pay_status']    = '1';  //已支付
         $order_update_data['delivery_time'] = date('Y-m-d H:i:s', time());
