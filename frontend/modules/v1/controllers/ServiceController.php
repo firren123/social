@@ -268,7 +268,8 @@ class ServiceController extends BaseController
             /**user_auth_status=1用户认证状态成功**/
             $data['user_auth_status'] = '1';
         } else {
-            $this->returnJsonMsg('1052', [], Common::C('code', '1052'));
+            //@todo 20151020 未进行实名认证也可以发布服务
+            //$this->returnJsonMsg('1052', [], Common::C('code', '1052'));
             /**user_auth_status=2用户认证状态失败**/
             $data['user_auth_status'] = '2';
         }
@@ -362,7 +363,8 @@ class ServiceController extends BaseController
             /**user_auth_status=1用户认证状态成功**/
             $data['user_auth_status'] = '1';
         } else {
-            $this->returnJsonMsg('1052', [], Common::C('code', '1052'));
+            //@todo 20151020 未进行实名认证也可以发布服务
+            //$this->returnJsonMsg('1052', [], Common::C('code', '1052'));
             /**user_auth_status=2用户认证状态失败**/
             $data['user_auth_status'] = '2';
         }
