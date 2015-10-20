@@ -190,11 +190,10 @@ class ServiceController extends BaseController
             $this->returnJsonMsg('1044', [], Common::C('code', '1044'));
         }
         $user_info = $this->_getUserInfo($where['mobile']);
-        //@todo 20151020 未进行实名认证也可以发布服务
-        //if ($user_info['card_audit_status'] != '2') {
+        if ($user_info['card_audit_status'] != '2') {
             //!=2 表示审核不成功
-            //$this->returnJsonMsg('1052', [], Common::C('code', '1052'));
-        //}
+            $this->returnJsonMsg('1052', [], Common::C('code', '1052'));
+        }
         $rs_info['user_name'] = $user_info['realname'];
         $this->returnJsonMsg('200', $rs_info, Common::C('code', '200'));
     }
@@ -269,8 +268,7 @@ class ServiceController extends BaseController
             /**user_auth_status=1用户认证状态成功**/
             $data['user_auth_status'] = '1';
         } else {
-            //@todo 20151020 未进行实名认证也可以发布服务
-            //$this->returnJsonMsg('1052', [], Common::C('code', '1052'));
+            $this->returnJsonMsg('1052', [], Common::C('code', '1052'));
             /**user_auth_status=2用户认证状态失败**/
             $data['user_auth_status'] = '2';
         }
@@ -364,8 +362,7 @@ class ServiceController extends BaseController
             /**user_auth_status=1用户认证状态成功**/
             $data['user_auth_status'] = '1';
         } else {
-            //@todo 20151020 未进行实名认证也可以发布服务
-            //$this->returnJsonMsg('1052', [], Common::C('code', '1052'));
+            $this->returnJsonMsg('1052', [], Common::C('code', '1052'));
             /**user_auth_status=2用户认证状态失败**/
             $data['user_auth_status'] = '2';
         }
