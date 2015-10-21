@@ -191,6 +191,15 @@ class ServiceController extends BaseController
         }
         $user_info = $this->_getUserInfo($where['mobile']);
         if ($user_info['card_audit_status'] != '2') {
+            if ($user_info['card_audit_status'] == '0') {
+                $this->returnJsonMsg('1059', [], Common::C('code', '1059'));
+            }
+            if ($user_info['card_audit_status'] == '1') {
+                $this->returnJsonMsg('1060', [], Common::C('code', '1060'));
+            }
+            if ($user_info['card_audit_status'] == '3') {
+                $this->returnJsonMsg('1061', [], Common::C('code', '1061'));
+            }
             //!=2 表示审核不成功
             $this->returnJsonMsg('1052', [], Common::C('code', '1052'));
         }
