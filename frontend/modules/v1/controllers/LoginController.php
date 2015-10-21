@@ -496,16 +496,17 @@ class LoginController extends BaseController
             $user_add_data['salt']     = Common::getRandomNumber();
             $password_random = Common::getRandomNumber();
             $user_add_data['password'] = md5($user_add_data['salt'].md5($password_random));
-            $rs = $user_model->insertInfo($user_add_data);
+            $rs = $user_model->insertOneRecord($user_add_data);
+            if ($rs['result'] != '1') {
+                $this->returnJsonMsg('400', [], Common::C('code', '400'));
+            }
             /**同时记录UserBaseInfo**/
             $user_base_model = new UserBasicInfo();
+            $user_base_data['uid'] = $rs['data']['new_id'];
             $user_base_data['mobile'] = $mobile;
             $user_base_data['nickname'] = $channel_nickname;
             $user_base_data['avatar'] = $channel_user_avatar;
             $user_base_model->insertInfo($user_base_data);
-            if (!$rs) {
-                $this->returnJsonMsg('400', [], Common::C('code', '400'));
-            }
             /**给用户发短信**/
             $sms_content = Common::getSmsTemplate(4, $password_random);
             $user_sms_data['mobile']  = $mobile;
