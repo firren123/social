@@ -1018,7 +1018,7 @@ class ServiceController extends BaseController
         $rs['avatar']   = '';
         $rs['nickname'] = '';
         $rs['sex']      = '0';
-        $rs['card_audit_status'] = '1';
+        $rs['card_audit_status'] = '0';
         //get缓存
         $cache_key = 'profile_'.$mobile;
         $cache_rs = SsdbHelper::Cache('get', $cache_key);
@@ -1037,7 +1037,7 @@ class ServiceController extends BaseController
                 }
             }
             $rs['sex'] = empty($rs['sex']) ? "0" : $rs['sex'];
-            $rs['card_audit_status'] = empty($rs['card_audit_status']) ? "1" : $rs['card_audit_status'];
+            $rs['card_audit_status'] = empty($rs['card_audit_status']) ? "0" : $rs['card_audit_status'];
         }
         return $rs;
     }
