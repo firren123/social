@@ -331,6 +331,7 @@ class ProfileController extends BaseController
         if (empty($push_id)) {
             $this->returnJsonMsg('644', [], Common::C('code', '644'));
         }
+        $dev = RequestHelper::post('dev', '0', 'intval');
         $user_base_model = new UserBasicInfo();
         $user_base_where['mobile'] = $mobile;
         $user_base_fields = 'id,mobile';
@@ -344,7 +345,7 @@ class ProfileController extends BaseController
             if (!$rs) {
                 $this->returnJsonMsg('400', [], Common::C('code', '400'));
             }
-            $this->_setUserPushId($uid, $mobile, $push_channel, $push_id);
+            $this->_setUserPushId($uid, $mobile, $push_channel, $push_id, $dev);
             $this->returnJsonMsg('200', [], Common::C('code', '200'));
         }
         /**编辑**/
@@ -353,7 +354,7 @@ class ProfileController extends BaseController
         if (!$update_rs) {
             $this->returnJsonMsg('400', [], Common::C('code', '400'));
         }
-        $this->_setUserPushId($uid, $mobile, $push_channel, $push_id);
+        $this->_setUserPushId($uid, $mobile, $push_channel, $push_id, $dev);
         $this->returnJsonMsg('200', [], Common::C('code', '200'));
     }
 
@@ -506,11 +507,20 @@ class ProfileController extends BaseController
      * @param string $mobile       手机号
      * @param int    $push_channel 推送平台
      * @param string $push_id      推送平台ID
+     * @param int    $dev          设备
      * @return bool
      */
-    private function _setUserPushId($uid = 0, $mobile = '', $push_channel = 0, $push_id = '')
+    private function _setUserPushId($uid = 0, $mobile = '', $push_channel = 0, $push_id = '', $dev = 0)
     {
-        if (!empty($push_id) && !empty($push_channel) && !empty($mobile) && !empty($uid)) {
+        if (!empty($push_id) && !empty($push_channel) && !empty($uid)) {
+            if ($dev == '2') {
+                //安卓
+                $user_push_where['device'] = '1';
+            }
+            if ($dev == '3') {
+                //苹果
+                $user_push_where['device'] = '2';
+            }
             $user_push_model = new UserPushId();
             $user_push_fields = 'id';
 
