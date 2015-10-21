@@ -524,6 +524,7 @@ class LoginController extends BaseController
             if (empty($hx_rs)) {
                 $this->returnJsonMsg('626', ['first_login'=>'1'], Common::C('code', '626'));
             }
+            $hx_rs['code'] = ArrayHelper::getValue($hx_rs, 'code', '0');
             if ($hx_rs['code'] == '101') {
                 $this->returnJsonMsg('639', [], Common::C('code', '639'));
             }
@@ -559,6 +560,7 @@ class LoginController extends BaseController
             if (empty($hx_rs)) {
                 $this->returnJsonMsg('626', ['first_login'=>'1'], Common::C('code', '626'));
             }
+            $hx_rs['code'] = ArrayHelper::getValue($hx_rs, 'code', '0');
             if ($hx_rs['code'] == '101') {
                 $this->returnJsonMsg('639', [], Common::C('code', '639'));
             }
