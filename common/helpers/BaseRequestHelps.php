@@ -98,7 +98,8 @@ class BaseRequestHelps
     {
         $filters    =   isset($filter) ? $filter : 'htmlspecialchars';
         $filters    =   !empty($filters) ? $filters : 'htmlspecialchars';
-        $filters    .= ',removeXSS,abacaAddslashes';
+        //@todo 20151022 取消验证，因为会出现验签失败。
+        //$filters    .= ',removeXSS,abacaAddslashes';
         if ('' == $name) {
             $data       =   $input;
             if ($filters) {
