@@ -431,7 +431,9 @@ class LoginController extends BaseController
     {
         $channel         = RequestHelper::post('channel', '1', '');
         $channel_user_id = RequestHelper::post('channel_user_id', '0', '');
-        $channel_nickname = RequestHelper::post('channel_nickname', '', '');
+        //@todo 20151022 绑定用户时，用户昵称规则 = 用户＋6位随机数
+        //$channel_nickname = RequestHelper::post('channel_nickname', '', '');
+        $channel_nickname = '用户'.str_pad(mt_rand(1, 999999), 6, '0', STR_PAD_LEFT);
         $channel_user_avatar = RequestHelper::post('channel_user_avatar', '', '');
         $source          = RequestHelper::post('dev', '1', '');
         $mobile          = RequestHelper::post('mobile', '', '');
