@@ -128,6 +128,9 @@ class BaseRequestHelps
         } else { // 变量默认值
             $data = isset($default) ? $default : '';
         }
+        if ($data == null || $data == 'null' || $data == 'NULL') {
+            $data = '';
+        }
         return $data;
     }
 
