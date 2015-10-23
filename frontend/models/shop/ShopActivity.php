@@ -8,12 +8,13 @@
  * @category  I500M
  * @package   Social
  * @author    renyineng <renyineng@iyangpin.com>
- * @time      15/8/26 下午2:03 
+ * @time      2015-08-26
  * @copyright 2015 灵韬致胜（北京）科技发展有限公司
  * @license   http://www.i500m.com license
  * @link      renyineng@iyangpin.com
  */
 namespace frontend\models\shop;
+
 use frontend\models\i500m\Product;
 use yii\helpers\ArrayHelper;
 

@@ -47,13 +47,13 @@ class CartController extends BaseController
         $cartList = $cart->getList(['mobile'=>$mobile, 'shop_id'=>$shop_id, 'status'=>1]);
         if (!empty($cartList)) {
             $product_ids = [];
-            foreach ($cartList as $k=>$v) {
+            foreach ($cartList as $k => $v) {
                 $product_ids[] = $v['product_id'];
             }
             if (!empty($product_ids)) {
                 $s_products = new ShopProducts();
                 $goods_list = $s_products->getList(['product_id'=>$product_ids, 'shop_id'=>$shop_id], 'product_id');
-                foreach ($goods_list as $k=>$v) {
+                foreach ($goods_list as $k => $v) {
 
                 }
                 $m_goods = new Product();
@@ -84,7 +84,7 @@ class CartController extends BaseController
         $goods = [];
         if (!empty($list)) {
             $product_ids = $goods_lists = [];
-            foreach ($list as $k=>$v) {
+            foreach ($list as $k => $v) {
                 $product_ids[] = $v['product_id'];
             }
             if (!empty($product_ids)) {
@@ -92,10 +92,10 @@ class CartController extends BaseController
                 $map = ['product_id'=>$product_ids, 'shop_id'=>$shop_id];
                 $goods_arr = $s_products->getList($map, 'product_id, product_number, status');
 
-                foreach ($goods_arr as $k=>$v) {
+                foreach ($goods_arr as $k => $v) {
                     $goods_lists[$v['product_id']] = $v;
                 }
-                foreach ($list as $k=>$v) {
+                foreach ($list as $k => $v) {
                     $status = ArrayHelper::getValue($goods_lists, $v['product_id'].'.status', 0);
                     $goods[$k]['product_id'] = $v['product_id'];
                     $goods[$k]['message'] = '';

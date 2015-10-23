@@ -74,22 +74,26 @@ class ProfileController extends BaseController
             $mobile = $user_mobile;
         }
         $type = RequestHelper::post('type', '0', '');
-        $user_base_model = new UserBasicInfo();
-        $user_base_where['mobile'] = $mobile;
-        $user_base_fields = 'id,mobile,nickname,avatar,personal_sign,realname,sex,birthday,province_id,city_id,district_id,community_name,push_status';
-        if ($type == '1') {
-            //仅获取昵称 + 头像
-            $user_base_fields = 'nickname,avatar';
-        }
-        $user_base_info = $user_base_model->getInfo($user_base_where, true, $user_base_fields);
-        if (empty($user_base_info)) {
-            $user_base_data['uid']    = $uid;
-            $user_base_data['mobile'] = $mobile;
-            $rs = $user_base_model->insertInfo($user_base_data);
-            if (!$rs) {
-                $this->returnJsonMsg('400', [], Common::C('code', '400'));
-            }
+        $cache_key = 'profile_'.$mobile;
+        $cache_rs = SsdbHelper::Cache('get', $cache_key);
+        if ($cache_rs) {
+            $user_base_info = $cache_rs;
+        } else {
+            $user_base_model = new UserBasicInfo();
+            $user_base_where['mobile'] = $mobile;
+            $user_base_fields = 'id,mobile,nickname,avatar,personal_sign,realname,sex,birthday,age,user_card,card_audit_status,constellation,province_id,city_id,district_id,community_name,push_status';
             $user_base_info = $user_base_model->getInfo($user_base_where, true, $user_base_fields);
+            if (empty($user_base_info)) {
+                $user_base_data['uid']    = $uid;
+                $user_base_data['mobile'] = $mobile;
+                $rs = $user_base_model->insertInfo($user_base_data);
+                if (!$rs) {
+                    $this->returnJsonMsg('400', [], Common::C('code', '400'));
+                }
+                $user_base_info = $user_base_model->getInfo($user_base_where, true, $user_base_fields);
+            }
+            //set缓存
+            SsdbHelper::Cache('set', $cache_key, $user_base_info, Common::C('SSDBCacheTime'));
         }
         if (!empty($user_base_info)) {
             if ($user_base_info['avatar']) {
@@ -99,14 +103,23 @@ class ProfileController extends BaseController
             } else {
                 $user_base_info['avatar'] = Common::C('defaultAvatar');
             }
+            //@todo 返回的身份证号码进行加*
+            if (!empty($user_base_info['user_card'])) {
+                $user_base_info['user_card'] = Common::hiddenUserCard($user_base_info['user_card']);
+            }
         }
         if ($type == '1') {
             //仅获取昵称 + 头像
             if (empty($user_base_info['nickname'])) {
-                $user_base_info['nickname'] = Common::C('defaultNickName');
+                $rs['nickname'] = Common::C('defaultNickName');
+            } else {
+                $rs['nickname'] = $user_base_info['nickname'];
             }
+            $rs['avatar'] = $user_base_info['avatar'];
+            $this->returnJsonMsg('200', $rs, Common::C('code', '200'));
+        } else {
+            $this->returnJsonMsg('200', $user_base_info, Common::C('code', '200'));
         }
-        $this->returnJsonMsg('200', $user_base_info, Common::C('code', '200'));
     }
 
     /**
@@ -151,6 +164,30 @@ class ProfileController extends BaseController
         if (!empty($birthday)) {
             $user_base_update_data['birthday'] = $birthday;
         }
+        $age = RequestHelper::post('age', '0', 'intval');
+        if (!empty($age)) {
+            $user_base_update_data['age'] = $age;
+        }
+        $constellation = RequestHelper::post('constellation', '0', 'intval');
+        if (!empty($constellation)) {
+            $user_base_update_data['constellation'] = $constellation;
+        }
+        $user_card = RequestHelper::post('user_card', '0', '');
+        if (!empty($user_card)) {
+            $user_base_update_data['user_card'] = $user_card;
+            //验证身份证
+            if (strlen($user_base_update_data['user_card']) != '18') {
+                $this->returnJsonMsg('1017', [], Common::C('code', '1017'));
+            }
+            if (!Common::isIdCard($user_base_update_data['user_card'])) {
+                $this->returnJsonMsg('1018', [], Common::C('code', '1018'));
+            }
+            //@todo 验证身份证的合法性
+            $user_base_update_data['age'] = Common::getAgeByCard($user_base_update_data['user_card']);
+            $user_base_update_data['sex'] = Common::getSexByCard($user_base_update_data['user_card']);
+            $user_base_update_data['constellation'] = Common::getConstellationByCard($user_base_update_data['user_card']);
+            $user_base_update_data['birthday'] = Common::getBirthdayByCard($user_base_update_data['user_card']);
+        }
         $province_id = RequestHelper::post('province_id', '', 'intval');
         if (!empty($province_id)) {
             $user_base_update_data['province_id'] = $province_id;
@@ -176,6 +213,30 @@ class ProfileController extends BaseController
         if (!empty($user_base_update_data)) {
             $user_base_model = new UserBasicInfo();
             $user_base_where['mobile'] = $mobile;
+            if (!empty($user_base_update_data['realname'])) {
+                if (empty($user_base_update_data['user_card'])) {
+                    $this->returnJsonMsg('649', [], Common::C('code', '649'));
+                }
+            }
+            if (!empty($user_base_update_data['user_card'])) {
+                if (empty($user_base_update_data['realname'])) {
+                    $this->returnJsonMsg('650', [], Common::C('code', '650'));
+                }
+            }
+            if (!empty($user_base_update_data['realname']) && !empty($user_base_update_data['user_card'])) {
+                //判断认证状态
+                $user_basic_info_where['mobile'] = $mobile;
+                $user_basic_info = $user_base_model->getInfo($user_basic_info_where, true, 'card_audit_status');
+                if ($user_basic_info['card_audit_status'] == '1') {
+                    //认证中
+                    $this->returnJsonMsg('647', [], Common::C('code', '647'));
+                }
+                if ($user_basic_info['card_audit_status'] == '2') {
+                    //认证成功
+                    $this->returnJsonMsg('648', [], Common::C('code', '648'));
+                }
+                $user_base_update_data['card_audit_status'] = '1';
+            }
             $rs = $user_base_model->updateInfo($user_base_update_data, $user_base_where);
             if (!$rs) {
                 $this->returnJsonMsg('623', [], Common::C('code', '623'));
@@ -183,6 +244,8 @@ class ProfileController extends BaseController
                 if (!empty($nickname)) {
                     HuanXinHelper::hxModifyNickName($mobile, $nickname);
                 }
+                $cache_key = 'profile_'.$mobile;
+                SsdbHelper::Cache('del', $cache_key);
                 $this->returnJsonMsg('200', [], Common::C('code', '200'));
             }
         } else {
@@ -268,6 +331,7 @@ class ProfileController extends BaseController
         if (empty($push_id)) {
             $this->returnJsonMsg('644', [], Common::C('code', '644'));
         }
+        $dev = RequestHelper::post('dev', '0', 'intval');
         $user_base_model = new UserBasicInfo();
         $user_base_where['mobile'] = $mobile;
         $user_base_fields = 'id,mobile';
@@ -281,7 +345,7 @@ class ProfileController extends BaseController
             if (!$rs) {
                 $this->returnJsonMsg('400', [], Common::C('code', '400'));
             }
-            $this->_setUserPushId($uid, $mobile, $push_channel, $push_id);
+            $this->_setUserPushId($uid, $mobile, $push_channel, $push_id, $dev);
             $this->returnJsonMsg('200', [], Common::C('code', '200'));
         }
         /**编辑**/
@@ -290,7 +354,7 @@ class ProfileController extends BaseController
         if (!$update_rs) {
             $this->returnJsonMsg('400', [], Common::C('code', '400'));
         }
-        $this->_setUserPushId($uid, $mobile, $push_channel, $push_id);
+        $this->_setUserPushId($uid, $mobile, $push_channel, $push_id, $dev);
         $this->returnJsonMsg('200', [], Common::C('code', '200'));
     }
 
@@ -443,11 +507,20 @@ class ProfileController extends BaseController
      * @param string $mobile       手机号
      * @param int    $push_channel 推送平台
      * @param string $push_id      推送平台ID
+     * @param int    $dev          设备
      * @return bool
      */
-    private function _setUserPushId($uid = 0, $mobile = '', $push_channel = 0, $push_id = '')
+    private function _setUserPushId($uid = 0, $mobile = '', $push_channel = 0, $push_id = '', $dev = 0)
     {
-        if (!empty($push_id) && !empty($push_channel) && !empty($mobile) && !empty($uid)) {
+        if (!empty($push_id) && !empty($push_channel) && !empty($uid)) {
+            if ($dev == '2') {
+                //安卓
+                $user_push_where['device'] = '1';
+            }
+            if ($dev == '3') {
+                //苹果
+                $user_push_where['device'] = '2';
+            }
             $user_push_model = new UserPushId();
             $user_push_fields = 'id';
 
@@ -462,6 +535,7 @@ class ProfileController extends BaseController
                 if (!$add_rs) {
                     return false;
                 }
+                return true;
             }
         }
         return false;

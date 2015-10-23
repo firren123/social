@@ -36,9 +36,14 @@ class SsdbHelper
     public static function Cache($op='set', $key='', $value='', $ttl=0)
     {
         if (Common::C('openSSDB')) {
+            $log_arr['op']    = $op;
+            $log_arr['key']   = $key;
+            $log_arr['value'] = $value;
+            $log_arr['ttl']   = $ttl;
+            self::_saveCacheLog(Common::C('ssdbLogFile'), var_export($log_arr, true));
             switch ($op) {
                 case 'set':
-                    return \Yii::$app->cache->setValue($key,$value,$ttl);
+                    return \Yii::$app->cache->setValue($key, $value, $ttl);
                     break;
                 case 'get':
                     return \Yii::$app->cache->getValue($key);
@@ -54,6 +59,19 @@ class SsdbHelper
             }
         } else {
             return false;
+        }
+    }
+
+    /**
+     * 开启缓存日志
+     * @param string $path 路径
+     * @param string $data 数据
+     * @return bool
+     */
+    private function _saveCacheLog($path = '', $data = '')
+    {
+        if (Common::C('openCacheLog')) {
+            file_put_contents($path, "执行时间：" . date('Y-m-d H:i:s') . " 数据：" . var_export($data, true) . "\n", FILE_APPEND);
         }
     }
 }

@@ -90,6 +90,9 @@ class BaseController extends Controller
 
             if (isset($this->params['uid']) && $this->params['uid']) {
                 /**验证签名**/
+                if (empty($this->params['token'])) {
+                    $this->returnJsonMsg('507', [], Common::C('code', '507'));
+                }
                 $this->_checkToken($this->params['token'], $this->params['mobile']);
             }
             if (isset($this->params['token'])) {
@@ -132,7 +135,7 @@ class BaseController extends Controller
             if (isset($params['json_str'])) {
                 $params['json_str'] = $_POST['json_str'];
             }
-            foreach ($params as $k=>$v) {
+            foreach ($params as $k => $v) {
                 $v = strtolower($v);
                 $val .= $v;
             }
@@ -186,7 +189,7 @@ class BaseController extends Controller
      * @param string $message 错误说明
      * @return array
      */
-    public function returnJsonMsg($code='',$data=array(),$message='')
+    public function returnJsonMsg($code='', $data=array(), $message='')
     {
         $arr = array(
             'code' => $code,
@@ -195,7 +198,8 @@ class BaseController extends Controller
         );
         $this->saveLog(Common::C('paramsLogFile'), var_export($arr, true));
         $ret = json_encode($arr);
-        $ret_str = str_replace('null', '""', $ret);
+        $ret_str = str_replace('(null)', '', $ret);      //出现在数据库中
+        $ret_str = str_replace('null', '""', $ret_str);  //出现在返回值中
         die($ret_str);
     }
 
@@ -215,6 +219,7 @@ class BaseController extends Controller
             if ($rs['code']=='200') {
                 return true;
             }
+            $this->returnJsonMsg('401', [], Common::C('code', '401'));
             return false;
         } else {
             return true;
@@ -271,7 +276,7 @@ class BaseController extends Controller
      * @param array  $data   数据
      * @return bool
      */
-    public function pushToApp($mobile='',$type=0, $data=[])
+    public function pushToApp($mobile='', $type=0, $data=[])
     {
         if (Common::C('OpenPushToApp')) {
             if (empty($mobile) || empty($type) || empty($data)) {

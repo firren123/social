@@ -14,6 +14,7 @@
  */
 
 namespace frontend\models\i500_social;
+
 use frontend\models\i500m\Shop;
 use common\helpers\CurlHelper;
 

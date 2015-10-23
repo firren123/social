@@ -16,6 +16,7 @@ namespace frontend\modules\v1\controllers;
 
 use Yii;
 use common\helpers\Common;
+use common\helpers\SsdbHelper;
 use common\helpers\RequestHelper;
 use frontend\models\i500_social\Service;
 use frontend\models\i500_social\ServiceCategory;
@@ -47,10 +48,10 @@ class ServiceController extends BaseController
     }
 
     /**
-     * 服务主页
+     * 服务主页 - 弃用 - 备份20151010
      * @return array
      */
-    public function actionIndex()
+    public function actionIndexBak()
     {
         $uuid = RequestHelper::get('uuid', '', '');
         if (empty($uuid)) {
@@ -58,7 +59,6 @@ class ServiceController extends BaseController
         }
         /**获取服务设置信息**/
         $service_setting_where['uid']          = $uuid;
-        $service_setting_where['audit_status'] = '2';
         $service_setting_where['status']       = '2';
         $service_setting_where['is_deleted']   = '2';
         $service_setting_fields = 'mobile,name,search_address';
@@ -72,10 +72,70 @@ class ServiceController extends BaseController
             $service_setting_info['user_avatar'] = $user_info['avatar'];
         }
         $service_setting_info['star']     = '5';
-        //@todo 距离需求请求仪能的接口
+        //@todo 距离需求请求仪能的接口[当前方法弃用]
         $service_setting_info['distance'] = '1.0公里';
         $rs['service_setting'] = $service_setting_info;
         $rs['service_list']    = [];
+        $page      = RequestHelper::get('page', '1', 'intval');
+        $page_size = RequestHelper::get('page_size', '6', 'intval');
+        if ($page_size > Common::C('maxPageSize')) {
+            $this->returnJsonMsg('705', [], Common::C('code', '705'));
+        }
+        $service_model = new Service();
+        $service_where['uid']                  = $uuid;
+        $service_where['audit_status']         = '2';
+        $service_where['user_auth_status']     = '1';
+        $service_where['servicer_info_status'] = '1';
+        $service_where['status']               = '1';
+        $service_where['is_deleted']           = '2';
+        $service_fields = 'id,mobile,image,title,description as service_description,price,unit,service_way';
+        $list = $service_model->getPageList($service_where, $service_fields, 'id desc', $page, $page_size);
+        if (!empty($list)) {
+            foreach ($list as $k => $v) {
+                if ($v['image']) {
+                    $list[$k]['image'] = $this->_formatImg($v['image']);
+                }
+                $list[$k]['price'] = $v['price'].$this->_getServiceUnit($v['unit']);
+                unset($list[$k]['mobile']);
+                unset($list[$k]['unit']);
+            }
+        }
+        $rs['service_list'] = $list;
+        $this->returnJsonMsg('200', $rs, Common::C('code', '200'));
+    }
+
+    /**
+     * 服务主页
+     * @return array
+     */
+    public function actionIndex()
+    {
+        $uuid = RequestHelper::get('uuid', '0', 'intval');
+        if (empty($uuid)) {
+            $this->returnJsonMsg('1035', [], Common::C('code', '1035'));
+        }
+        $rs['service_setting'] = [];
+        $rs['service_list']    = [];
+        $type = RequestHelper::get('type', '0', 'intval');
+        if ($type != '1') {
+            /**获取服务设置信息**/
+            $service_setting_where['uid']          = $uuid;
+            $service_setting_where['status']       = '2';
+            $service_setting_where['is_deleted']   = '2';
+            $service_setting_fields = 'mobile,name';
+            $service_setting_model = new ServiceSetting();
+            $service_setting_info = $service_setting_model->getInfo($service_setting_where, true, $service_setting_fields);
+            if (empty($service_setting_info)) {
+                $this->returnJsonMsg('1015', [], Common::C('code', '1015'));
+            }
+            if (!empty($service_setting_info['mobile'])) {
+                $user_info = $this->_getUserInfo($service_setting_info['mobile']);
+                $service_setting_info['user_avatar'] = $user_info['avatar'];
+                $service_setting_info['user_sex']    = $user_info['sex'];
+                $service_setting_info['user_auth']   = $user_info['card_audit_status'];
+            }
+            $rs['service_setting'] = $service_setting_info;
+        }
         $page      = RequestHelper::get('page', '1', 'intval');
         $page_size = RequestHelper::get('page_size', '6', 'intval');
         if ($page_size > Common::C('maxPageSize')) {
@@ -122,14 +182,28 @@ class ServiceController extends BaseController
             $this->returnJsonMsg('605', [], Common::C('code', '605'));
         }
         $service_setting_model = new ServiceSetting();
-        $info = $service_setting_model->getInfo($where, true, 'user_name,audit_status,status');
-        if (empty($info) || $info['audit_status'] != '2') {
-            $this->returnJsonMsg('1038', [], Common::C('code', '1038'));
+        $info = $service_setting_model->getInfo($where, true, 'status');
+        if (empty($info)) {
+            $this->returnJsonMsg('1015', [], Common::C('code', '1015'));
         }
         if ($info['status'] != '2') {
             $this->returnJsonMsg('1044', [], Common::C('code', '1044'));
         }
-        $rs_info['user_name'] = $info['user_name'];
+        $user_info = $this->_getUserInfo($where['mobile']);
+        if ($user_info['card_audit_status'] != '2') {
+            if ($user_info['card_audit_status'] == '0') {
+                $this->returnJsonMsg('1059', [], Common::C('code', '1059'));
+            }
+            if ($user_info['card_audit_status'] == '1') {
+                $this->returnJsonMsg('1060', [], Common::C('code', '1060'));
+            }
+            if ($user_info['card_audit_status'] == '3') {
+                $this->returnJsonMsg('1061', [], Common::C('code', '1061'));
+            }
+            //!=2 表示审核不成功
+            $this->returnJsonMsg('1052', [], Common::C('code', '1052'));
+        }
+        $rs_info['user_name'] = $user_info['realname'];
         $this->returnJsonMsg('200', $rs_info, Common::C('code', '200'));
     }
     /**
@@ -189,29 +263,23 @@ class ServiceController extends BaseController
         if (empty($data['community_city_id'])) {
             $this->returnJsonMsg('645', [], Common::C('code', '645'));
         }
-        /**查看该用户是否已经认证**/
-        $service_setting_info = $this->_getSettingInfo($data['mobile'], 'audit_status,status', 2);
-        $audit_status = $service_setting_info['audit_status'];
-        $status       = $service_setting_info['status'];
-        if ($audit_status == "") {
-            $this->returnJsonMsg('1019', [], Common::C('code', '1019'));
-        }
+        $status = $this->_getSettingInfo($data['mobile'], 'status', 1);
         if ($status == '2') {
             /**servicer_info_status=1表示服务人(店铺)信息审核成功**/
             $data['servicer_info_status'] = '1';
         } else {
-            //@todo 未审核成功 抛出提示
             $this->returnJsonMsg('1044', [], Common::C('code', '1044'));
-            /**servicer_info_status=2表示服务人(店铺)信息审核成功**/
+            /**servicer_info_status=2表示服务人(店铺)信息不审核成功**/
             $data['servicer_info_status'] = '2';
         }
-        if ($audit_status == '2') {
-            /**user_auth_status=1表示认证成功**/
+        $user_info = $this->_getUserInfo($data['mobile']);
+        if ($user_info['card_audit_status'] == '2') {
+            /**user_auth_status=1用户认证状态成功**/
             $data['user_auth_status'] = '1';
         } else {
-            //@todo 未认证成功 抛出提示
-            $this->returnJsonMsg('1038', [], Common::C('code', '1038'));
-            /**user_auth_status=2表示认证失败**/
+            //@todo 20151020 未进行实名认证也可以发布服务
+            //$this->returnJsonMsg('1052', [], Common::C('code', '1052'));
+            /**user_auth_status=2用户认证状态失败**/
             $data['user_auth_status'] = '2';
         }
         $service_model = new Service();
@@ -290,27 +358,23 @@ class ServiceController extends BaseController
             $this->returnJsonMsg('1020', [], Common::C('code', '1020'));
         }
         $data['audit_status'] = '0';
-        /**查看该用户是否已经认证**/
-        $service_setting_info = $this->_getSettingInfo($data['mobile'], 'audit_status,status', 2);
-        $audit_status = $service_setting_info['audit_status'];
-        $status       = $service_setting_info['status'];
-        if ($audit_status == "") {
-            $this->returnJsonMsg('1019', [], Common::C('code', '1019'));
-        }
+        $status = $this->_getSettingInfo($data['mobile'], 'status', 1);
         if ($status == '2') {
             /**servicer_info_status=1表示服务人(店铺)信息审核成功**/
             $data['servicer_info_status'] = '1';
         } else {
-            //@todo 未审核成功 抛出提示
             $this->returnJsonMsg('1044', [], Common::C('code', '1044'));
             /**servicer_info_status=2表示服务人(店铺)信息审核成功**/
             $data['servicer_info_status'] = '2';
         }
-        if ($audit_status == '2') {
-            /**user_auth_status=1表示认证成功**/
+        $user_info = $this->_getUserInfo($data['mobile']);
+        if ($user_info['card_audit_status'] == '2') {
+            /**user_auth_status=1用户认证状态成功**/
             $data['user_auth_status'] = '1';
         } else {
-            /**user_auth_status=2表示认证失败**/
+            //@todo 20151020 未进行实名认证也可以发布服务
+            //$this->returnJsonMsg('1052', [], Common::C('code', '1052'));
+            /**user_auth_status=2用户认证状态失败**/
             $data['user_auth_status'] = '2';
         }
         $rs = $service_model->updateInfo($data, $where);
@@ -330,20 +394,28 @@ class ServiceController extends BaseController
         if (empty($where['id'])) {
             $this->returnJsonMsg('1010', [], Common::C('code', '1010'));
         }
-        $where['community_id'] = RequestHelper::get('community_id', '0', 'intval');
-        if (empty($where['community_id'])) {
-            $this->returnJsonMsg('642', [], Common::C('code', '642'));
-        }
-        $where['community_city_id'] = RequestHelper::get('community_city_id', '0', 'intval');
-        if (empty($where['community_city_id'])) {
-            $this->returnJsonMsg('645', [], Common::C('code', '645'));
-        }
+//        $where['community_id'] = RequestHelper::get('community_id', '0', 'intval');
+//        if (empty($where['community_id'])) {
+//            $this->returnJsonMsg('642', [], Common::C('code', '642'));
+//        }
+//        $where['community_city_id'] = RequestHelper::get('community_city_id', '0', 'intval');
+//        if (empty($where['community_city_id'])) {
+//            $this->returnJsonMsg('645', [], Common::C('code', '645'));
+//        }
         $type = RequestHelper::get('type', '0', 'intval');
         if (empty($type)) {
             $this->returnJsonMsg('1008', [], Common::C('code', '1008'));
         }
         $fields = '*';
         if ($type == '1') {
+            $lat = RequestHelper::get('lat', '0', '');
+            if (empty($lat)) {
+                $this->returnJsonMsg('1057', [], Common::C('code', '1057'));
+            }
+            $lng = RequestHelper::get('lng', '0', '');
+            if (empty($lng)) {
+                $this->returnJsonMsg('1056', [], Common::C('code', '1056'));
+            }
             /**在首页或服务广场页查看服务详情**/
             $where['status']               = '1';
             $where['user_auth_status']     = '1';
@@ -382,10 +454,9 @@ class ServiceController extends BaseController
         if ($type == '1') {
             /**获取服务设置信息**/
             $service_setting_where['uid']          = $info['uid'];
-            $service_setting_where['audit_status'] = '2';
             $service_setting_where['status']       = '2';
             $service_setting_where['is_deleted']   = '2';
-            $service_setting_fields = 'uid,mobile,name,search_address';
+            $service_setting_fields = 'uid,mobile,name,search_address,lat,lng';
             $service_setting_model = new ServiceSetting();
             $service_setting_info = $service_setting_model->getInfo($service_setting_where, true, $service_setting_fields);
             if (empty($service_setting_info)) {
@@ -395,12 +466,13 @@ class ServiceController extends BaseController
                 $user_info = $this->_getUserInfo($service_setting_info['mobile']);
                 $service_setting_info['user_avatar'] = $user_info['avatar'];
             }
-            unset($service_setting_info['mobile']);
             $service_setting_info['star']     = '5';
-            //@todo 距离需求请求仪能的接口
-            $service_setting_info['distance'] = '1.0公里';
+            //计算距离
+            $service_setting_info['distance'] = Common::getDistance($lat, $lng, $service_setting_info['lat'], $service_setting_info['lng']);
             $info['service_setting'] = $service_setting_info;
             unset($info['uid']);
+            unset($info['service_setting']['lat']);
+            unset($info['service_setting']['lng']);
         }
         $this->returnJsonMsg('200', $info, Common::C('code', '200'));
     }
@@ -491,6 +563,14 @@ class ServiceController extends BaseController
         if (empty($community_city_id)) {
             $this->returnJsonMsg('645', [], Common::C('code', '645'));
         }
+        $lat = RequestHelper::get('lat', '0', '');
+        if (empty($lat)) {
+            $this->returnJsonMsg('1057', [], Common::C('code', '1057'));
+        }
+        $lng = RequestHelper::get('lng', '0', '');
+        if (empty($lng)) {
+            $this->returnJsonMsg('1056', [], Common::C('code', '1056'));
+        }
         $page      = RequestHelper::get('page', '1', 'intval');
         $page_size = RequestHelper::get('page_size', '6', 'intval');
         if ($page_size > Common::C('maxPageSize')) {
@@ -516,9 +596,10 @@ class ServiceController extends BaseController
             if (!empty($v['mobile'])) {
                 $user_info = $this->_getUserInfo($v['mobile']);
                 $list[$k]['user_avatar']    = $user_info['avatar'];
-                $list[$k]['search_address'] = $this->_getSettingInfo($v['mobile'], 'search_address', 1);
-                //@todo 距离需求请求仪能的接口
-                $list[$k]['distance']       = '1.5公里';
+                $service_setting_info = $this->_getSettingInfo($v['mobile'], 'search_address,lng,lat', 2);
+                $list[$k]['search_address'] = $service_setting_info['search_address'];
+                //判断距离
+                $list[$k]['distance']       = Common::getDistance($lat, $lng, $service_setting_info['lat'], $service_setting_info['lng']);
             }
             $list[$k]['price'] = $v['price'].$this->_getServiceUnit($v['unit']);
             unset($list[$k]['mobile']);
@@ -558,6 +639,14 @@ class ServiceController extends BaseController
             if (empty($community_city_id)) {
                 $this->returnJsonMsg('645', [], Common::C('code', '645'));
             }
+            $lat = RequestHelper::get('lat', '0', '');
+            if (empty($lat)) {
+                $this->returnJsonMsg('1057', [], Common::C('code', '1057'));
+            }
+            $lng = RequestHelper::get('lng', '0', '');
+            if (empty($lng)) {
+                $this->returnJsonMsg('1056', [], Common::C('code', '1056'));
+            }
             $page      = RequestHelper::get('page', '1', 'intval');
             $page_size = RequestHelper::get('page_size', '6', 'intval');
             if ($page_size > Common::C('maxPageSize')) {
@@ -583,9 +672,10 @@ class ServiceController extends BaseController
                 if (!empty($v['mobile'])) {
                     $user_info = $this->_getUserInfo($v['mobile']);
                     $list[$k]['user_avatar']    = $user_info['avatar'];
-                    $list[$k]['search_address'] = $this->_getSettingInfo($v['mobile'], 'search_address', 1);
-                    //@todo 距离需求请求仪能的接口
-                    $list[$k]['distance']       = '1.5公里';
+                    $service_setting_info = $this->_getSettingInfo($v['mobile'], 'search_address,lng,lat', 2);
+                    $list[$k]['search_address'] = $service_setting_info['search_address'];
+                    //判断距离
+                    $list[$k]['distance']       = Common::getDistance($lat, $lng, $service_setting_info['lat'], $service_setting_info['lng']);
                 }
                 $list[$k]['price'] = $v['price'].$this->_getServiceUnit($v['unit']);
                 unset($list[$k]['mobile']);
@@ -654,13 +744,12 @@ class ServiceController extends BaseController
         if (!Common::validateMobile($where['mobile'])) {
             $this->returnJsonMsg('605', [], Common::C('code', '605'));
         }
-        $fields = 'name,description,province_id,search_address,details_address,lng,lat,user_name,user_card,user_description,audit_status';
+        $fields = 'name,description,province_id,search_address,details_address,lng,lat,status';
         $service_setting_model = new ServiceSetting();
         $info = $service_setting_model->getInfo($where, true, $fields);
         if (empty($info)) {
             $this->returnJsonMsg('1015', [], Common::C('code', '1015'));
         }
-        //@todo 身份证号码需要处理，考虑是否需要返回
         $this->returnJsonMsg('200', $info, Common::C('code', '200'));
     }
 
@@ -702,55 +791,43 @@ class ServiceController extends BaseController
         if (!empty($details_address)) {
             $update_data['details_address'] = $details_address;
         }
-        $lng = RequestHelper::post('lng', '', '');
+        $lng = RequestHelper::post('lng', '0', '');
         if (!empty($lng)) {
             $update_data['lng'] = $lng;
         }
-        $lat = RequestHelper::post('lat', '', '');
+        $lat = RequestHelper::post('lat', '0', '');
         if (!empty($lat)) {
             $update_data['lat'] = $lat;
-        }
-        $user_name = RequestHelper::post('user_name', '', '');
-        if (!empty($user_name)) {
-            $update_data['user_name'] = $user_name;
-        }
-        $user_card = RequestHelper::post('user_card', '', '');
-        if (!empty($user_card)) {
-            $update_data['user_card'] = $user_card;
-            //验证身份证
-            //@todo 通过身份证号未能获取到地址所在地
-            if (strlen($update_data['user_card']) != '18') {
-                $this->returnJsonMsg('1017', [], Common::C('code', '1017'));
-            }
-            if (!Common::isIdCard($update_data['user_card'])) {
-                $this->returnJsonMsg('1018', [], Common::C('code', '1018'));
-            }
-            $update_data['user_age'] = Common::getAgeByCard($update_data['user_card']);
-            $update_data['user_sex'] = Common::getSexByCard($update_data['user_card']);
-        }
-        $user_description = RequestHelper::post('user_description', '', '');
-        if (!empty($user_description)) {
-            $update_data['user_description'] = $user_description;
         }
         if (empty($update_data)) {
             $this->returnJsonMsg('1016', [], Common::C('code', '1016'));
         }
         $service_setting_model = new ServiceSetting();
-        $info = $service_setting_model->getInfo($where, true, 'id,audit_status');
+        $info = $service_setting_model->getInfo($where, true, 'id');
         if (empty($info)) {
             /**执行添加**/
             $update_data['uid']    = $where['uid'];
             $update_data['mobile'] = $where['mobile'];
+            if (empty($update_data['name'])) {
+                $this->returnJsonMsg('1058', [], Common::C('code', '1058'));
+            }
+            if (empty($update_data['province_id'])) {
+                $this->returnJsonMsg('638', [], Common::C('code', '638'));
+            }
+            if (empty($update_data['search_address'])) {
+                $this->returnJsonMsg('1054', [], Common::C('code', '1054'));
+            }
+            if (empty($update_data['details_address'])) {
+                $this->returnJsonMsg('1055', [], Common::C('code', '1055'));
+            }
+            if (empty($update_data['lng'])) {
+                $this->returnJsonMsg('1056', [], Common::C('code', '1056'));
+            }
+            if (empty($update_data['lat'])) {
+                $this->returnJsonMsg('1057', [], Common::C('code', '1057'));
+            }
             $rs = $service_setting_model->insertInfo($update_data);
         } else {
-            if (!empty($user_name) || !empty($user_card) || !empty($user_description)) {
-                //审核状态 0=未审核1=审核中2=审核成功3=审核失败
-                if ($info['audit_status'] == '1') {
-                    $this->returnJsonMsg('1021', [], Common::C('code', '1021'));
-                }
-                $update_data['audit_status'] = '0';
-            }
-            $update_data['status']      = '1'; //禁用  编辑后信息需要审核
             $update_data['update_time'] = date('Y-m-d H:i:s', time());
             /**执行更新**/
             $rs = $service_setting_model->updateInfo($update_data, $where);
@@ -771,13 +848,23 @@ class ServiceController extends BaseController
         if (empty($type)) {
             $this->returnJsonMsg('1008', [], Common::C('code', '1008'));
         }
-        $service_category_model = new ServiceCategory();
-        $where['pid']        = '0';
-        $where['status']     = '2';
-        $where['is_deleted'] = '2';
-        $fields = 'id,name,image';
-        $order  = 'sort desc';
-        $info = $service_category_model->getList($where, $fields, $order);
+        $info = [];
+        //get缓存
+        $cache_key = 'service_top_category';
+        $cache_rs = SsdbHelper::Cache('get', $cache_key);
+        if ($cache_rs) {
+            $info = $cache_rs;
+        } else {
+            $service_category_model = new ServiceCategory();
+            $where['pid']        = '0';
+            $where['status']     = '2';
+            $where['is_deleted'] = '2';
+            $fields = 'id,name,image';
+            $order  = 'sort desc';
+            $info = $service_category_model->getList($where, $fields, $order);
+            //set缓存
+            SsdbHelper::Cache('set', $cache_key, $info, Common::C('SSDBCacheTime'));
+        }
         if (!empty($info)) {
             foreach ($info as $k => $v) {
                 if ($v['image']) {
@@ -818,11 +905,20 @@ class ServiceController extends BaseController
         if (!Common::validateMobile($data['mobile'])) {
             $this->returnJsonMsg('605', [], Common::C('code', '605'));
         }
-        $unit_model = new ServiceUnit();
-        $unit_where['status'] = '2';
-        $unit_list = $unit_model->getList($unit_where, 'id,unit', 'id asc');
-        if (empty($unit_list)) {
-            $this->returnJsonMsg('1039', [], Common::C('code', '1039'));
+        //get缓存
+        $cache_key = 'service_unit';
+        $cache_rs = SsdbHelper::Cache('get', $cache_key);
+        if ($cache_rs) {
+            $unit_list = $cache_rs;
+        } else {
+            $unit_model = new ServiceUnit();
+            $unit_where['status'] = '2';
+            $unit_list = $unit_model->getList($unit_where, 'id,unit', 'id asc');
+            if (empty($unit_list)) {
+                $this->returnJsonMsg('1039', [], Common::C('code', '1039'));
+            }
+            //set缓存
+            SsdbHelper::Cache('set', $cache_key, $unit_list, Common::C('SSDBCacheTime'));
         }
         $this->returnJsonMsg('200', $unit_list, Common::C('code', '200'));
     }
@@ -833,7 +929,7 @@ class ServiceController extends BaseController
      * @param int    $type   表示 1=一个参数 返回一个字段值 2=多个参数 返回数组
      * @return string
      */
-    private function _getSettingInfo($mobile = '',$params = '',$type = 1)
+    private function _getSettingInfo($mobile = '', $params = '', $type = 1)
     {
         if (!empty($mobile) && !empty($params)) {
             $service_setting_model = new ServiceSetting();
@@ -880,13 +976,22 @@ class ServiceController extends BaseController
             $rs['image'] = '';
         }
         if (!empty($pid)) {
-            $service_category_model = new ServiceCategory();
-            $fields = 'id,name,image';
-            $where['pid']        = $pid;
-            $where['status']     = '2';
-            $where['is_deleted'] = '2';
-            $order  = 'sort desc';
-            $info = $service_category_model->getList($where, $fields, $order);
+            //get缓存
+            $cache_key = 'service_son_category_'.$pid;
+            $cache_rs = SsdbHelper::Cache('get', $cache_key);
+            if ($cache_rs) {
+                $info = $cache_rs;
+            } else {
+                $service_category_model = new ServiceCategory();
+                $fields = 'id,name,image';
+                $where['pid']        = $pid;
+                $where['status']     = '2';
+                $where['is_deleted'] = '2';
+                $order  = 'sort desc';
+                $info = $service_category_model->getList($where, $fields, $order);
+                //set缓存
+                SsdbHelper::Cache('set', $cache_key, $info, Common::C('SSDBCacheTime'));
+            }
             if (!empty($type)) {
                 array_unshift($info, $rs);//向数组插入元素
             }
@@ -909,18 +1014,30 @@ class ServiceController extends BaseController
      */
     private function _getUserInfo($mobile = '')
     {
-        $user_base_info_model = new UserBasicInfo();
-        $user_base_info_where['mobile'] = $mobile;
-        $user_base_info_fields = 'avatar';
+        $rs['realname'] = '';
         $rs['avatar']   = '';
         $rs['nickname'] = '';
-        $rs = $user_base_info_model->getInfo($user_base_info_where, true, $user_base_info_fields);
+        $rs['sex']      = '0';
+        $rs['card_audit_status'] = '0';
+        //get缓存
+        $cache_key = 'profile_'.$mobile;
+        $cache_rs = SsdbHelper::Cache('get', $cache_key);
+        if ($cache_rs) {
+            $rs = $cache_rs;
+        } else {
+            $user_base_info_model = new UserBasicInfo();
+            $user_base_info_where['mobile'] = $mobile;
+            $user_base_info_fields = 'realname,avatar,nickname,sex,card_audit_status';
+            $rs = $user_base_info_model->getInfo($user_base_info_where, true, $user_base_info_fields);
+        }
         if (!empty($rs)) {
             if ($rs['avatar']) {
                 if (!strstr($rs['avatar'], 'http')) {
                     $rs['avatar'] = Common::C('imgHost').$rs['avatar'];
                 }
             }
+            $rs['sex'] = empty($rs['sex']) ? "0" : $rs['sex'];
+            $rs['card_audit_status'] = empty($rs['card_audit_status']) ? "0" : $rs['card_audit_status'];
         }
         return $rs;
     }
@@ -934,9 +1051,18 @@ class ServiceController extends BaseController
     {
         $unit = '';
         if (!empty($unit_id)) {
-            $unit_model = new ServiceUnit();
-            $unit_where['status'] = '2';
-            $unit_list = $unit_model->getList($unit_where, 'id,unit', 'id asc');
+            //get缓存
+            $cache_key = 'service_unit';
+            $cache_rs = SsdbHelper::Cache('get', $cache_key);
+            if ($cache_rs) {
+                $unit_list = $cache_rs;
+            } else {
+                $unit_model = new ServiceUnit();
+                $unit_where['status'] = '2';
+                $unit_list = $unit_model->getList($unit_where, 'id,unit', 'id asc');
+                //set缓存
+                SsdbHelper::Cache('set', $cache_key, $unit_list, Common::C('SSDBCacheTime'));
+            }
             if (!empty($unit_list)) {
                 foreach ($unit_list as $k => $v) {
                     if ($unit_list[$k]['id'] == $unit_id) {

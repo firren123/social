@@ -93,11 +93,12 @@ class ServiceorderController extends BaseController
         }
         /**获取服务信息**/
         $service_model = new Service();
-        $service_where['id']               = $data['service_id'];
-        $service_where['audit_status']     = '2';
-        $service_where['status']           = '1';
-        $service_where['user_auth_status'] = '1';
-        $service_where['is_deleted']       = '2';
+        $service_where['id']                   = $data['service_id'];
+        $service_where['audit_status']         = '2';
+        $service_where['status']               = '1';
+        $service_where['user_auth_status']     = '1';
+        $service_where['servicer_info_status'] = '1';
+        $service_where['is_deleted']           = '2';
         $service_fields = 'uid,mobile,image,title,price,unit,service_way,description';
         $service_info = $service_model->getInfo($service_where, true, $service_fields);
         if (empty($service_info)) {
@@ -109,6 +110,9 @@ class ServiceorderController extends BaseController
         $order_model = new Order();
         //@todo 确定创建订单号为什么用省份？35=全国
         $data['order_sn']                 = $order_model->createSn('35', $data['mobile']);
+        if (empty($data['order_sn'])) {
+            $this->returnJsonMsg('1053', [], Common::C('code', '1053'));
+        }
         $data['service_uid']              = $service_info['uid'];
         $data['service_mobile']           = $service_info['mobile'];
         $data['service_way']              = $service_info['service_way'];
@@ -133,8 +137,9 @@ class ServiceorderController extends BaseController
         if (!empty($day) && !empty($hour)) {
             $time_status = $service_time_model->updateTimeStatus($service_info['uid'], $day, $hour);
         }
+        $rs_info['order_sn'] = $data['order_sn'];
         //@todo 应该用事务 判断这两个逻辑。
-        $this->returnJsonMsg('200', [], Common::C('code', '200'));
+        $this->returnJsonMsg('200', $rs_info, Common::C('code', '200'));
     }
 
     /**
@@ -169,7 +174,7 @@ class ServiceorderController extends BaseController
             if (!Common::validateMobile($where['mobile'])) {
                 $this->returnJsonMsg('605', [], Common::C('code', '605'));
             }
-            $fields = 'service_info_title,service_mobile as mobile,appointment_service_time,appointment_service_address,status,pay_status,order_sn';
+            $fields = 'service_info_title,service_mobile as mobile,appointment_service_time,appointment_service_address,status,pay_status,order_sn,total,service_id,service_info_image';
             $data = $this->_getStatus($type, $order_status);
             if (!empty($data['and_where'])) {
                 $and_where = $data['and_where'];
@@ -180,6 +185,12 @@ class ServiceorderController extends BaseController
                 }
                 if (!empty($data['where']['pay_status'])) {
                     $where['pay_status'] = $data['where']['pay_status'];
+                }
+                if (isset($data['where']['user_evaluation_status'])) {
+                    $where['user_evaluation_status'] = $data['where']['user_evaluation_status'];
+                }
+                if (isset($data['where']['servicer_evaluation_status'])) {
+                    $where['servicer_evaluation_status'] = $data['where']['servicer_evaluation_status'];
                 }
             }
         } else {
@@ -195,7 +206,7 @@ class ServiceorderController extends BaseController
             if (!Common::validateMobile($where['service_mobile'])) {
                 $this->returnJsonMsg('605', [], Common::C('code', '605'));
             }
-            $fields = 'service_info_title,mobile,appointment_service_time,appointment_service_address,status,pay_status,order_sn';
+            $fields = 'service_info_title,mobile,appointment_service_time,appointment_service_address,status,pay_status,order_sn,total,service_id,service_info_image';
             $data = $this->_getStatus($type, $order_status);
             if (!empty($data['and_where'])) {
                 $and_where = $data['and_where'];
@@ -206,6 +217,12 @@ class ServiceorderController extends BaseController
                 }
                 if (!empty($data['where']['pay_status'])) {
                     $where['pay_status'] = $data['where']['pay_status'];
+                }
+                if (isset($data['where']['user_evaluation_status'])) {
+                    $where['user_evaluation_status'] = $data['where']['user_evaluation_status'];
+                }
+                if (isset($data['where']['servicer_evaluation_status'])) {
+                    $where['servicer_evaluation_status'] = $data['where']['servicer_evaluation_status'];
                 }
             }
         }
@@ -221,16 +238,19 @@ class ServiceorderController extends BaseController
         }
         $rs_info = [];
         foreach ($list as $k => $v) {
-            $rs_info[$k]['day']        = date('Y-m-d', strtotime($v['appointment_service_time']));
-            $rs_info[$k]['week']       = "周".Common::getWeek($rs_info[$k]['day']);
-            $rs_info[$k]['hour']       = date('H', strtotime($v['appointment_service_time']));
-            $rs_info[$k]['title']      = $v['service_info_title'];
-            $rs_info[$k]['mobile']     = $v['mobile'];
-            $rs_info[$k]['name']       = $this->_getUserInfo($v['mobile']);
-            $rs_info[$k]['address']    = $v['appointment_service_address'];
-            $rs_info[$k]['status']     = $v['status'];
-            $rs_info[$k]['pay_status'] = $v['pay_status'];
-            $rs_info[$k]['order_sn']   = $v['order_sn'];
+            $rs_info[$k]['day']                = date('Y-m-d', strtotime($v['appointment_service_time']));
+            $rs_info[$k]['week']               = "周".Common::getWeek($rs_info[$k]['day']);
+            $rs_info[$k]['hour']               = date('H', strtotime($v['appointment_service_time']));
+            $rs_info[$k]['title']              = $v['service_info_title'];
+            $rs_info[$k]['mobile']             = $v['mobile'];
+            $rs_info[$k]['name']               = $this->_getUserInfo($v['mobile'], 'nickname');
+            $rs_info[$k]['address']            = $v['appointment_service_address'];
+            $rs_info[$k]['status']             = $v['status'];
+            $rs_info[$k]['pay_status']         = $v['pay_status'];
+            $rs_info[$k]['order_sn']           = $v['order_sn'];
+            $rs_info[$k]['total']              = $v['total'];
+            $rs_info[$k]['service_id']         = $v['service_id'];
+            $rs_info[$k]['service_info_image'] = $this->_formatImg($v['service_info_image']);
         }
         $this->returnJsonMsg('200', $rs_info, Common::C('code', '200'));
     }
@@ -241,31 +261,62 @@ class ServiceorderController extends BaseController
      */
     public function actionDetail()
     {
-        $where['uid'] = RequestHelper::get('uid', '', '');
-        if (empty($where['uid'])) {
-            $this->returnJsonMsg('621', [], Common::C('code', '621'));
+        $type = RequestHelper::get('type', '0', 'intval');  //1=体验方 2=服务方
+        if (empty($type)) {
+            $this->returnJsonMsg('1008', [], Common::C('code', '1008'));
         }
-        $where['mobile'] = RequestHelper::get('mobile', '', '');
-        if (empty($where['mobile'])) {
-            $this->returnJsonMsg('604', [], Common::C('code', '604'));
+        if ($type !='1' && $type !='2') {
+            $this->returnJsonMsg('1014', [], Common::C('code', '1014'));
         }
-        if (!Common::validateMobile($where['mobile'])) {
-            $this->returnJsonMsg('605', [], Common::C('code', '605'));
+        if ($type == '1') {
+            $where['uid'] = RequestHelper::get('uid', '', '');
+            if (empty($where['uid'])) {
+                $this->returnJsonMsg('621', [], Common::C('code', '621'));
+            }
+            $where['mobile'] = RequestHelper::get('mobile', '', '');
+            if (empty($where['mobile'])) {
+                $this->returnJsonMsg('604', [], Common::C('code', '604'));
+            }
+            if (!Common::validateMobile($where['mobile'])) {
+                $this->returnJsonMsg('605', [], Common::C('code', '605'));
+            }
+            $fields = 'service_id,service_mobile,service_way,total,service_info_title,service_info_price,service_info_image,service_info_unit,appointment_service_time,appointment_service_address,remark,status,pay_status,user_evaluation_status,servicer_evaluation_status';
+        } else {
+            $where['service_uid'] = RequestHelper::get('uid', '', '');
+            if (empty($where['service_uid'])) {
+                $this->returnJsonMsg('621', [], Common::C('code', '621'));
+            }
+            $where['service_mobile'] = RequestHelper::get('mobile', '', '');
+            if (empty($where['service_mobile'])) {
+                $this->returnJsonMsg('604', [], Common::C('code', '604'));
+            }
+            if (!Common::validateMobile($where['service_mobile'])) {
+                $this->returnJsonMsg('605', [], Common::C('code', '605'));
+            }
+            $fields = 'service_id,mobile,service_way,total,service_info_title,service_info_price,service_info_image,service_info_unit,appointment_service_time,appointment_service_address,remark,status,pay_status,user_evaluation_status,servicer_evaluation_status';
         }
         $where['order_sn'] = RequestHelper::get('order_sn', '', '');
         if (empty($where['order_sn'])) {
             $this->returnJsonMsg('1042', [], Common::C('code', '1042'));
         }
         $service_order_model = new ServiceOrder();
-        $fields = 'service_id,service_mobile,service_way,total,service_info_title,service_info_price,service_info_unit,appointment_service_time,appointment_service_address,remark,status,pay_status';
         $info = $service_order_model->getInfo($where, true, $fields);
         if (empty($info)) {
             $this->returnJsonMsg('1043', [], Common::C('code', '1043'));
         }
         $info['service_info_price'] = $info['service_info_price'].$this->_getServiceUnit($info['service_info_unit']);
-        $info['contact'] = $this->_getSettingInfo($info['service_mobile'], 'user_name', 1);
-        $info['contact_mobile'] = $info['service_mobile'];
-        unset($info['service_mobile']);
+        if (!empty($info['service_info_image'])) {
+            $info['service_info_image'] = Common::C('imgHost').$info['service_info_image'];
+        }
+        if ($type == '1') {
+            $info['contact'] = $this->_getUserInfo($info['service_mobile'], 'realname');
+            $info['contact_mobile'] = $info['service_mobile'];
+            unset($info['service_mobile']);
+        } else {
+            $info['contact'] = $this->_getUserInfo($info['mobile'], 'realname');
+            $info['contact_mobile'] = $info['mobile'];
+            unset($info['mobile']);
+        }
         unset($info['service_info_unit']);
         $this->returnJsonMsg('200', $info, Common::C('code', '200'));
     }
@@ -276,15 +327,15 @@ class ServiceorderController extends BaseController
      */
     public function actionStartService()
     {
-        $where['uid'] = RequestHelper::post('uid', '', '');
-        if (empty($where['uid'])) {
+        $where['service_uid'] = RequestHelper::post('uid', '', '');
+        if (empty($where['service_uid'])) {
             $this->returnJsonMsg('621', [], Common::C('code', '621'));
         }
-        $where['mobile'] = RequestHelper::post('mobile', '', '');
-        if (empty($where['mobile'])) {
+        $where['service_mobile'] = RequestHelper::post('mobile', '', '');
+        if (empty($where['service_mobile'])) {
             $this->returnJsonMsg('604', [], Common::C('code', '604'));
         }
-        if (!Common::validateMobile($where['mobile'])) {
+        if (!Common::validateMobile($where['service_mobile'])) {
             $this->returnJsonMsg('605', [], Common::C('code', '605'));
         }
         $where['order_sn'] = RequestHelper::post('order_sn', '', '');
@@ -300,6 +351,7 @@ class ServiceorderController extends BaseController
             $this->returnJsonMsg('1048', [], Common::C('code', '1048'));
         }
         $update_data['status'] = '3';
+        $update_data['start_time'] = date("Y-m-d H:i:s", time());
         $rs = $order_model->updateInfo($update_data, $where);
         if (!$rs) {
             $this->returnJsonMsg('400', [], Common::C('code', '400'));
@@ -313,15 +365,15 @@ class ServiceorderController extends BaseController
      */
     public function actionConfirmService()
     {
-        $where['uid'] = RequestHelper::post('uid', '', '');
-        if (empty($where['uid'])) {
+        $where['service_uid'] = RequestHelper::post('uid', '', '');
+        if (empty($where['service_uid'])) {
             $this->returnJsonMsg('621', [], Common::C('code', '621'));
         }
-        $where['mobile'] = RequestHelper::post('mobile', '', '');
-        if (empty($where['mobile'])) {
+        $where['service_mobile'] = RequestHelper::post('mobile', '', '');
+        if (empty($where['service_mobile'])) {
             $this->returnJsonMsg('604', [], Common::C('code', '604'));
         }
-        if (!Common::validateMobile($where['mobile'])) {
+        if (!Common::validateMobile($where['service_mobile'])) {
             $this->returnJsonMsg('605', [], Common::C('code', '605'));
         }
         $where['order_sn'] = RequestHelper::post('order_sn', '', '');
@@ -337,6 +389,7 @@ class ServiceorderController extends BaseController
             $this->returnJsonMsg('1049', [], Common::C('code', '1049'));
         }
         $update_data['status'] = '1';
+        $update_data['confirm_time'] = date("Y-m-d H:i:s", time());
         $rs = $order_model->updateInfo($update_data, $where);
         if (!$rs) {
             $this->returnJsonMsg('400', [], Common::C('code', '400'));
@@ -345,21 +398,42 @@ class ServiceorderController extends BaseController
     }
 
     /**
-     * 完成服务 - 服务方调用
+     * 完成服务
      * @return array
      */
     public function actionCompleteService()
     {
-        $where['uid'] = RequestHelper::post('uid', '', '');
-        if (empty($where['uid'])) {
-            $this->returnJsonMsg('621', [], Common::C('code', '621'));
+        $type = RequestHelper::post('type', '0', 'intval');  //1=体验方 2=服务方
+        if (empty($type)) {
+            $this->returnJsonMsg('1008', [], Common::C('code', '1008'));
         }
-        $where['mobile'] = RequestHelper::post('mobile', '', '');
-        if (empty($where['mobile'])) {
-            $this->returnJsonMsg('604', [], Common::C('code', '604'));
+        if ($type !='1' && $type !='2') {
+            $this->returnJsonMsg('1014', [], Common::C('code', '1014'));
         }
-        if (!Common::validateMobile($where['mobile'])) {
-            $this->returnJsonMsg('605', [], Common::C('code', '605'));
+        if ($type == '1') {
+            $where['uid'] = RequestHelper::post('uid', '', '');
+            if (empty($where['uid'])) {
+                $this->returnJsonMsg('621', [], Common::C('code', '621'));
+            }
+            $where['mobile'] = RequestHelper::post('mobile', '', '');
+            if (empty($where['mobile'])) {
+                $this->returnJsonMsg('604', [], Common::C('code', '604'));
+            }
+            if (!Common::validateMobile($where['mobile'])) {
+                $this->returnJsonMsg('605', [], Common::C('code', '605'));
+            }
+        } else {
+            $where['service_uid'] = RequestHelper::post('uid', '', '');
+            if (empty($where['service_uid'])) {
+                $this->returnJsonMsg('621', [], Common::C('code', '621'));
+            }
+            $where['service_mobile'] = RequestHelper::post('mobile', '', '');
+            if (empty($where['service_mobile'])) {
+                $this->returnJsonMsg('604', [], Common::C('code', '604'));
+            }
+            if (!Common::validateMobile($where['service_mobile'])) {
+                $this->returnJsonMsg('605', [], Common::C('code', '605'));
+            }
         }
         $where['order_sn'] = RequestHelper::post('order_sn', '', '');
         if (empty($where['order_sn'])) {
@@ -370,10 +444,16 @@ class ServiceorderController extends BaseController
         if (empty($info)) {
             $this->returnJsonMsg('1043', [], Common::C('code', '1043'));
         }
-        if ($info['status'] != '3' || $info['pay_status'] != '1') {
+        if (($info['status'] != '3' && $info['status'] != '4') || $info['pay_status'] != '1') {
             $this->returnJsonMsg('1051', [], Common::C('code', '1051'));
         }
-        $update_data['status'] = '4';
+        if ($type == '1') {
+            $update_data['status'] = '5';
+            $update_data['user_complete_time'] = date("Y-m-d H:i:s", time());
+        } else {
+            $update_data['status'] = '4';
+            $update_data['servicer_complete_time'] = date("Y-m-d H:i:s", time());
+        }
         $rs = $order_model->updateInfo($update_data, $where);
         if (!$rs) {
             $this->returnJsonMsg('400', [], Common::C('code', '400'));
@@ -411,6 +491,7 @@ class ServiceorderController extends BaseController
             $this->returnJsonMsg('1050', [], Common::C('code', '1050'));
         }
         $update_data['status'] = '2';
+        $update_data['cancel_time'] = date("Y-m-d H:i:s", time());
         $rs = $order_model->updateInfo($update_data, $where);
         if (!$rs) {
             $this->returnJsonMsg('400', [], Common::C('code', '400'));
@@ -424,6 +505,13 @@ class ServiceorderController extends BaseController
      */
     public function actionEvaluation()
     {
+        $where['type']     = RequestHelper::post('type', '0', 'intval');
+        if (empty($where['type'])) {
+            $this->returnJsonMsg('1008', [], Common::C('code', '1008'));
+        }
+        if ($where['type'] !='1' && $where['type'] !='2') {
+            $this->returnJsonMsg('1014', [], Common::C('code', '1014'));
+        }
         $where['uid'] = RequestHelper::post('uid', '', '');
         if (empty($where['uid'])) {
             $this->returnJsonMsg('621', [], Common::C('code', '621'));
@@ -439,15 +527,8 @@ class ServiceorderController extends BaseController
         if (empty($where['order_sn'])) {
             $this->returnJsonMsg('1042', [], Common::C('code', '1042'));
         }
-        $where['type']     = RequestHelper::post('type', '0', 'intval');
-        $star = RequestHelper::post('type', '0', 'intval');
+        $star = RequestHelper::post('star', '0', 'intval');
         $content = RequestHelper::post('content', '', '');
-        if (empty($where['type'])) {
-            $this->returnJsonMsg('1008', [], Common::C('code', '1008'));
-        }
-        if ($where['type'] !='1' && $where['type'] !='2') {
-            $this->returnJsonMsg('1014', [], Common::C('code', '1014'));
-        }
         $evaluation_model = new ServiceOrderEvaluation();
         $info = $evaluation_model->getInfo($where, true, 'id');
         if (!empty($info)) {
@@ -463,10 +544,10 @@ class ServiceorderController extends BaseController
         /**更新订单状态**/
         if ($where['type'] == '1') {
             /**体验方**/
-            $update_data['status'] = '5';
+            $update_data['user_evaluation_status'] = '1';
         } else {
             /**服务方**/
-            $update_data['status'] = '6';
+            $update_data['servicer_evaluation_status'] = '1';
         }
         $order_model = new ServiceOrder();
         $order_where['order_sn'] = $where['order_sn'];
@@ -482,7 +563,7 @@ class ServiceorderController extends BaseController
      * @param int    $type   表示 1=一个参数 返回一个字段值 2=多个参数 返回数组
      * @return string
      */
-    private function _getSettingInfo($mobile = '',$params = '',$type = 1)
+    private function _getSettingInfo($mobile = '', $params = '', $type = 1)
     {
         if (!empty($mobile) && !empty($params)) {
             $service_setting_model = new ServiceSetting();
@@ -503,16 +584,17 @@ class ServiceorderController extends BaseController
     /**
      * 获取用户信息
      * @param string $mobile 电话
+     * @param string $param  参数
      * @return array
      */
-    private function _getUserInfo($mobile = '')
+    private function _getUserInfo($mobile = '', $param = '')
     {
         $user_base_info_model = new UserBasicInfo();
         $user_base_info_where['mobile'] = $mobile;
-        $user_base_info_fields = 'nickname';
-        $rs['nickname'] = '';
+        $user_base_info_fields = $param;
+        $rs[$param] = '';
         $rs = $user_base_info_model->getInfo($user_base_info_where, true, $user_base_info_fields);
-        return $rs['nickname'];
+        return $rs[$param];
     }
 
     /**
@@ -555,41 +637,59 @@ class ServiceorderController extends BaseController
             /**体验方**/
             switch ($status) {
                 case 1:
-                    $data['and_where'] = ['or', ['=', 'status', '0' ], ['=', 'status', '1'], ['=', 'status', '2']];
+                    $data['and_where'] = ['or', ['=', 'status', '0' ], ['=', 'status', '1']];
                     break;
                 case 2 :
-                    $data['where']['status']     = '3';
+                    $data['and_where'] = ['or', ['=', 'status', '3' ], ['=', 'status', '4'], ['=', 'status', '2']];
                     $data['where']['pay_status'] = '1';
                     break;
                 case 3 :
-                    $data['where']['pay_status'] = '1';
-                    $data['and_where'] = ['or', ['=', 'status', '6' ], ['=', 'status', '4' ]];
+                    $data['where']['status']                 = '5';
+                    $data['where']['user_evaluation_status'] = '0';
+                    $data['where']['pay_status']             = '1';
                     break;
                 case 4 :
-                    $data['where']['status']     = '5';
-                    $data['where']['pay_status'] = '1';
+                    $data['where']['user_evaluation_status'] = '1';
+                    $data['where']['pay_status']             = '1';
                     break;
             }
         } else {
             /**服务方**/
             switch ($status) {
                 case 1:
-                    $data['and_where'] = ['or', ['=', 'status', '0' ], ['=', 'status', '1'], ['=', 'status', '2']];
+                    $data['and_where'] = ['or', ['=', 'status', '0' ], ['=', 'status', '1']];
+                    $data['where']['pay_status'] = '1';
                     break;
                 case 2 :
-                    $data['where']['status']     = '3';
+                    $data['and_where'] = ['or', ['=', 'status', '3' ], ['=', 'status', '4'], ['=', 'status', '2']];
                     $data['where']['pay_status'] = '1';
                     break;
                 case 3 :
-                    $data['where']['pay_status'] = '1';
-                    $data['and_where'] = ['or', ['=', 'status', '5' ], ['=', 'status', '4' ]];
+                    $data['where']['status']                     = '5';
+                    $data['where']['servicer_evaluation_status'] = '0';
+                    $data['where']['pay_status']                 = '1';
                     break;
                 case 4 :
-                    $data['where']['status']     = '6';
-                    $data['where']['pay_status'] = '1';
+                    $data['where']['servicer_evaluation_status'] = '1';
+                    $data['where']['pay_status']                 = '1';
                     break;
             }
         }
         return $data;
+    }
+
+    /**
+     * 格式化图片
+     * @param string $image 图片地址
+     * @return string
+     */
+    private function _formatImg($image = '')
+    {
+        if (!empty($image)) {
+            if (!strstr($image, 'http')) {
+                return Common::C('imgHost').$image;
+            }
+        }
+        return '';
     }
 }

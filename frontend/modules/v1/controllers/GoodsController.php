@@ -14,7 +14,6 @@
  */
 namespace frontend\modules\v1\controllers;
 
-
 use frontend\models\i500m\Brand;
 use frontend\models\i500m\Category;
 use frontend\models\i500m\Product;
@@ -74,7 +73,7 @@ class GoodsController extends BaseController
                     if (!empty($data_arr)) {
 
                         //此活动有效
-                        if ($data_arr['start_time'] < $now && $data_arr['end_time'] > $now ) {
+                        if ($data_arr['start_time'] < $now && $data_arr['end_time'] > $now) {
                             $activity_ids[] = $v['activity_id'];
                             $activity_product_ids[] = $v['product_id'];
                         }
@@ -155,7 +154,7 @@ class GoodsController extends BaseController
                     if (!empty($data_arr)) {
 
                         //此活动有效
-                        if ($data_arr['start_time'] < $now && $data_arr['end_time'] > $now ) {
+                        if ($data_arr['start_time'] < $now && $data_arr['end_time'] > $now) {
                             $activity_ids[] = $v['activity_id'];
                             $activity_product_ids[] = $v['product_id'];
                         }
@@ -275,7 +274,7 @@ class GoodsController extends BaseController
             if (!empty($data_arr)) {
                 $now = date("Y-m-d H:i:s");
                 //此活动有效
-                if ($data_arr['start_time'] < $now && $data_arr['end_time'] > $now ) {
+                if ($data_arr['start_time'] < $now && $data_arr['end_time'] > $now) {
                     $activity_model = new ActivityGoods();
                     $activity_info = $activity_model->getActivityGood($this->shop_id, $product_id, $goods_info['activity_id']);
                 }

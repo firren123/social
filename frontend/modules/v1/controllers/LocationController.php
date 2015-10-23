@@ -34,7 +34,23 @@ class LocationController extends BaseController
     {
         $lng = RequestHelper::get('lng', 0);
         $lat = RequestHelper::get('lat', 0);
-        $url = Common::C('channelHost').'lbs/near-community?lng='.$lng.'&lat='.$lat;
+        $dis = RequestHelper::get('dis', 3);
+        $url = Common::C('channelHost').'lbs/near-community?lng='.$lng.'&lat='.$lat.'&dis='.$dis;
+        $res = CurlHelper::get($url);
+        if ($res['code'] == 200) {
+            $this->returnJsonMsg($res['code'], $res['data'], $res['message']);
+        } else {
+            $this->returnJsonMsg(101, [], '获取失败');
+        }
+    }
+    public function actionSearchCommunity()
+    {
+        $keywords = RequestHelper::get('keywords', '');
+        $city = RequestHelper::get('city', '');
+        $limit = RequestHelper::get('limit', 10, 'intval');
+
+        $url = Common::C('channelHost').'lbs/search-community?keywords='.$keywords.'&city='.$city.'&limit='.$limit;
+
         $res = CurlHelper::get($url);
         if ($res['code'] == 200) {
             $this->returnJsonMsg($res['code'], $res['data'], $res['message']);
@@ -42,6 +58,14 @@ class LocationController extends BaseController
             $this->returnJsonMsg(101, [], '获取失败');
         }
 
-
+//        $table_name = Common::getCommunityTable(1);
+//        $model = new CommunityMongo($table_name);
+//        $list = $model->search($keywords, $city, $limit);
+//        //var_dump($list);exit();
+//        if (!empty($list)) {
+//            return $this->returnJsonMsg(200, $list, '获取成功');
+//        } else {
+//            return $this->returnJsonMsg(404, [], '暂无数据');
+//        }
     }
 }

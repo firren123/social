@@ -52,8 +52,5 @@ class CategoryController extends BaseController
             }
         }
         $this->returnJsonMsg(200, $menu, 'SUCCESS');
-
-
-
     }
 }

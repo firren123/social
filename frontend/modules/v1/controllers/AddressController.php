@@ -63,11 +63,20 @@ class AddressController extends BaseController
         if (!Common::validateMobile($mobile)) {
             $this->returnJsonMsg('605', [], Common::C('code', '605'));
         }
-        $open_city_model = new OpenCity();
-        $open_city_where['status']  = '1';
-        $open_city_where['display'] = '1';
-        $open_city_fields = 'province as province_id';
-        $info = $open_city_model->getList($open_city_where, $open_city_fields);
+        //get缓存
+        $cache_key = 'open_province';
+        $cache_rs = SsdbHelper::Cache('get', $cache_key);
+        if ($cache_rs) {
+            $info = $cache_rs;
+        } else {
+            $open_city_model = new OpenCity();
+            $open_city_where['status']  = '1';
+            $open_city_where['display'] = '1';
+            $open_city_fields = 'province as province_id';
+            $info = $open_city_model->getList($open_city_where, $open_city_fields);
+            //set缓存
+            SsdbHelper::Cache('set', $cache_key, $info, Common::C('SSDBCacheTime'));
+        }
         $info = Common::arrUnique($info, 'province_id');
         if (!empty($info)) {
             foreach ($info as $k => $v) {
@@ -122,7 +131,21 @@ class AddressController extends BaseController
         $data['tag'] = RequestHelper::post('tag', '0', '');
         $data['lng'] = RequestHelper::post('lng', '0', '');
         $data['lat'] = RequestHelper::post('lat', '0', '');
+        $where['is_deleted'] = '2';
+        $where['mobile']     = $data['mobile'];
         $user_address_model = new UserAddress();
+        //get缓存
+        $cache_key = 'address_list_'.$where['mobile'];
+        $cache_rs = SsdbHelper::Cache('get', $cache_key);
+        if ($cache_rs) {
+            $count = count($cache_rs);
+        } else {
+            $count = $user_address_model->getCount($where);
+        }
+        //最多只能添加10个
+        if ($count >= 10) {
+            $this->returnJsonMsg('646', [], Common::C('code', '646'));
+        }
         $rs = $user_address_model->insertInfo($data);
         if (empty($rs)) {
             $this->returnJsonMsg('400', [], Common::C('code', '400'));
@@ -194,7 +217,7 @@ class AddressController extends BaseController
         $cache_key = 'address_list_'.$data['mobile'];
         SsdbHelper::Cache('del', $cache_key);
         //del详情缓存
-        $cache_detail_key = 'address_details_'.$where['id'].'_'.$data['mobile'];
+        $cache_detail_key = 'address_details_'.$where['id'];
         SsdbHelper::Cache('del', $cache_detail_key);
         //记录用户活跃时间
         $this->saveUserActiveTime(['mobile'=>$data['mobile']]);
@@ -232,7 +255,7 @@ class AddressController extends BaseController
         $cache_list_key = 'address_list_'.$where['mobile'];
         SsdbHelper::Cache('del', $cache_list_key);
         //del详情缓存
-        $cache_detail_key = 'address_details_'.$where['id'].'_'.$where['mobile'];
+        $cache_detail_key = 'address_details_'.$where['id'];
         SsdbHelper::Cache('del', $cache_detail_key);
         //记录用户活跃时间
         $this->saveUserActiveTime(['mobile'=>$where['mobile']]);
@@ -294,7 +317,7 @@ class AddressController extends BaseController
         }
         $where['is_deleted'] = '2';
         //get缓存
-        $cache_key = 'address_details_'.$where['id'].'_'.$where['mobile'];
+        $cache_key = 'address_details_'.$where['id'];
         $cache_rs = SsdbHelper::Cache('get', $cache_key);
         if ($cache_rs) {
             $this->returnJsonMsg('200', $cache_rs, Common::C('code', '200'));
@@ -334,6 +357,9 @@ class AddressController extends BaseController
         }
         $url = Common::C('channelHost').'lbs/get-suggest?keywords='.$keywords.'&province='.$province_name;
         $res = CurlHelper::get($url, true);
+        if (empty($res['code'])) {
+            $this->returnJsonMsg('401', [], Common::C('code', '401'));
+        }
         if ($res['code'] != '200' || empty($res['data'])) {
             $this->returnJsonMsg('200', [], Common::C('code', '200'));
         }
@@ -350,10 +376,19 @@ class AddressController extends BaseController
         if (empty($province_id)) {
             $this->returnJsonMsg('638', [], Common::C('code', '638'));
         }
-        $province_model = new Province();
-        $province_where['id'] = $province_id;
-        $province_fields = 'name';
-        $info = $province_model->getInfo($province_where, true, $province_fields);
+        //get缓存
+        $cache_key = 'province_name_'.$province_id;
+        $cache_rs = SsdbHelper::Cache('get', $cache_key);
+        if ($cache_rs) {
+            $info = $cache_rs;
+        } else {
+            $province_model = new Province();
+            $province_where['id'] = $province_id;
+            $province_fields = 'name';
+            $info = $province_model->getInfo($province_where, true, $province_fields);
+            //set 缓存
+            SsdbHelper::Cache('set', $cache_key, $info, Common::C('SSDBCacheTime'));
+        }
         return $info['name'];
     }
 }

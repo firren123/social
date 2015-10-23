@@ -103,7 +103,7 @@ class BaseCurlHelps
         $val = '';
         if ($data) {
             krsort($data);
-            foreach ($data as $k=>$v) {
+            foreach ($data as $k => $v) {
                 $val .= $v;
             }
         }

@@ -210,7 +210,7 @@ class Common
         $ai = array('1', '0', 'X', '9', '8', '7', '6', '5', '4', '3', '2');
         //按顺序循环处理前17位
         $sigma = 0;
-        for ($i = 0;$i < 17;$i++) {
+        for ($i = 0; $i < 17; $i++) {
             //提取前17位的其中一位，并将变量类型转为实数
             $b = (int) $number{$i};
             //提取相应的加权因子
@@ -236,7 +236,14 @@ class Common
      */
     public static function getBirthdayByCard($card = '')
     {
-        return strlen($card)==15 ? ('19' . substr($card, 6, 6)) : substr($card, 6, 8);
+        $birthday = strlen($card)==15 ? ('19' . substr($card, 6, 6)) : substr($card, 6, 8);
+        if (strlen($card) != 15) {
+            $year  = substr($birthday, 0, 4);
+            $month = substr($birthday, 4, 2);
+            $day   = substr($birthday, -2);
+            return $year.'-'.$month.'-'.$day;
+        }
+        return $birthday;
     }
 
     /**
@@ -247,7 +254,9 @@ class Common
     public static function getSexByCard($card = '')
     {
         //1=男 2=女
-        return substr($card, (strlen($card)==15 ? -2 : -1), 1) % 2 ? '1' : '2';
+        $sex = (int)substr($card, 16, 1);
+        return $sex % 2 === 0 ? '2' : '1';
+        //return substr($card, (strlen($card)==15 ? -2 : -1), 1) % 2 ? '1' : '2';
     }
 
     /**
@@ -266,6 +275,45 @@ class Common
     }
 
     /**
+     * 通过身份证获取星座
+     * @param string $card 身份证
+     * @return string
+     */
+    public static function getConstellationByCard($card = '')
+    {
+        $bir   = substr($card, 10, 4);
+        $month = (int)substr($bir, 0, 2);
+        $day   = (int)substr($bir, 2);
+        $strValue = '0';
+        if (($month == 1 && $day >= 20) || ($month == 2 && $day <= 18)) {
+            $strValue = "1"; //水瓶座
+        } elseif (($month == 2 && $day >= 19) || ($month == 3 && $day <= 20)) {
+            $strValue = "2"; //双鱼座
+        } elseif (($month == 3 && $day > 20) || ($month == 4 && $day <= 19)) {
+            $strValue = "3"; //白羊座
+        } elseif (($month == 4 && $day >= 20) || ($month == 5 && $day <= 20)) {
+            $strValue = "4"; //金牛座
+        } elseif (($month == 5 && $day >= 21) || ($month == 6 && $day <= 21)) {
+            $strValue = "5"; //双子座
+        } elseif (($month == 6 && $day > 21) || ($month == 7 && $day <= 22)) {
+            $strValue = "6"; //巨蟹座
+        } elseif (($month == 7 && $day > 22) || ($month == 8 && $day <= 22)) {
+            $strValue = "7"; //狮子座
+        } elseif (($month == 8 && $day >= 23) || ($month == 9 && $day <= 22)) {
+            $strValue = "8"; //处女座
+        } elseif (($month == 9 && $day >= 23) || ($month == 10 && $day <= 23)) {
+            $strValue = "9"; //天秤座
+        } elseif (($month == 10 && $day > 23) || ($month == 11 && $day <= 22)) {
+            $strValue = "10"; //天蝎座
+        } elseif (($month == 11 && $day > 22) || ($month == 12 && $day <= 21)) {
+            $strValue = "11"; //射手座
+        } elseif (($month == 12 && $day > 21) || ($month == 1 && $day <= 19)) {
+            $strValue = "12"; //魔羯座
+        }
+        return $strValue;
+    }
+
+    /**
      * 通过日期获取星期
      * @param string $day 日期
      * @return string
@@ -280,12 +328,22 @@ class Common
     }
 
     /**
-     * 距离当前时间展示方法
+     * 隐藏身份证信息
+     * @param string $card 身份证
+     * @return string
+     */
+    public static function hiddenUserCard($card = '')
+    {
+        return substr_replace($card, '****', 10, 4);
+    }
+
+    /**
+     * 距离当前时间展示方法 - 【权威的】
      * @param string $datetime 活跃时间
      * @param int    $nowtime  当前时间
      * @return bool|string
      */
-    public static function timeAgo($datetime='', $nowtime = 0)
+    public static function timeAgoBAK($datetime='', $nowtime = 0)
     {
         $datetime = strtotime($datetime);
         if (empty($nowtime)) {
@@ -318,5 +376,74 @@ class Common
         }
         // 往年
         return date('Y年m月d日', $datetime);
+    }
+
+    /**
+     * 距离当前时间展示方法 - 【产品非要这样的，沟通无果,所以...】
+     * @param string $datetime 活跃时间
+     * @param int    $nowtime  当前时间
+     * @return bool|string
+     */
+    public static function timeAgo($datetime='', $nowtime = 0)
+    {
+        $datetime = strtotime($datetime);
+        if (empty($nowtime)) {
+            $nowtime = time();
+        }
+        $timediff = $nowtime - $datetime;
+        $timediff = $timediff >= 0 ? $timediff : $datetime - $nowtime;
+        // 秒
+        if ($timediff < 60) {
+            return '今天';
+        }
+        // 分
+        if ($timediff < 3600 && $timediff >= 60) {
+            return '今天';
+        }
+        // 今天
+        $today = mktime(0, 0, 0, date('m'), date('d'), date('Y'));
+        if ($datetime >= $today) {
+            return '今天';
+        }
+        // 昨天
+        $yestoday = mktime(0, 0, 0, date('m'), date('d') - 1, date('Y'));
+        if ($datetime >= $yestoday) {
+            return '昨天';
+        }
+        // 今年月份
+        $this_year = mktime(0, 0, 0, 1, 1, date('Y'));
+        if ($datetime >= $this_year) {
+            return date('m月d日', $datetime);
+        }
+        // 往年
+        return date('m月d日Y年', $datetime);
+    }
+
+    /**
+     * 根据经纬度获取两个两点之间的距离
+     * @param int $lat1 纬度
+     * @param int $lng1 经度
+     * @param int $lat2 纬度
+     * @param int $lng2 经度
+     * @return float
+     */
+    public static function getDistance($lat1 = 0, $lng1 = 0, $lat2 = 0, $lng2 = 0)
+    {
+        //地球半径
+        $R = 6378137;
+        //将角度转为弧度
+        $radLat1 = deg2rad($lat1);
+        $radLat2 = deg2rad($lat2);
+        $radLng1 = deg2rad($lng1);
+        $radLng2 = deg2rad($lng2);
+        //结果
+        $s = acos(cos($radLat1)*cos($radLat2)*cos($radLng1-$radLng2)+sin($radLat1)*sin($radLat2))*$R;
+        //精度
+        $s = round($s* 10000)/10000;
+        if ($s > 1000) {
+            return round($s/1000, 2).'km';
+        } else {
+            return round($s).'m';
+        }
     }
 }

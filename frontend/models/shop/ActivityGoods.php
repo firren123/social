@@ -1,14 +1,13 @@
 <?php
 /**
- * 一行的文件介绍
+ * 活动商品表
  *
  * PHP Version 5
- * 可写多行的文件相关说明
  *
  * @category  I500M
  * @package   Member
  * @author    renyineng <renyineng@iyangpin.com>
- * @time      15/8/26 下午3:31 
+ * @time      2015-08-26
  * @copyright 2015 灵韬致胜（北京）科技发展有限公司
  * @license   http://www.i500m.com license
  * @link      renyineng@iyangpin.com
@@ -57,11 +56,11 @@ class ActivityGoods extends ShopBase
 
     /**
      * 根据商品id
-     * @param $shop_id
-     * @param $product_id
+     * @param int $shop_id    店铺ID
+     * @param int $product_id 商品ID
      * @return array
      */
-    public function getActivitygoods($shop_id, $product_id)
+    public function getActivitygoods($shop_id = 0, $product_id = 0)
     {
         $info = $this->getInfo(['shop_id'=>$shop_id, 'product_id'=>$product_id]);
         $data = [];
@@ -108,7 +107,15 @@ class ActivityGoods extends ShopBase
         return $data;
 
     }
-    public function getActivityGoodsList($activity_ids, $products_id, $shop_id)
+
+    /**
+     * 活动商品列表
+     * @param string $activity_ids 活动IDS
+     * @param string $products_id  商品IDS
+     * @param int    $shop_id      店铺ID
+     * @return array|\yii\db\ActiveRecord[]
+     */
+    public function getActivityGoodsList($activity_ids = '', $products_id = '', $shop_id = 0)
     {
         $activity = new ShopActivity();
         $activity_id = [];
@@ -121,6 +128,5 @@ class ActivityGoods extends ShopBase
             $goods_list = $this->getList(['activity_id'=>$activity_id, 'product_id'=>$products_id, 'shop_id'=>$shop_id]);
         }
         return $goods_list;
-
     }
 }

@@ -14,7 +14,6 @@
  */
 namespace frontend\modules\v1\controllers;
 
-
 use frontend\models\i500_social\Cart;
 use frontend\models\i500_social\Dispatch;
 use frontend\models\i500_social\Order;
@@ -103,7 +102,7 @@ class OrderController extends BaseController
         }
         if (!empty($cart_goods)) {
             $product_ids = $cart_list = $goods_lists = [];
-            foreach ($cart_goods as $k=>$v) {
+            foreach ($cart_goods as $k => $v) {
                 $product_ids[] = $v['product_id'];
                 $cart_list[$v['product_id']] = $v;
             }
@@ -116,7 +115,7 @@ class OrderController extends BaseController
                 $p_list = $p_model->getList(['id'=>$product_ids, 'status'=>1], 'id,name,image');
                 $p_list = ArrayHelper::index($p_list, 'id');
 
-                foreach ($goods_arr as $k=>$v) {
+                foreach ($goods_arr as $k => $v) {
                     if ($v['status'] != 1) {
                         $this->returnJsonMsg(105, [], '有商品下架');
                     }
@@ -326,13 +325,34 @@ class OrderController extends BaseController
             $this->returnJsonMsg(103, [], '无效的手机号');
         }
         if (empty($send_time)) {
-            $this->returnJsonMsg(103, [], '配送时间为空');
+            $this->returnJsonMsg(104, [], '配送时间为空');
         }
-        if (empty($address_id)) {
-            $this->returnJsonMsg(103, [], '请选择有效的收货地址');
-        }
-        if (empty($address_id)) {
-            $this->returnJsonMsg(103, [], '请选择有效的收货地址');
+        //配送费
+        $shop_model  = new Shop();
+        $address_model = new UserAddress();
+        $info = $shop_model->getInfo(['id'=>$this->shop_id], true, 'id,shop_name,contact_name,mobile,address,province,sent_fee,free_money,freight');
+        if ($dispatch_id == 2) {//上门自提
+            //$shop_model = new Shop();
+            //$address = $shop_model->getInfo(['id'=>$this->shop_id], 'id,shop_name,contact_name,mobile,address,province');
+            $address_info = [
+                'id'=>$info['id'],
+                'consignee'=>$info['shop_name'],
+                'consignee_mobile'=>$info['mobile'],
+                'province_id'=>$info['province'],
+            ];
+            $address = $info['address'];
+        } else {
+            if (empty($address_id)) {
+                $this->returnJsonMsg(105, [], '请选择有效的收货地址');
+            }
+            //获取收货地址
+
+            $address_info = $address_model->getInfo(['id'=>$address_id, 'mobile'=>$mobile]);
+            if (empty($address_info)) {
+                $this->returnJsonMsg(103, [], '收货地址不存在！');
+            }
+            $address = $address_info['search_address'] . ' ' . $address_info['details_address'];
+
         }
         if (empty($community_id)) {
             $this->returnJsonMsg(103, [], '无效的小区参数');
@@ -342,13 +362,7 @@ class OrderController extends BaseController
         if (empty($cart_goods)) {
             $this->returnJsonMsg(104, [], '无效的json数据');
         }
-        //获取收货地址
-        $address_model = new UserAddress();
-        $address_info = $address_model->getInfo(['id'=>$address_id, 'mobile'=>$mobile]);
-        if (empty($address_info)) {
-            $this->returnJsonMsg(103, [], '收货地址不存在！');
-        }
-        $address = $address_info['search_address'] . ' ' . $address_info['details_address'];
+
         $goods = [];
         $time = time();
         $m_order = new Order();
@@ -365,6 +379,7 @@ class OrderController extends BaseController
             'total'=>0,
             'remark'=>'',
             'status'=>0,
+            'code'=>rand(1000, 9999),
             'pay_status'=>0,
             'pay_method_id'=>0,
             'ship_status'=>0,
@@ -390,7 +405,7 @@ class OrderController extends BaseController
         //$coupon_id = 0;
         if (!empty($cart_goods)) {
             $product_ids = $cart_list = $goods_lists = [];
-            foreach ($cart_goods as $k=>$v) {
+            foreach ($cart_goods as $k => $v) {
                 $product_ids[] = $v['product_id'];
                 $cart_list[$v['product_id']] = $v;
             }
@@ -403,7 +418,7 @@ class OrderController extends BaseController
                 $p_list = $p_model->getList(['id'=>$product_ids, 'status'=>1], 'id,name,image,attr_value');
                 $p_list = ArrayHelper::index($p_list, 'id');
 
-                foreach ($goods_arr as $k=>$v) {
+                foreach ($goods_arr as $k => $v) {
                     if ($v['status'] != 1) {
                         $this->returnJsonMsg(105, [], '有商品下架');
                     }
@@ -490,14 +505,12 @@ class OrderController extends BaseController
                     //$dis_amount = $coupons->getField(['mobile'=>$mobile, 'id'=>$coupon_id], 'par_value');
                     if (!empty($dis_amount)) {
                         $order['coupon_id'] = $coupon_id;
-                        $dis_amount = $dis_amount;
+                        $order['dis_amount'] = $dis_amount;
                     }
 
                 }
 
-                //配送费
-                $shop_model  = new Shop();
-                $info = $shop_model->getInfo(['id'=>$this->shop_id], true, 'sent_fee,free_money,freight');
+
                 if ($info['sent_fee'] > $goods_total) {
                     $this->returnJsonMsg(109, [], '不够起送费');
                 }
@@ -510,7 +523,7 @@ class OrderController extends BaseController
                 //支付总价
                 $order['total'] = $goods_total + $order['freight'] - $dis_amount;
                 $pay_type = 'pay';
-                if ($order['total'] < 0) {
+                if ($order['total'] <= 0) {
                     $order['total'] = 0;
                     $pay_type = 'nopay';
                 }

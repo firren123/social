@@ -89,11 +89,11 @@ class MyorderController extends BaseController
             }
             if ($order_status == '2') {
                 /**待收货**/
-                $order_and_where = ['and', ['!=', 'ship_status', '2'], ['=', 'status', '1']];
+                $order_and_where = ['or', ['=', 'status', '4'], ['=', 'status', '1']];
             }
             if ($order_status == '3') {
                 /**已完成**/
-                $order_and_where = ['or', ['=', 'ship_status', '2'], ['=', 'status', '2']];
+                $order_and_where = ['or', ['=', 'ship_status', '2'], ['=', 'status', '2'], ['=', 'status', '5']];
             }
             $info = $order_model->getPageList($order_where, $order_fields, 'id desc', $page, $page_size, $order_and_where);
             if (!empty($info)) {
@@ -110,8 +110,11 @@ class MyorderController extends BaseController
             $info = $exchange_model->getPageList($exchange_where, $exchange_fields, 'id desc', $page, $page_size);
             if (!empty($info)) {
                 foreach ($info as $k => $v) {
+                    $where[$k]['order_sn']   = $v['order_sn'];
+                    $where[$k]['product_id'] = $v['product_id'];
                     $info[$k]['total']       = $v['price']*$v['num'];
-                    $info[$k]['product_img'] = $this->_formatImg($v['product_img']);
+                    //$info[$k]['product_img'] = $this->_formatImg($v['product_img']);
+                    $info[$k]['product_img'] = $this->_getProductImg($where[$k]);
                     $info[$k]['price']       = $v['price'];
                     unset($info[$k]['price']);
                 }
@@ -270,6 +273,7 @@ class MyorderController extends BaseController
         if ($rs['ship_status'] != '1') {
             $this->returnJsonMsg('806', [], Common::C('code', '806'));
         }
+        $order_update_data['status']        = '5';  //订单完成
         $order_update_data['ship_status']   = '2';  //确定收货
         $order_update_data['pay_status']    = '1';  //已支付
         $order_update_data['delivery_time'] = date('Y-m-d H:i:s', time());
@@ -364,6 +368,29 @@ class MyorderController extends BaseController
         $data['remark']      = RequestHelper::post('remark', '', '');
         $data['apply_time']  = date('Y-m-d H:i:s', time());
         $model = new Exchange();
+        //@todo 判断数据库中是否存在相同商品的退换货单
+        $where['shop_id']    = $data['shop_id'];
+        $where['order_sn']   = $data['order_sn'];
+        $where['uid']        = $data['uid'];
+        $where['mobile']     = $data['mobile'];
+        $where['product_id'] = $data['product_id'];
+        $info = $model->getInfo($where, true, 'id,number');
+        $have_number = 0;
+        if (!empty($info)) {
+            $have_number += $info['number'];
+        }
+        //@todo 退换货数量的限制 与 订单表的数量进行比较
+        $number = $data['number'] + $have_number;
+        $order_model = new OrderDetail();
+        $order_d_where['order_sn']   = $data['order_sn'];
+        $order_d_where['product_id'] = $data['product_id'];
+        $order_detail_info = $order_model->getInfo($order_d_where, true, 'num');
+        if (empty($order_detail_info)) {
+            $this->returnJsonMsg('818', [], Common::C('code', '818'));
+        }
+        if ($number > $order_detail_info['num']) {
+            $this->returnJsonMsg('819', [], Common::C('code', '819'));
+        }
         $rs = $model->insertInfo($data);
         //更新订单详情表当前商品的退货数量
         $order_detail_model = new OrderDetail();
@@ -524,5 +551,20 @@ class MyorderController extends BaseController
             }
         }
         return $img_data;
+    }
+
+    /**
+     * 获取商品图片
+     * @param array $where 条件
+     * @return array
+     */
+    private function _getProductImg($where = [])
+    {
+        $model = new OrderDetail();
+        $info = $model->getInfo($where, true, 'product_img');
+        if (!empty($info) && !empty($info['product_img'])) {
+            return $this->_formatImg($info['product_img']);
+        }
+        return [];
     }
 }
